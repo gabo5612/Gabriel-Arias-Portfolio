@@ -1,0 +1,88 @@
+.experienceContainer {
+  background-color: var(--cards);
+  position: relative;
+}
+.experienceContainer h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  position: absolute;
+  z-index: 100;
+  top: -17px;
+  left: 15px;
+}
+
+.experience {
+    padding-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.expCard {
+  display: flex;
+  margin-bottom: 20px;
+  width: 95%;
+}
+.expDate {
+  display: flex;
+  background-color: var(--cards-ligher);
+  height: fit-content;
+  padding: 10px;
+  border-radius: 0 100px 100px 0;
+  font-weight: 600;
+}
+.yellowDot {
+    margin: 5px 10px;
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+    background-color: var(--second-color);
+    -webkit-box-shadow: 8px 8px 35px 4px rgba(240, 191, 108, 1);
+    -moz-box-shadow: 8px 8px 35px 4px rgba(240, 191, 108, 1);
+    box-shadow: 8px 8px 35px 4px rgba(240, 191, 108, 1);
+    animation: glow 2s infinite alternate;
+  }
+  
+  @keyframes glow {
+    0% {
+      box-shadow: 8px 8px 35px 4px rgba(240, 191, 108, 0.5);
+    }
+    100% {
+      box-shadow: 8px 8px 35px 4px rgba(240, 191, 108, 1);
+    }
+  }
+  
+.line{
+    width: 2px;
+    background-color: var(--main-color);
+    height: 70%;
+    margin:10px auto;  
+    position: relative;  
+    left: 1px;
+}
+.expTexts{
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.expTexts h4{
+    font-size: 2rem;
+    font-weight: 600;
+}
+.expTexts span{
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+.expTexts p{
+    line-height: 19px;
+}
+@media (min-width:1023px) {
+    .expCard {
+        width: 70%;
+    }
+    .experienceContainer h3 {
+        font-size: 2.5rem;
+        top: -20px;
+        left: 125px;
+}
+}

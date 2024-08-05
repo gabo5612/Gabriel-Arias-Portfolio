@@ -1,0 +1,101 @@
+.portfolio {
+  margin: 0 20px 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+.portfolio h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+}
+.pCardsContainer {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  width: 100%;
+}
+.pCard {
+  position: relative;
+  height: 200px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 0 20px;
+  color: var(--main-color);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  -webkit-box-shadow: 4px 2px 29px -15px rgba(0, 0, 0, 1);
+  -moz-box-shadow: 4px 2px 29px -15px rgba(0, 0, 0, 1);
+  box-shadow: 4px 2px 29px -15px rgba(0, 0, 0, 1);
+}
+.pCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 0;
+}
+.pCard:hover::before {
+  opacity: 1;
+}
+.pCardContent {
+  position: relative;
+  z-index: 1;
+}
+.pCardBtn {
+  border: none;
+  background-color: var(--second-color);
+  color: var(--cards);
+  font-weight: 600;
+  padding: 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.7rem;
+}
+.pCardBtn:focus {
+  border: 1px solid var(--main-color);
+}
+.pCardNotHover {
+  opacity: 0;
+  transition: opacity 0.5s ease 0s;
+  position: relative;
+  z-index: 50;
+}
+.pCardHover {
+  position: relative;
+  z-index: 50;
+  opacity: 1;
+  color: var(--main-color);
+}
+
+.pCardBtnVM {
+  font-size: 1.2rem;
+  padding: 10px;
+}
+@media (min-width: 767px) {
+  .pCardsContainer {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+  }
+  .pCard {
+    height: 300px;
+  }
+}
+
+@media (min-width: 1439px) {
+  .pCardsContainer {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+  .pCard {
+    width: 90%;
+    height: 400px;
+  }
+}

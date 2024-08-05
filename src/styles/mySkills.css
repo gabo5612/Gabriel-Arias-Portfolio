@@ -1,0 +1,75 @@
+.msContainer{
+    margin-bottom: 40px;
+}
+.msContainer h3{
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+}
+.msCards{
+    margin: 0 20px;
+}
+.msCards ul{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 450px;
+    gap: 15px;
+    margin: 20px auto;
+}
+.msCards li{
+    font-weight: 600;   
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.card{
+    background-color: var(--cards);
+    height: 150px;
+    width: 100%;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    -webkit-box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
+    -moz-box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
+    box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
+}
+.card:hover{
+    scale: 0.95;
+}
+.card img{
+    width: 50px;
+}
+.cardsContainer{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+    gap: 20px;
+    justify-items: center;
+}
+@media (min-width:1023px) {
+    .cardsContainer{
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        max-width: 80%;
+        margin: 0 auto;
+    }
+    .card{
+        height: 250px;
+    }
+    .card img{
+        width: 75px;
+    }
+    .card span{
+        font-size: 1.2rem;
+    }
+}
+@media (min-width:1439px) {
+    .cardsMaxWidth{
+        margin: 0 auto;
+        max-width: 1600px;
+    }
+}
