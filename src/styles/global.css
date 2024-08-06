@@ -150,3 +150,8 @@ header {
   background-color: var(--second-color);
   color: var(--cards);
 }
+
+.skillActive{
+  background-color: var(--second-color);
+  color: var(--cards);
+}
