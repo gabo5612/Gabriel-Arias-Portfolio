@@ -2,68 +2,63 @@ import image from '../logic/imgMySkills'
 
 const cards = {
     frontEnd: [
-        { img: image.css, title: 'JavaScript' },
-        { img: image.css, title: 'TypeScript' },
-        { img: image.css, title: 'PHP' },
-        { img: image.css, title: 'React JS' },
-        { img: image.css, title: 'Next.js' },
-        { img: image.css, title: 'Vite.js' },
-        { img: image.css, title: 'Gatsby JS' }
+        { img: image.javascript, title: 'JavaScript' },
+        { img: image.typescript, title: 'TypeScript' },
+        { img: image.PHP, title: 'PHP' },
+        { img: image.react, title: 'React JS' },
+        { img: image.Nextjs, title: 'Next.js' },
+        { img: image.vitejs, title: 'Vite.js' },
+        { img: image.Gatsby, title: 'Gatsby JS' }
     ],
     shopify: [
-        { img: image.css, title: 'Liquid' },
-        { img: image.css, title: 'Shopify API' }
+        { img: image.liquid, title: 'Liquid' },
+        { img: image.shopify, title: 'Shopify API' }
     ],
     wordpress: [
-        { img: image.css, title: 'GitHub' },
-        { img: image.css, title: 'WordPress' },
-        { img: image.css, title: 'Elementor' },
-        { img: image.css, title: 'ACF' },
-        { img: image.css, title: 'JQuery' }
+        { img: image.woocomerce, title: 'WordPress' },
+        { img: image.elementor, title: 'Elementor' },
+        { img: image.ACFPRO, title: 'ACF' },
+        { img: image.jquery, title: 'JQuery' }
     ],
     styling: [
         { img: image.css, title: 'CSS' },
-        { img: image.css, title: 'Tailwind' },
-        { img: image.css, title: 'SASS' }
+        { img: image.tailwind, title: 'Tailwind' },
+        { img: image.bootstrap, title: 'Bootstrap' },
+        { img: image.sass, title: 'SASS' }
     ],
     backend: [
-        { img: image.css, title: 'MySQL' },
-        { img: image.css, title: 'PostgreSQL' },
-        { img: image.css, title: 'Firebase' },
-        { img: image.css, title: 'Google Cloud' },
-        { img: image.css, title: 'Node.js' },
-        { img: image.css, title: 'Express.js' }
+        { img: image.mysql, title: 'MySQL' },
+        { img: image.postgress, title: 'PostgreSQL' },
+        { img: image.firebase, title: 'Firebase' },
+        { img: image.cloud, title: 'Google Cloud' },
+        { img: image.node, title: 'Node.js' },
+        { img: image.Expresssjs, title: 'Express.js' }
     ],
     tools: [
-        { img: image.css, title: 'NPM' },
-        { img: image.css, title: 'Webpack' },
-        { img: image.css, title: 'Babel' },
-        { img: image.css, title: 'Redux' },
-        { img: image.css, title: 'JSON' },
-        { img: image.css, title: 'API Rest' },
-        { img: image.css, title: 'Bootstrap' },
-        { img: image.css, title: 'GitHub' },
-        { img: image.css, title: 'ES6+' },
-        { img: image.css, title: 'HTML5' }
+        { img: image.npm, title: 'NPM' },
+        { img: image.webpack, title: 'Webpack' },
+        { img: image.babel, title: 'Babel' },
+        { img: image.redux, title: 'Redux' },
+        { img: image.json, title: 'JSON' },
+        { img: image.restApi, title: 'Rest API' },
+        { img: image.github, title: 'GitHub' },
+        { img: image.es6, title: 'ES6+' }
     ],
     others: [
-        { img: image.css, title: 'Visual Studio Code' },
-        { img: image.css, title: 'Figma' },
-        { img: image.css, title: 'Photoshop' },
-        { img: image.css, title: 'Illustrator' },
-        { img: image.css, title: 'ClickUp' },
-        { img: image.css, title: 'Slack' },
-        { img: image.css, title: 'Zoom' },
-        { img: image.css, title: 'Google Calendar' }
+        { img: image.vstudio, title: 'Visual Studio Code' },
+        { img: image.figma, title: 'Figma' },
+        { img: image.photoshop, title: 'Photoshop' },
+        { img: image.illustrator, title: 'Illustrator' },
+        { img: image.clickup, title: 'ClickUp' },
+        { img: image.slack, title: 'Slack' },
+        { img: image.zoom, title: 'Zoom' }
     ],
     seo: [
-        { img: image.css, title: 'WordPress SEO' },
-        { img: image.css, title: 'Google Ads' },
-        { img: image.css, title: 'Google Analytics' },
-        { img: image.css, title: 'Google Search Console' },
-        { img: image.css, title: 'Google PageSpeed Insights' },
-        { img: image.css, title: 'SEOQuake' },
-        { img: image.css, title: 'SemRush' }
+        { img: image.ads, title: 'Google Ads' },
+        { img: image.analytics, title: 'Google Analytics' },
+        { img: image.searchConsole, title: 'Google Search Console' },
+        { img: image.pagespeed, title: 'Google PageSpeed Insights' },
+        { img: image.semrush, title: 'SemRush' }
     ]
 };
 

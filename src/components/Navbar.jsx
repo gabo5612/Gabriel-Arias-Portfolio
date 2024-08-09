@@ -7,16 +7,13 @@ import email from '../images/Navbar/email.svg'
 
 export default function Navbar() {
   return (
-    <nav className="navBar">
-      
-        <span className="navSpan">Garbriel A.</span>
-      
-      <div className="navIcons">
+
+      <nav className="navIcons">       
         <a href="https://www.frontendmentor.io/profile/gabo5612"><img src={frontEndMentor} alt="Frontend Mentor" /></a>
         <a href="https://github.com/gabo5612/"><img src={github} alt="Github" /></a>
         <a href="https://www.linkedin.com/in/gabriel-oniel-arias/"><img src={linkedin} alt="LinkedIn" /></a>
         <a href="mailto:gabo5612@gmail.com"><img src={email} alt="Gmail" /></a>
-      </div>
-    </nav>
+      </nav>
+  
   );
 }

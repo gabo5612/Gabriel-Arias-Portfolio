@@ -76,6 +76,10 @@
 .expTexts p{
     line-height: 19px;
 }
+.expCardsCentered{
+  display: flex;
+  justify-content: center;
+}
 @media (min-width:1023px) {
     .expCard {
         width: 70%;

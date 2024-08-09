@@ -21,6 +21,7 @@ const IndexPage = () => {
       <MySkill/>
       <Porfolio/>
       <Experience/>
+
     </main>
     </body>
     <Footer/>

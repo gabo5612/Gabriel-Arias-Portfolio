@@ -34,7 +34,7 @@
 .fvContent span{
     font-size: 2rem;
 }
-.fvContent h1{
+.fvH1 span{
     color: var(--second-color);
     font-size: 2.5rem;
     font-weight: 600;
@@ -54,7 +54,7 @@
     .fvContent span{
         font-size: 2.5rem;
     }
-    .fvContent h1{
+    .fvH1 span{
         font-size: 4rem;
     }
     .fvcTitle h2{

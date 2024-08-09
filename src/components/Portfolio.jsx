@@ -1,15 +1,20 @@
 import React, { useState } from "react";
 import '../styles/portfolio.css';
 import porfolioCards from "../logic/porfolioCards";
+import AnimatedSection from "../animations/AnimatedSection";
 
 export default function Porfolio() {
   const [hoverIndex, setHoverIndex] = useState(null);
 
   return (
     <div className="portfolio ">
-      <h3>Porfoliooo</h3>
+      <AnimatedSection>
+      <h3>Porfolio</h3>
+      </AnimatedSection>
+    
       <div className="pCardsContainer cardsContainer cardsMaxWidth">
         {porfolioCards.map((pCard, index) => (
+          <AnimatedSection>
           <div
             key={pCard.title}
             className="pCard"
@@ -27,10 +32,13 @@ export default function Porfolio() {
               <button className="pCardBtn">See More -X</button>
             </a>
           </div>
+          </AnimatedSection>
         ))}
       </div>
-
+      
+      <AnimatedSection>
       <a href="https://github.com/gabo5612/My-portoflio/tree/master"><button className="pCardBtn pCardBtnVM">View More</button></a>
+      </AnimatedSection>
     </div>
   );
 }
