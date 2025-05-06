@@ -33,7 +33,7 @@ export default function MySkill() {
       <div className="msCards cardsMaxWidth" on>
       <AnimatedSection>
         <ul>
-          {['Front-End', 'Back-End', 'Shopify', 'WordPress', 'SEO', 'Styling', 'Tools', 'Others'].map((skillName, index) => (
+          {['Front-End', 'Back-End', 'Shopify',  'WordPress', 'SEO', 'Styling', 'Tools', 'Others'].map((skillName, index) => (
             <li
               key={index}
               className={`hoverEffect ${skillActive === index ? 'skillActive' : ''}`} 
@@ -51,7 +51,7 @@ export default function MySkill() {
             <motion.div key={card.title} className="card hoverEffect" whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}> 
-              <img src={card.img} alt={card.title}/>
+              <img src={card.img} alt={card.title} />
               <span>{card.title}</span>
             </motion.div>
           ))}

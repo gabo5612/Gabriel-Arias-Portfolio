@@ -1,6 +1,7 @@
 .experienceContainer {
   background-color: var(--cards);
   position: relative;
+  padding: 40px 0;
 }
 .experienceContainer h3 {
   font-size: 2rem;
@@ -16,6 +17,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 20px;
+}
+.expLine{
+  display: none;
+  @media (min-width:1023px) {
+    display: block;
+
+    
+  }
 }
 .expCard {
   display: flex;
@@ -29,6 +39,12 @@
   padding: 10px;
   border-radius: 0 100px 100px 0;
   font-weight: 600;
+  min-width: 50px;
+  min-height: 25px;
+  margin-top: -5px;
+}
+.expDate span {
+  font-size: 0.8rem;
 }
 .yellowDot {
     margin: 5px 10px;
@@ -66,12 +82,24 @@
     gap: 10px;
 }
 .expTexts h4{
+  font-size: 1.4rem;
+  font-weight: 600;
+  @media (min-width:1023px) {
     font-size: 2rem;
-    font-weight: 600;
+ 
+    
+  }
+    
 }
 .expTexts span{
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 600;
+  @media (min-width:1023px) {
+    font-size: 1.4rem;
+    
+  }
+   
+   
 }
 .expTexts p{
     line-height: 19px;

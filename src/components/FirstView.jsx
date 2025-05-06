@@ -12,8 +12,8 @@ const FirstView = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{
             duration: 0.8,
-            delay: 0.55,
-            ease: [0, 0.71, 0.2, 1.01]
+            delay: 0.10,
+            ease: [0, 0.71, 0.2, 0.5]
           }}
         >
           <span>I'M</span>

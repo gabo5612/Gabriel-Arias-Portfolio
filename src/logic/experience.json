@@ -1,23 +1,26 @@
 [
   {
-    "date" : "2022",
-    "title": "Web Master",
-    "location": "Remote",
-    "description": "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen."
-    
+    "date": "2014-2019",
+    "title": "Cameraman & Web Developer",
+    "location": "Venezuela",
+    "description": "Managed domain acquisition, CDN configuration, and full website development for Producciones Mi Tricolor. Created audiovisual and written content with strong SEO practices and implemented code-level optimization to boost performance."
   },
   {
-    "date" : "2023",
-    "title": "SEO Expert",
-    "location": "Remote",
-    "description": "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen."
-    
+    "date": "2019-2022",
+    "title": "Web Developer & SEO Consultant",
+    "location": "Venezuela",
+    "description": "Developed and managed WordPress websites for Clarita’ShopVnzla. Focused on SEO-driven content strategy, multimedia creation, and optimization to attract local clients and improve site visibility."
   },
   {
-    "date" : "2023",
-    "title": "Junior Front End Developer",
+    "date": "2022-2023",
+    "title": "WordPress Developer & SEO Specialist",
     "location": "Remote",
-    "description": "Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T. persona que se dedica a la imprenta) desconocido usó una galería de textos y los mezcló de tal manera que logró hacer un libro de textos especimen."
-    
+    "description": "Worked at Efiempresa analyzing site content for SEO issues. Applied advanced SEO strategies and tools to improve rankings, increase organic traffic, and enhance customer acquisition."
+  },
+  {
+    "date": "2023-Present",
+    "title": "Junior Web Producer",
+    "location": "Remote",
+    "description": "At Magnetic Creative, responsible for building and customizing websites across platforms. Tasks include responsive UI development, setting up e-commerce features, optimizing performance, troubleshooting issues, and collaborating with cross-functional teams."
   }
 ]

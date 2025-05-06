@@ -30,6 +30,8 @@ import npm from '../images/MySkills/npm.svg'
 import PHP from '../images/MySkills/PHP-logo.svg'
 import postgress from '../images/MySkills/postgresql.svg'
 import react from '../images/MySkills/React-icon.svg'
+import reactNative from '../images/MySkills/react-native.svg'
+import hubspot from '../images/MySkills/hubspot.png'   
 import redux from '../images/MySkills/redux.svg'
 import restApi from '../images/MySkills/rest-api-icon.svg'
 import sass from '../images/MySkills/sass-1.svg'
@@ -43,6 +45,7 @@ import vitejs from '../images/MySkills/Vitejs-logo.svg'
 import webpack from '../images/MySkills/webpack-icon.svg'
 import woocomerce from '../images/MySkills/WooCommerce_logo.svg'
 import zoom from '../images/MySkills/zoom-app.svg'
+import localWP from '../images/MySkills/local-wp.png'
 
 export default {
     css,
@@ -76,6 +79,8 @@ export default {
     PHP,
     postgress,
     react,
+    reactNative,
+    hubspot,
     redux,
     restApi,
     sass,
@@ -89,5 +94,6 @@ export default {
     webpack,
     woocomerce,
     zoom,
-    node
+    node,
+    localWP
 };
