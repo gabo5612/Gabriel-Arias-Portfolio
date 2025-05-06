@@ -37,16 +37,17 @@
 }
 .expDate {
   display: flex;
+  align-items: center;
   background-color: var(--cards-ligher);
-  height: fit-content;
   padding: 10px;
   border-radius: 0 100px 100px 0;
   font-weight: 600;
   height: 20px;
   margin-top: -5px;
   min-height: 25px;
-  min-width: 50px;
+  min-width: 60px;
   padding: 10px;
+
 }
 .expDate span {
   font-size: 0.8rem;
