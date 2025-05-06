@@ -9,7 +9,7 @@ export default function About(){
         whileInView="visible"
         viewport={{ once: true }}>
             <h3>About</h3>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem doloremque quia vel optio nobis eveniet perferendis cumque! Exercitationem, dignissimos voluptatibus, necessitatibus cum nulla, vel verisstatis aspernatur quo laudantium quidem illosss.</p>
+            <p>Hi! I'm a full-stack developer who loves creating clean, responsive websites and web apps. I’ve worked with tools like WordPress, React, and Node.js, and I enjoy building things that are both useful and easy to use. I also have experience with SEO and enjoy learning new tech to improve my work every day.</p>
         </div>
         </AnimatedSection>
     )

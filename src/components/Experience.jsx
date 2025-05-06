@@ -16,7 +16,7 @@ export default function Experience() {
             <div className="expDate">
               <span>{exp.date}</span>
             </div>
-            <div>
+            <div className="expLine">
               <div className="yellowDot"></div>
               <div className="line"></div>
             </div>

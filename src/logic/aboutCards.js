@@ -6,6 +6,7 @@ const cards = {
         { img: image.typescript, title: 'TypeScript' },
         { img: image.PHP, title: 'PHP' },
         { img: image.react, title: 'React JS' },
+        { img: image.reactNative, title: 'React Native' },
         { img: image.Nextjs, title: 'Next.js' },
         { img: image.vitejs, title: 'Vite.js' },
         { img: image.Gatsby, title: 'Gatsby JS' }
@@ -18,7 +19,9 @@ const cards = {
         { img: image.woocomerce, title: 'WordPress' },
         { img: image.elementor, title: 'Elementor' },
         { img: image.ACFPRO, title: 'ACF' },
-        { img: image.jquery, title: 'JQuery' }
+        { img: image.jquery, title: 'JQuery' },
+        { img: image.localWP, title: 'Local WP' }
+    
     ],
     styling: [
         { img: image.css, title: 'CSS' },
@@ -51,7 +54,8 @@ const cards = {
         { img: image.illustrator, title: 'Illustrator' },
         { img: image.clickup, title: 'ClickUp' },
         { img: image.slack, title: 'Slack' },
-        { img: image.zoom, title: 'Zoom' }
+        { img: image.zoom, title: 'Zoom' },
+        { img: image.hubspot, title: 'HubSpot' }
     ],
     seo: [
         { img: image.ads, title: 'Google Ads' },

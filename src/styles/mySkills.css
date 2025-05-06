@@ -1,5 +1,5 @@
 .msContainer{
-    margin-bottom: 40px;
+    margin-bottom: 80px;
 }
 .msContainer h3{
     font-size: 2rem;
@@ -40,7 +40,7 @@
     box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
 }
 .card:hover{
-    scale: 0.95;
+    scale: 0.90;
 }
 .card img{
     width: 50px;
@@ -57,6 +57,11 @@
 .skillActive{
     background-color: var(--second-color);
     color: var(--cards);
+}
+.card:hover img{
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius:12px
 }
 @media (min-width:1023px) {
     .cardsContainer{

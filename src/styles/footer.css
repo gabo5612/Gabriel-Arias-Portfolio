@@ -1,6 +1,7 @@
 footer{
     border-top: 4px inset var(--second-color);
     margin-bottom: 40px;
+    background-color: var(--cards);
 }
 footer h5{
     text-align: center;
@@ -32,10 +33,9 @@ footer h5{
 }
 
 footer ul{
-    display: flex;
-    justify-content: center;
+    display: flex;  
+  justify-content: center;
     gap: 15px;
     position: relative;
-    bottom: -15px;
-    margin-bottom: 15px;
+    padding-bottom: 40px;
 }

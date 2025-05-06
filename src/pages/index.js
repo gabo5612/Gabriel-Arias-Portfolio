@@ -3,7 +3,6 @@ import Navbar from "../components/Navbar"
 import FirstView from "../components/FirstView"
 import About from "../components/About"
 import MySkill from "../components/MySkills"
-import Porfolio from "../components/Portfolio"
 import Experience from "../components/Experience"
 import Footer from "../components/Footer"
 import '../styles/global.css'
@@ -19,7 +18,7 @@ const IndexPage = () => {
     <main>
       <About/>
       <MySkill/>
-      <Porfolio/>
+    
       <Experience/>
 
     </main>
