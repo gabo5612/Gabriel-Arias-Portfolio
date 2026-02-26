@@ -47,6 +47,11 @@ const cards = {
         { img: image.github, title: 'GitHub' },
         { img: image.es6, title: 'ES6+' }
     ],
+    IA: [
+        { img: image.chagpt, title: 'ChatGPT' },
+        { img: image.gemini, title: 'Gemini' },
+        { img: image.claude, title: 'Claude' }
+    ],
     others: [
         { img: image.vstudio, title: 'Visual Studio Code' },
         { img: image.figma, title: 'Figma' },

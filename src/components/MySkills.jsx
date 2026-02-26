@@ -13,6 +13,7 @@ export default function MySkill() {
     cards.seo,
     cards.styling,
     cards.tools,
+    cards.IA,
     cards.others
   ];
 
@@ -33,7 +34,7 @@ export default function MySkill() {
       <div className="msCards cardsMaxWidth" on>
       <AnimatedSection>
         <ul>
-          {['Front-End', 'Back-End', 'Shopify',  'WordPress', 'SEO', 'Styling', 'Tools', 'Others'].map((skillName, index) => (
+          {['Front-End', 'Back-End', 'Shopify',  'WordPress', 'SEO', 'Styling', 'Tools', 'IA', 'Others'].map((skillName, index) => (
             <li
               key={index}
               className={`hoverEffect ${skillActive === index ? 'skillActive' : ''}`} 

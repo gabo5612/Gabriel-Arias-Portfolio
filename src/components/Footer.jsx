@@ -10,7 +10,6 @@ import AnimatedSection from "../animations/AnimatedSection";
 export default function Footer() {
   return (
     <footer>
-     
       <ul>
       <AnimatedSection>
         <li>
