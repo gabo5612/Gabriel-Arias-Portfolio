@@ -53,7 +53,6 @@ export default function MySkill() {
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}> 
               <img src={card.img} alt={card.title} />
-              <img src={card.img} alt={card.title} />
               <span>{card.title}</span>
             </motion.div>
           ))}
