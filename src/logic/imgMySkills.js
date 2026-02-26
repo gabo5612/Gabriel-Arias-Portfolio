@@ -46,9 +46,6 @@ import webpack from '../images/MySkills/webpack-icon.svg'
 import woocomerce from '../images/MySkills/WooCommerce_logo.svg'
 import zoom from '../images/MySkills/zoom-app.svg'
 import localWP from '../images/MySkills/local-wp.png'
-import chagpt from '../images/MySkills/chatgpt.svg'
-import gemini from '../images/MySkills/google-gemini.svg'
-import claude from '../images/MySkills/claude.svg'
 
 export default {
     css,
@@ -98,8 +95,5 @@ export default {
     woocomerce,
     zoom,
     node,
-    localWP,
-    chagpt,
-    gemini,
-    claude
+    localWP
 };

@@ -13,11 +13,14 @@
 }
 
 .experience {
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 20px;
+  margin: 0 auto;
+  max-width: 1400px;
+
 }
 .expLine{
   display: none;
@@ -34,14 +37,17 @@
 }
 .expDate {
   display: flex;
+  align-items: center;
   background-color: var(--cards-ligher);
-  height: fit-content;
   padding: 10px;
   border-radius: 0 100px 100px 0;
   font-weight: 600;
-  min-width: 50px;
-  min-height: 25px;
+  height: 20px;
   margin-top: -5px;
+  min-height: 25px;
+  min-width: 60px;
+  padding: 10px;
+
 }
 .expDate span {
   font-size: 0.8rem;
@@ -115,6 +121,6 @@
     .experienceContainer h3 {
         font-size: 2.5rem;
         top: -20px;
-        left: 125px;
+        left: 20%;
 }
 }
