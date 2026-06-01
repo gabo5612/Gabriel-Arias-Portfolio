@@ -1,74 +1,223 @@
-.firstViewContainer{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 90dvh;
-}
-.fvContent{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 25px;
+/* ==========================================
+   HERO — Full-screen with animated bg
+   ========================================== */
 
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 100px 24px 80px;
+  overflow: hidden;
 }
-.mainBtn{
-    background-color: transparent;
-    border: 2px solid var(--second-color);
-    color: var(--second-color);
-    border-radius: 7px;
-    padding: 10px;
-    font-weight: 600;
+
+/* ── Animated Background ── */
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
 }
-.mainBtn:hover{
-    background-color: var(--second-color);
-    color: var(--main-bg);
-    border: 2px solid var(--main-bg);
+
+.hero__blob {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
 }
-.fvcTitle{
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
+
+.hero__blob--1 {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(245, 165, 36, 0.14) 0%, transparent 70%);
+  top: -250px;
+  right: -200px;
+  filter: blur(60px);
+  animation: float 14s ease-in-out infinite;
 }
-.fvContent span{
-    font-size: 2rem;
+
+.hero__blob--2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.09) 0%, transparent 70%);
+  bottom: -200px;
+  left: -200px;
+  filter: blur(80px);
+  animation: float-reverse 11s ease-in-out infinite;
 }
-.fvH1 span{
-    color: var(--second-color);
-    font-size: 2.5rem;
-    font-weight: 600;
+
+.hero__blob--3 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.07) 0%, transparent 70%);
+  top: 45%;
+  left: 40%;
+  filter: blur(60px);
+  animation: float-slow 18s ease-in-out infinite;
 }
-.fvImage img{
-    width: 300px;
+
+/* Subtle dot-grid overlay */
+.hero__grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
 }
-@media (min-width:1023px) {
-    .firstViewContainer{
-        flex-direction: row;
-        justify-content: space-around;
-    }
-    .fvContent {
-        align-items: flex-start;
-        gap: 15px;
-    }
-    .fvContent span{
-        font-size: 2.5rem;
-    }
-    .fvH1 span{
-        font-size: 4rem;
-    }
-    .fvcTitle h2{
-        font-size: 1.5rem;
-    }
-    .fvImage img{
-        width: 500px;
-    }
-    .mainBtn{
-        font-size: 1.5rem;
-        padding: 20px 30px;
-        border: 5px solid var(--second-color);
-    }
-    .mainBtn:hover{
-        border: 5px solid var(--main-bg);
-    }
+
+/* ── Content ── */
+.hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: var(--container);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Available badge */
+.hero__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: var(--r-full);
+  background: rgba(34, 197, 94, 0.07);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4ade80;
+  margin-bottom: 32px;
+  width: fit-content;
+  font-family: var(--font-body);
+}
+
+.hero__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+  animation: status-pulse 2.2s ease-in-out infinite;
+}
+
+/* Greeting */
+.hero__greeting {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 6px;
+  font-family: var(--font-body);
+}
+
+/* Name */
+.hero__name {
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 9vw, 6.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  background: linear-gradient(135deg, #f5a524 0%, #fb923c 45%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+}
+
+/* Typewriter role */
+.hero__role-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+  min-height: 2rem;
+}
+
+.hero__role-prefix {
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+}
+
+.hero__role {
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.hero__role-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.3em;
+  background: var(--accent);
+  border-radius: 1px;
+  margin-left: 1px;
+  vertical-align: middle;
+  animation: typing-cursor 1.1s ease-in-out infinite;
+}
+
+/* Description */
+.hero__description {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  max-width: 540px;
+  margin-bottom: 40px;
+  font-family: var(--font-body);
+}
+
+/* CTA buttons */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 56px;
+}
+
+/* Scroll indicator */
+.hero__scroll {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+}
+
+.hero__scroll-indicator {
+  width: 22px;
+  height: 36px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 11px;
+  display: flex;
+  justify-content: center;
+  padding: 5px 0;
+}
+
+.hero__scroll-dot {
+  width: 4px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: scroll-bounce 2.2s ease-in-out infinite;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (min-width: 768px) {
+  .hero {
+    padding: 100px 48px 80px;
+  }
+
+  .hero__description {
+    font-size: 1.1rem;
+  }
 }

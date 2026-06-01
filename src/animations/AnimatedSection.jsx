@@ -1,19 +1,18 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const AnimatedSection = ({ children }) => {
-  const variants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0 }
-  };
-
+const AnimatedSection = ({ children, delay = 0, className = "" }) => {
   return (
     <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={variants}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{
+        duration: 0.6,
+        delay,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      className={className}
     >
       {children}
     </motion.div>

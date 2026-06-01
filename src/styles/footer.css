@@ -1,41 +1,84 @@
-footer{
-    border-top: 4px inset var(--second-color);
-    margin-bottom: 40px;
-    background-color: var(--cards);
-}
-footer h5{
-    text-align: center;
-    font-size: 3rem;
-    font-weight: 600;
-    margin: 20px;
-}
-.footerContact{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
-.footerContact a{
-    text-decoration: none;
-    color: var(--second-color);
-    background: var(--cards-ligher);
-    padding: 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.footerContact h6{
-    font-size: 2.7rem;
-    color: var(--second-color);
+/* ==========================================
+   FOOTER — Minimal with links
+   ========================================== */
+
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
 }
 
-footer ul{
-    display: flex;  
+.footer__inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+/* Logo */
+.footer__logo {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text-muted);
+}
+
+.footer__logo span { color: var(--accent); }
+
+/* Social links */
+.footer__links {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer__links a {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-    gap: 15px;
-    position: relative;
-    padding-bottom: 40px;
+  border-radius: var(--r-md);
+  transition: var(--t-fast);
+}
+
+.footer__links a:hover {
+  background: var(--bg-card-hover);
+}
+
+.footer__links img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(0.4);
+  transition: filter var(--t-fast);
+  display: block;
+}
+
+.footer__links a:hover img {
+  filter: brightness(0) invert(0.75);
+}
+
+/* Copyright */
+.footer__copy {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (min-width: 640px) {
+  .footer__inner {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
 }

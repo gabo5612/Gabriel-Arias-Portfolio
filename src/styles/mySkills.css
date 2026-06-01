@@ -1,87 +1,140 @@
-.msContainer{
-    margin-bottom: 80px;
-}
-.msContainer h3{
-    font-size: 2rem;
-    font-weight: 600;
-    text-align: center;
-}
-.msCards{
-    margin: 0 20px;
-}
-.msCards ul{
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 450px;
-    gap: 15px;
-    margin: 20px auto;
-}
-.msCards li{
-    font-weight: 600;   
-    padding: 10px;
-    border-radius: 7px;
-    cursor: pointer;
+/* ==========================================
+   SKILLS — Tab filter + glass cards
+   ========================================== */
+
+.skills {
+  padding: var(--section-py) 0;
+  background: var(--bg-alt);
 }
 
-.card{
-    background-color: var(--cards);
-    height: 150px;
-    width: 100%;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-    font-weight: bold;
-    cursor: pointer;
-    -webkit-box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
-    -moz-box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
-    box-shadow: 4px 2px 29px -10px rgba(0, 0, 0, 1);
+.skills__inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
 }
-.card:hover{
-    scale: 0.90;
+
+.skills__header { margin-bottom: 0; }
+
+.skills__title {
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  margin-top: 4px;
 }
-.card img{
-    width: 50px;
+
+/* Category tabs */
+.skills__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 36px 0 28px;
+  list-style: none;
+  padding: 0;
 }
-.card span{
-    text-align: center;
+
+.skills__tab {
+  padding: 8px 16px;
+  border-radius: var(--r-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--t-fast);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  user-select: none;
+  appearance: none;
+  outline: none;
+  line-height: 1;
 }
-.cardsContainer{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
-    gap: 20px;
-    justify-items: center;
+
+.skills__tab:hover {
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--bg-card-hover);
 }
-.skillActive{
-    background-color: var(--second-color);
-    color: var(--cards);
+
+.skills__tab.skillActive {
+  background: var(--accent) !important;
+  color: #09090b !important;
+  border-color: var(--accent) !important;
 }
-.card:hover img{
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 10px;
-    border-radius:12px
+
+/* Skills grid */
+.skills__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
 }
-@media (min-width:1023px) {
-    .cardsContainer{
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        max-width: 80%;
-        margin: 0 auto;
-    }
-    .card{
-        height: 250px;
-    }
-    .card img{
-        width: 75px;
-    }
-    .card span{
-        font-size: 1.2rem;
-    }
+
+.skill-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: default;
+  transition: border-color var(--t-base), background var(--t-base),
+    box-shadow var(--t-base);
 }
-@media (min-width:1439px) {
-    .cardsMaxWidth{
-        margin: 0 auto;
-        max-width: 1600px;
-    }
+
+.skill-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  box-shadow: 0 4px 24px rgba(245, 165, 36, 0.07);
+}
+
+.skill-card img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.skill-card span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.3;
+  transition: color var(--t-fast);
+  font-family: var(--font-body);
+}
+
+.skill-card:hover span {
+  color: var(--text-primary);
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (min-width: 640px) {
+  .skills__grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .skills__grid {
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 18px;
+  }
+
+  .skill-card {
+    padding: 26px 18px;
+  }
+
+  .skill-card img { width: 52px; height: 52px; }
+
+  .skill-card span { font-size: 0.85rem; }
+}
+
+@media (min-width: 1024px) {
+  .skills__grid {
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  }
 }
