@@ -37,7 +37,7 @@ const porfolioCards = [
   },
   {
     img: images.trailKit,
-    title: "TrailKit",
+    title: "TrailPlugin",
     description:
       "WordPress plugin for adventure routes, POIs & guides — with interactive Leaflet maps, elevation profiles, and a Next.js license management backend.",
     link: "https://trailplugin.com",
