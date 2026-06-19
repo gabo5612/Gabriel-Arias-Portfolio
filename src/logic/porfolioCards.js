@@ -35,6 +35,16 @@ const porfolioCards = [
     link: "https://github.com/gabo5612/Venezuela-Rutas",
     tags: ["JavaScript", "Maps API", "CSS", "WordPress", "ACF"],
   },
+  {
+    img: images.trailKit,
+    title: "TrailKit",
+    description:
+      "WordPress plugin for adventure routes, POIs & guides — with interactive Leaflet maps, elevation profiles, and a Next.js license management backend.",
+    link: "https://trailplugin.com",
+    demo: "https://trailplugin.com",
+    github: "https://github.com/TrailPlugin/",
+    tags: ["WordPress", "PHP", "Leaflet", "Next.js", "Supabase"],
+  },
 ];
 
 export default porfolioCards;
