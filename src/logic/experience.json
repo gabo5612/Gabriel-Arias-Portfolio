@@ -3,7 +3,7 @@
     "date": "2014-2019",
     "title": "Cameraman & Web Developer",
     "location": "Venezuela",
-    "description": "Managed domain acquisition, CDN configuration, and full website development for Producciones Mi Tricolor. Created audiovisual and written content with strong SEO practices and implemented code-level optimization to boost performance."
+    "description": "Managed domain acquisition, CDN configuration, and full website development for Producciones Mi Tricolor. Created audiovisual and written content with SEO best practices, and implemented code-level optimization to improve performance."
   },
   {
     "date": "2019-2022",
@@ -15,12 +15,12 @@
     "date": "2022-2023",
     "title": "WordPress Developer & SEO Specialist",
     "location": "Remote",
-    "description": "Worked at Efiempresa analyzing site content for SEO issues. Applied advanced SEO strategies and tools to improve rankings, increase organic traffic, and enhance customer acquisition."
+    "description": "Analyzed site content for SEO issues at Efiempresa. Applied SEO strategy and tooling to improve rankings, grow organic traffic, and support customer acquisition."
   },
   {
     "date": "2023-Present",
-    "title": "Junior Web Producer",
+    "title": "Web Producer & AI Engineer",
     "location": "Remote",
-    "description": "At Magnetic Creative, responsible for building and customizing websites across platforms. Tasks include responsive UI development, setting up e-commerce features, optimizing performance, troubleshooting issues, and collaborating with cross-functional teams."
+    "description": "At a digital agency. Built and shipped a multi-tenant RAG content platform in production: document ingestion and chunking, pgvector embeddings with similarity retrieval, and a five-stage generation pipeline running on background jobs — behind a server-side model allowlist, role-based access control, an audit log, and a per-generation cost ledger. Stack: Next.js, Supabase, Anthropic and OpenAI via the Vercel AI SDK. Delivered a WCAG 2.1 AA remediation programme across five properties, using a purpose-built contrast auditing tool that triaged 854 flagged instances by separating what can be measured from what needs human judgement. Deliver technical audits by operating multi-agent orchestration — up to 11 specialist audits in parallel — and synthesizing the cross-confirmed findings into prioritized action plans. Also build internal tooling, including a local-first image and video compressor that runs with no backend."
   }
 ]

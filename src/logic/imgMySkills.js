@@ -50,6 +50,23 @@ import chagpt from '../images/MySkills/chatgpt.svg'
 import gemini from '../images/MySkills/google-gemini.svg'
 import claude from '../images/MySkills/claude.svg'
 
+// AI & automation
+import ollama from '../images/MySkills/ai/ollama.svg'
+import localInference from '../images/MySkills/ai/local-inference.svg'
+import rag from '../images/MySkills/ai/rag.svg'
+import pgvector from '../images/MySkills/ai/pgvector.svg'
+import mcp from '../images/MySkills/ai/mcp.svg'
+import aiSdk from '../images/MySkills/ai/ai-sdk.svg'
+import agents from '../images/MySkills/ai/agents.svg'
+import evals from '../images/MySkills/ai/evals.svg'
+import playwright from '../images/MySkills/ai/playwright.svg'
+import electron from '../images/MySkills/ai/electron.svg'
+import python from '../images/MySkills/ai/python.svg'
+import docker from '../images/MySkills/ai/docker.svg'
+import supabase from '../images/MySkills/ai/supabase.svg'
+import githubActions from '../images/MySkills/ai/github-actions.svg'
+import inngest from '../images/MySkills/ai/inngest.svg'
+
 export default {
     css,
     ACFPRO,
@@ -101,5 +118,21 @@ export default {
     localWP,
     chagpt,
     gemini,
-    claude
+    claude,
+
+    ollama,
+    localInference,
+    rag,
+    pgvector,
+    mcp,
+    aiSdk,
+    agents,
+    evals,
+    playwright,
+    electron,
+    python,
+    docker,
+    supabase,
+    githubActions,
+    inngest
 };

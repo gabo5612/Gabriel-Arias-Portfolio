@@ -62,8 +62,8 @@ export default function About() {
           <AnimatedSection>
             <span className="section-badge">About Me</span>
             <h2 id="about-heading" className="about__title">
-              Developer. Creator.<br />
-              <span className="gradient-text">Problem Solver.</span>
+              AI systems that run<br />
+              <span className="gradient-text">where your data lives.</span>
             </h2>
           </AnimatedSection>
         </div>
@@ -73,20 +73,22 @@ export default function About() {
           <AnimatedSection>
             <div className="about__bio">
               <p>
-                Hi! I'm a <strong>full-stack developer</strong> with over 10 years of experience
-                building clean, responsive websites and web applications. I'm driven by the
-                intersection of great design and solid engineering.
+                Hi! I'm a developer with over 10 years of web experience, now working on{' '}
+                <strong>applied AI engineering</strong> — retrieval systems, agent tooling, and
+                running models locally. Most of what I build shares one constraint: the data
+                never leaves the machine.
               </p>
               <p>
-                My toolkit spans <strong>React, Next.js, Node.js, WordPress</strong>, and{' '}
-                <strong>Shopify</strong>. I've shipped everything from high-traffic e-commerce
-                platforms to custom web apps — always with a focus on performance and user
-                experience.
+                In practice that means RAG pipelines over private document corpora on{' '}
+                <strong>pgvector</strong>, a CLI that dispatches coding work to{' '}
+                <strong>local models through Ollama</strong> and verifies the output
+                deterministically — typecheck, lint, tests, with no model grading another
+                model — and desktop automation that runs fully offline.
               </p>
               <p>
-                Beyond code, I bring experience in <strong>SEO strategy, web production</strong>,
-                and collaborating with cross-functional teams to deliver impactful digital products.
-                I'm currently open to new opportunities.
+                Underneath that is a decade of production web work in{' '}
+                <strong>React, Next.js, Node.js, WordPress</strong>, and <strong>Shopify</strong>,
+                plus SEO and accessibility engineering. I'm currently open to new opportunities.
               </p>
             </div>
           </AnimatedSection>

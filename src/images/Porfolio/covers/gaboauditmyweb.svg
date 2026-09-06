@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <defs>
+    <pattern id="ga" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0v40" fill="none" stroke="#161b26" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="wa" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#2DD48F" stop-opacity=".20"/>
+      <stop offset="100%" stop-color="#2DD48F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="#0B0D11"/>
+  <rect width="800" height="500" fill="url(#ga)"/>
+  <rect width="800" height="500" fill="url(#wa)"/>
+  <g fill="none" stroke="#2DD48F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left: the speed gauge. Track, then the value arc stopping short of
+         full, then the needle on the same angle. -->
+    <path d="M120 320A110 110 0 0 1 340 320" stroke-width="2" opacity=".28"/>
+    <path d="M120 320A110 110 0 0 1 328 270" stroke-width="7"/>
+    <path d="M110 320h-12M145 235l-8-8M230 200v-12M315 235l8-8M350 320h12" stroke-width="2" opacity=".55"/>
+    <path d="M230 320 308 280" stroke-width="4"/>
+    <circle cx="230" cy="320" r="9" fill="#0B0D11" stroke-width="3"/>
+
+    <!-- Bridge: one audit feeds the other page. -->
+    <path d="M362 320C400 320 420 260 470 260" opacity=".55"/>
+
+    <!-- Right: the checklist the crawler reads. Passing rows carry a tick,
+         the last one is still blank — the audit reports both. -->
+    <rect x="470" y="155" width="210" height="210" rx="14"/>
+    <path d="M470 196h210" stroke-width="2" opacity=".55"/>
+    <circle cx="492" cy="176" r="5" stroke-width="2" opacity=".55"/>
+    <circle cx="510" cy="176" r="5" stroke-width="2" opacity=".55"/>
+    <circle cx="528" cy="176" r="5" stroke-width="2" opacity=".55"/>
+    <path d="M496 240l7 7 13-15" stroke-width="4"/>
+    <path d="M534 240h118" stroke-width="2" opacity=".55"/>
+    <path d="M496 285l7 7 13-15" stroke-width="4"/>
+    <path d="M534 285h88" stroke-width="2" opacity=".55"/>
+    <circle cx="506" cy="330" r="10" stroke-width="2.5" opacity=".45"/>
+    <path d="M534 330h60" stroke-width="2" opacity=".28"/>
+  </g>
+</svg>

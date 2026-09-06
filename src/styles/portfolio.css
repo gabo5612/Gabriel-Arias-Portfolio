@@ -38,7 +38,10 @@
   transition: border-color var(--t-base), transform var(--t-base),
     box-shadow var(--t-base);
   cursor: pointer;
-  aspect-ratio: 4 / 3;
+  /* 16:10 matches the cover art, so object-fit crops as little as possible.
+     min-height keeps room for the hover overlay when the column narrows. */
+  aspect-ratio: 16 / 10;
+  min-height: 210px;
 }
 
 .project-card:hover {
@@ -96,7 +99,13 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 24px;
+  padding: 18px 20px;
+  overflow: hidden;
+  background: linear-gradient(
+    to top,
+    rgba(9, 9, 11, 0.97) 40%,
+    rgba(9, 9, 11, 0.88) 100%
+  );
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--t-base);
@@ -111,7 +120,7 @@
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   letter-spacing: -0.02em;
   transform: translateY(12px);
   transition: transform var(--t-base);
@@ -123,7 +132,12 @@
   font-size: 0.82rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   transform: translateY(12px);
   transition: transform var(--t-base) 40ms;
   font-family: var(--font-body);
@@ -136,7 +150,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   transform: translateY(12px);
   transition: transform var(--t-base);
 }
@@ -153,6 +167,12 @@
   padding: 2px 8px;
   font-family: var(--font-body);
   letter-spacing: 0.03em;
+}
+
+.project-card__tag--more {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Dual action buttons row */
@@ -191,4 +211,61 @@
   .projects__grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* No hover on touch: show the overlay content permanently, otherwise the
+   project links are unreachable on phones and tablets. */
+@media (hover: none) {
+  .project-card__image { filter: brightness(0.3); }
+
+  .project-card__badge { display: none; }
+
+  .project-card__overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .project-card__tags,
+  .project-card__title,
+  .project-card__desc,
+  .project-card__actions {
+    transform: none;
+  }
+}
+
+/* Service pill. The grid is otherwise personal projects; this marks the one
+   card that is a paid offer, so the two do not read as the same thing. It
+   appears twice per card — the badge is hidden on hover, the overlay takes
+   over — so it is sized off the surrounding text rather than fixed. */
+.project-card__kind {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border: 1px solid rgba(45, 212, 143, 0.45);
+  border-radius: 999px;
+  background: rgba(45, 212, 143, 0.12);
+  font-family: var(--font-body, inherit);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: none;
+  color: #2DD48F;
+  vertical-align: middle;
+}
+
+/* "Ask ChatGPT" — third button in a row sized for two. It is the quietest of
+   the three on purpose (the site and the repo come first), and smaller so the
+   row still fits on one line at the narrowest desktop column; the row already
+   wraps, so on a phone it drops to a second line instead of overflowing. */
+.project-card__btn--ask {
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  gap: 6px;
+}
+
+.project-card__btn--ask:hover {
+  color: var(--text-primary);
 }

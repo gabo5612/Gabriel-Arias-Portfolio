@@ -4,14 +4,15 @@ import '../styles/mySkills.css';
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedSection from "../animations/AnimatedSection";
 
+/* TAB_NAMES and ROUTES are parallel: index N of one maps to index N of the other. */
 const TAB_NAMES = [
-  'Front-End', 'Back-End', 'Shopify', 'WordPress',
-  'SEO', 'Styling', 'Tools', 'AI', 'Others',
+  'AI & Automation', 'Front-End', 'Back-End', 'Shopify', 'WordPress',
+  'SEO', 'Styling', 'Tools', 'Others',
 ];
 
 const ROUTES = [
-  cards.frontEnd, cards.backend, cards.shopify, cards.wordpress,
-  cards.seo, cards.styling, cards.tools, cards.IA, cards.others,
+  cards.IA, cards.frontEnd, cards.backend, cards.shopify, cards.wordpress,
+  cards.seo, cards.styling, cards.tools, cards.others,
 ];
 
 const gridVariants = {

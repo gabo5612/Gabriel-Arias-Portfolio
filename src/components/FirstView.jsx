@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 
 /* ── Typewriter hook ── */
 const ROLES = [
+  "AI Engineer",
   "Front-end Developer",
   "Full-Stack Developer",
   "Web Producer",

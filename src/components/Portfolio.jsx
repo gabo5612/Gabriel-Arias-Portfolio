@@ -3,6 +3,11 @@ import '../styles/portfolio.css';
 import porfolioCards from "../logic/porfolioCards";
 import { motion } from "framer-motion";
 import AnimatedSection from "../animations/AnimatedSection";
+import { askChatGptUrl } from "../logic/site";
+
+// Cards are 16:10; more than three tags wraps to a third row and pushes the
+// overlay content out of the card.
+const MAX_TAGS = 3;
 
 export default function Portfolio() {
   return (
@@ -32,20 +37,35 @@ export default function Portfolio() {
               />
 
               {/* Always-visible badge */}
-              <div className="project-card__badge">{card.title}</div>
+              <div className="project-card__badge">
+                {card.title}
+                {card.kind === 'service' && (
+                  <span className="project-card__kind">Service</span>
+                )}
+              </div>
 
               {/* Hover overlay */}
               <div className="project-card__overlay">
                 {/* Tags */}
                 {card.tags && (
                   <div className="project-card__tags">
-                    {card.tags.map(tag => (
+                    {card.tags.slice(0, MAX_TAGS).map(tag => (
                       <span key={tag} className="project-card__tag">{tag}</span>
                     ))}
+                    {card.tags.length > MAX_TAGS && (
+                      <span className="project-card__tag project-card__tag--more">
+                        +{card.tags.length - MAX_TAGS}
+                      </span>
+                    )}
                   </div>
                 )}
 
-                <h3 className="project-card__title">{card.title}</h3>
+                <h3 className="project-card__title">
+                  {card.title}
+                  {card.kind === 'service' && (
+                    <span className="project-card__kind">Service</span>
+                  )}
+                </h3>
                 <p className="project-card__desc">{card.description}</p>
 
                 <div className="project-card__actions">
@@ -56,9 +76,9 @@ export default function Portfolio() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-primary project-card__btn"
-                      aria-label={`Live demo of ${card.title}`}
+                      aria-label={`${card.kind === 'service' ? 'Visit' : 'Live demo of'} ${card.title}`}
                     >
-                      Live Demo
+                      {card.kind === 'service' ? 'Visit site' : 'Live Demo'}
                       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
                         <path d="M2 2h9v9M2 11L11 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
@@ -77,6 +97,23 @@ export default function Portfolio() {
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
                       <path d="M2 6.5h9M7 2l4.5 4.5L7 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                  </a>
+
+                  {/* Ask ChatGPT. The prompt points at /llms.txt so the answer
+                      comes off this site rather than off the project's name;
+                      scripts/verify-llms.mjs keeps that file in step with this
+                      list. Deliberately the quietest button of the three. */}
+                  <a
+                    href={askChatGptUrl(card.title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost project-card__btn project-card__btn--ask"
+                    aria-label={`Ask ChatGPT what ${card.title} does`}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                      <path d="M11.5 7.2c0 2.1-2.2 3.8-4.9 3.8-.6 0-1.2-.08-1.7-.23L2 11.8l.8-2.1C1.94 9 1.5 8.15 1.5 7.2c0-2.1 2.2-3.8 4.9-3.8s5.1 1.7 5.1 3.8Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+                    </svg>
+                    Ask ChatGPT
                   </a>
                 </div>
               </div>

@@ -1,13 +1,19 @@
-import gym         from '../images/Porfolio/GYM.jpg'
-import minuteTips  from '../images/Porfolio/Minute_tips.png'
-import danielArias from '../images/Porfolio/Daniel_arias.png'
-import venezuela   from '../images/Porfolio/Venezuel_rutas.png'
-import trailKit    from '../images/Porfolio/TrailKit.png'
+import gaboAuditMyWeb from '../images/Porfolio/covers/gaboauditmyweb.svg'
+import crew         from '../images/Porfolio/covers/crew.svg'
+import brandvoice        from '../images/Porfolio/covers/brandvoice.svg'
+import squish       from '../images/Porfolio/covers/squish.png'
+import typeit       from '../images/Porfolio/covers/typeit.svg'
+import quicktask    from '../images/Porfolio/covers/quicktask.png'
+import trailKit     from '../images/Porfolio/TrailKit.png'
+import danielArias  from '../images/Porfolio/Daniel_arias.png'
 
 export default {
-  gym,
-  minuteTips,
-  danielArias,
-  venezuela,
+  gaboAuditMyWeb,
+  crew,
+  brandvoice,
   trailKit,
+  quicktask,
+  squish,
+  typeit,
+  danielArias,
 }
