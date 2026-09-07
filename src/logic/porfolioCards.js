@@ -41,6 +41,9 @@ const porfolioCards = [
       "Commercial WordPress plugin for adventure routes, POIs and guides, with interactive Leaflet maps and elevation profiles. Licence management runs on a separate Next.js and Supabase backend.",
     link: "https://trailplugin.com",
     demo: "https://trailplugin.com",
+    // The plugin is a commercial product, not a sandbox: "Live Demo" would promise
+    // something to click through, and the site is the project itself.
+    demoLabel: "View Project",
     github: "https://github.com/TrailPlugin/",
     tags: ["WordPress", "PHP", "Leaflet", "Next.js", "Supabase"],
   },

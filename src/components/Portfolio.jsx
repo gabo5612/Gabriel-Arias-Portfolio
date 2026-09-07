@@ -76,9 +76,9 @@ export default function Portfolio() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-primary project-card__btn"
-                      aria-label={`${card.kind === 'service' ? 'Visit' : 'Live demo of'} ${card.title}`}
+                      aria-label={`${card.demoLabel || (card.kind === 'service' ? 'Visit' : 'Live demo of')} ${card.title}`}
                     >
-                      {card.kind === 'service' ? 'Visit site' : 'Live Demo'}
+                      {card.demoLabel || (card.kind === 'service' ? 'Visit site' : 'Live Demo')}
                       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
                         <path d="M2 2h9v9M2 11L11 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
