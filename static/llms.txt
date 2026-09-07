@@ -34,6 +34,77 @@ keys, same ids and hrefs — and refuses to deploy if anything moved.
 - Code: https://github.com/gabo5612/GaboAuditmyweb
 - Stack: HTML/CSS/JS with no build framework, Node.js, PageSpeed Insights API, CrUX API
 
+### shopfloor
+
+An on-prem assistant for a metals plant's technical documentation: equipment
+manuals of several thousand pages, qualified welding procedures, SOPs, spare-part
+catalogues, lockout procedures. It runs entirely inside the plant, with no
+internet — Postgres 18 with pgvector, `bge-m3` embeddings and a local model — for
+three reasons that each stand on their own: process parameters are the plant's
+competitive asset, vendor manuals are under NDA, and the shop floor often has no
+connectivity at all.
+
+It is not a chatbot. Every answer cites document, revision and page; a
+deterministic verifier sits between the model and the operator and checks that
+each figure and code in the answer is literally present in the cited chunk; and
+it abstains when the documentation does not answer, instead of guessing. Retrieval
+is hybrid, dense plus lexical, fused with reciprocal rank.
+
+Its quality is measured by `groundcheck` against a committed golden set, and the
+repository publishes what that measurement found — including the defects, such as
+answering from the neighbouring row of a parts table.
+
+- Demo: https://shopfloor-demo.vercel.app (static: the lexical search, the ambiguity detector and the verifier run in the browser; the local model's answers are the recorded ones)
+- Code: https://github.com/gabo5612/shopfloor
+- Stack: Python 3.12, FastAPI, Postgres 18 with pgvector, docling, bge-m3, local LLM via Ollama
+
+### groundcheck
+
+An evaluation harness for RAG systems: it measures, reproducibly, whether a system
+retrieves the right thing, answers with grounding, cites correctly and stays quiet
+when it does not know — and it fails CI when a change degrades any of that.
+
+It measures retrieval with recall@k, MRR and precision@k, and then the part most
+evaluations skip. Whether every number and identifier in an answer appears
+literally in a cited chunk. Whether the citation points at the gold document, page
+and revision rather than a superseded one. Whether the system abstained on the
+questions the corpus cannot answer: 23% of the golden set are negative controls,
+because a system that always answers confidently would otherwise score perfectly.
+
+Every check is deterministic — no model judges another model's output. A run
+stores only observations, never verdicts, so an old run can be re-evaluated with
+new checks; and the harness refuses to report if the golden set's hash no longer
+matches the one recorded with the run. 179 tests, one runtime dependency.
+
+- Demo: https://groundcheck-demo.vercel.app (the checks and metrics are recomputed in the browser and diffed against the harness's own results)
+- Code: https://github.com/gabo5612/groundcheck
+- Stack: Python 3.12, YAML golden sets, CLI, GitHub Actions
+
+### feedstock
+
+Input-cost risk for a metals plant, running local-first. A plant buys copper,
+aluminium, gold, platinum and energy, and those inputs decide its margin. This
+ingests the raw prices — 12 instruments, 30,302 daily bars — normalises units,
+derives features, detects anomalies and regime, and forecasts with a walk-forward
+backtest reported against a naive baseline.
+
+It is deliberately not a trading bot and makes no claim about beating the market.
+The defensible claim, and the only one it makes, is the out-of-sample error of each
+model against that baseline, measured and reproducible. A cost basket turns those
+prices into what one tonne of product costs, which input weighs most, and what
+happens to that cost if one input moves — a scenario that explicitly does not
+propagate the move to the others through correlation, because that would turn an
+explicit assumption into a covert prediction.
+
+The instrument registry stores display names verified against the source's own
+response after one ticker turned out to be a 10-year Treasury note future rather
+than zinc: a wrong series that would have contaminated every model with no visible
+error.
+
+- Demo: https://feedstock-demo.vercel.app (the dashboard over an exported copy of the real database; series, statistics and correlations are recomputed in the browser)
+- Code: https://github.com/gabo5612/feedstock
+- Stack: Python 3.12, TimescaleDB with pgvector, FastAPI, React
+
 ### crew
 
 A command-line tool that dispatches closed-contract coding tasks to local models
@@ -54,6 +125,7 @@ or the dimension diverges between the two paths, cosine distance stops meaning
 anything. A five-step Inngest pipeline runs behind a server-side model allowlist,
 nine-permission RBAC, an audit log and a per-generation cost ledger.
 
+- Demo: https://brandvoice-demo.vercel.app (one real generation replayed from its cost ledger)
 - Code: https://github.com/gabo5612/brandvoice
 - Stack: Next.js App Router, React, Supabase with row-level security, pgvector, Inngest, Vercel AI SDK, Tiptap
 

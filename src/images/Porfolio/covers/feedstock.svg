@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <defs>
+    <pattern id="gf" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0v40" fill="none" stroke="#161b26" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="wf" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#FB7185" stop-opacity=".20"/>
+      <stop offset="100%" stop-color="#FB7185" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="#0B0D11"/>
+  <rect width="800" height="500" fill="url(#gf)"/>
+  <rect width="800" height="500" fill="url(#wf)"/>
+  <g fill="none" stroke="#FB7185" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- the price history: two inputs, and where the forecast stops being history -->
+    <path d="M96 330V150M96 330h300" stroke-width="2" opacity=".5"/>
+    <path d="M96 296l34-18 32 12 30-34 34 16 32-46 30 22 34-30 32 14" stroke-width="3"/>
+    <path d="M96 244l34 10 32-22 30 18 34-8 32 24 30-16 34 8 32-22" stroke-width="2.5" opacity=".55"/>
+    <path d="M290 150v180" stroke-width="2" stroke-dasharray="6 7" opacity=".6"/>
+    <path d="M290 218l34-18 32 10" stroke-width="2.5" stroke-dasharray="8 6" opacity=".8"/>
+    <circle cx="290" cy="218" r="6" fill="#0B0D11"/>
+    <!-- the basket: what one unit of product costs, input by input -->
+    <path d="M418 250h34" opacity=".55"/>
+    <rect x="470" y="150" width="180" height="200" rx="12"/>
+    <path d="M492 190h60" stroke-width="2"/>
+    <rect x="492" y="212" width="136" height="16" rx="4"/>
+    <path d="M492 220h84" stroke-width="8" opacity=".75"/>
+    <rect x="492" y="244" width="136" height="16" rx="4"/>
+    <path d="M492 252h48" stroke-width="8" opacity=".75"/>
+    <rect x="492" y="276" width="136" height="16" rx="4"/>
+    <path d="M492 284h26" stroke-width="8" opacity=".75"/>
+    <path d="M492 312h136" stroke-width="2" opacity=".5"/>
+    <path d="M492 330h50M598 330h30" stroke-width="3"/>
+    <!-- the shock: the input moves, the unit cost moves with it -->
+    <path d="M664 250h30" opacity=".55"/>
+    <circle cx="726" cy="250" r="32" fill="#0B0D11"/>
+    <path d="M726 234v32M712 250h28" stroke-width="2.5" opacity=".45"/>
+    <path d="M714 262l10-14 8 8 10-16" stroke-width="3"/>
+  </g>
+</svg>

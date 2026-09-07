@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <defs>
+    <pattern id="gg" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0v40" fill="none" stroke="#161b26" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="wg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#C084FC" stop-opacity=".20"/>
+      <stop offset="100%" stop-color="#C084FC" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="#0B0D11"/>
+  <rect width="800" height="500" fill="url(#gg)"/>
+  <rect width="800" height="500" fill="url(#wg)"/>
+  <g fill="none" stroke="#C084FC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- the golden set: questions, one of them a negative control -->
+    <rect x="80" y="150" width="150" height="200" rx="10"/>
+    <path d="M100 184h96M100 208h110M100 232h84M100 256h104M100 280h72" stroke-width="2" opacity=".7"/>
+    <path d="M100 314h60" stroke-width="2" opacity=".35"/>
+    <circle cx="212" cy="314" r="9" fill="#0B0D11"/>
+    <path d="M208 314h8" stroke-width="2"/>
+    <path d="M244 250h40" opacity=".55"/>
+    <!-- the deterministic checks: passes, one failure, one not verifiable -->
+    <g stroke-width="2.5">
+      <circle cx="316" cy="196" r="15" fill="#0B0D11"/>
+      <path d="M309 197l5 5 9-11" stroke-width="3"/>
+      <circle cx="316" cy="250" r="15" fill="#0B0D11"/>
+      <path d="M310 244l12 12M322 244l-12 12" stroke-width="3"/>
+      <circle cx="316" cy="304" r="15" fill="#0B0D11"/>
+      <path d="M310 304h12" stroke-width="3" opacity=".5"/>
+    </g>
+    <path d="M342 196h34M342 250h34M342 304h34" opacity=".45"/>
+    <!-- the report: per-category rates against a threshold -->
+    <rect x="396" y="150" width="230" height="200" rx="12"/>
+    <path d="M420 320h182" stroke-width="2" opacity=".5"/>
+    <path d="M420 214h182" stroke-width="2" stroke-dasharray="6 7" opacity=".55"/>
+    <rect x="428" y="238" width="26" height="82" rx="4"/>
+    <rect x="470" y="192" width="26" height="128" rx="4"/>
+    <rect x="512" y="262" width="26" height="58" rx="4"/>
+    <rect x="554" y="176" width="26" height="144" rx="4"/>
+    <path d="M640 250h34" opacity=".55"/>
+    <!-- the gate: the build passes, or the metric that dropped stops it -->
+    <rect x="682" y="222" width="72" height="56" rx="12" fill="#0B0D11"/>
+    <path d="M700 251l10 10 18-22" stroke-width="4"/>
+    <path d="M700 208v-18M718 190h36" stroke-width="2" opacity=".45"/>
+  </g>
+</svg>

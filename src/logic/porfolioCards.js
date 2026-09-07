@@ -16,6 +16,43 @@ const porfolioCards = [
     github: "https://github.com/gabo5612/GaboAuditmyweb",
     tags: ["Shopify", "Core Web Vitals", "Technical SEO", "Node.js", "PageSpeed API"],
   },
+  // The flagship pair, in the order they were built: the harness first, then the
+  // system it measures. `demo` points at a static deployment of each — the real
+  // ones need a local model, a plant network or a database, so what is published
+  // is the deterministic half plus the recorded output.
+  {
+    img: images.shopfloor,
+    title: "shopfloor",
+    description:
+      "On-prem assistant for a plant's technical documentation — equipment manuals, welding procedures, SOPs, spare-part catalogues. It runs entirely inside the plant with no internet: Postgres with pgvector, bge-m3 embeddings and a local model. No figure reaches the operator without a deterministic verifier checking it against the cited page, every answer carries document, revision and page, and it abstains instead of guessing. Measured by groundcheck against a 39-question golden set, defects included.",
+    link: "https://shopfloor-demo.vercel.app",
+    demo: "https://shopfloor-demo.vercel.app",
+    demoLabel: "Live Demo",
+    github: "https://github.com/gabo5612/shopfloor",
+    tags: ["Python", "FastAPI", "pgvector", "Local LLMs", "RAG", "Docling"],
+  },
+  {
+    img: images.groundcheck,
+    title: "groundcheck",
+    description:
+      "An evaluation harness for RAG systems, and the reason the numbers above mean anything. It measures retrieval (recall@k, MRR, precision@k) and then the part most evaluations skip: whether every figure in an answer is literally present in a cited chunk, whether the citation points at the right page and revision, and whether the system stays quiet on questions the corpus cannot answer — 23% of the golden set are negative controls. Deterministic throughout: no model judges another. 179 tests, one runtime dependency, and a CI gate that fails the build when a metric drops.",
+    link: "https://groundcheck-demo.vercel.app",
+    demo: "https://groundcheck-demo.vercel.app",
+    demoLabel: "Live Demo",
+    github: "https://github.com/gabo5612/groundcheck",
+    tags: ["Python", "Evals", "RAG", "CI gate", "CLI"],
+  },
+  {
+    img: images.feedstock,
+    title: "feedstock",
+    description:
+      "Input-cost risk for a metals plant, local-first. It ingests raw prices for copper, aluminium, gold, platinum and energy — 12 instruments, 30,302 daily bars — normalises units, derives features, detects anomalies and forecasts with a walk-forward backtest reported against a naive baseline. It is deliberately not a trading bot: the claim it makes is the out-of-sample error of each model, measured and reproducible. The instrument registry stores display names verified against the source, after one ticker turned out to be a Treasury note future rather than zinc.",
+    link: "https://feedstock-demo.vercel.app",
+    demo: "https://feedstock-demo.vercel.app",
+    demoLabel: "Live Demo",
+    github: "https://github.com/gabo5612/feedstock",
+    tags: ["Python", "TimescaleDB", "Forecasting", "Backtesting", "React"],
+  },
   {
     img: images.crew,
     title: "crew",
@@ -30,7 +67,9 @@ const porfolioCards = [
     title: "BrandVoice",
     description:
       "Multi-tenant RAG editorial platform. Documents are parsed, chunked and embedded in batches of 100 into pgvector halfvec(1536) — text-embedding-3-large requested at 1536 dimensions so ingestion and retrieval share one schema — then a five-step Inngest pipeline runs behind a server-side model allowlist, nine-permission RBAC, an audit log and a per-generation cost ledger.",
-    link: "https://github.com/gabo5612/brandvoice",
+    link: "https://brandvoice-demo.vercel.app",
+    demo: "https://brandvoice-demo.vercel.app",
+    demoLabel: "Live Demo",
     github: "https://github.com/gabo5612/brandvoice",
     tags: ["Next.js", "pgvector", "RAG", "Supabase", "Inngest"],
   },
