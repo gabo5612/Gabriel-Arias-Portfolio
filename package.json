@@ -15,9 +15,13 @@
     "serve": "gatsby serve",
     "dev-m": "gatsby develop -H 0.0.0.0 -p 8000",
     "clean": "gatsby clean",
-    "verify:llms": "node scripts/verify-llms.mjs"
+    "verify:llms": "node scripts/verify-llms.mjs",
+    "postbuild": "node scripts/verify-budget.mjs",
+    "verify:budget": "node scripts/verify-budget.mjs",
+    "test": "node --test test/"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "^1.0.1",
     "framer-motion": "^11.3.21",
     "gatsby": "^5.13.5",
     "gatsby-omni-font-loader": "^2.0.2",
@@ -28,6 +32,7 @@
     "lmdb": "^3.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-helmet": "^6.1.0"
+    "react-helmet": "^6.1.0",
+    "three": "^0.185.1"
   }
 }

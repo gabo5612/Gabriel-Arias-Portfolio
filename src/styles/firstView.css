@@ -221,3 +221,227 @@
     font-size: 1.1rem;
   }
 }
+
+/* ==========================================
+   PROFUNDIDAD — capas, retícula 3D y tracking
+   ========================================== */
+
+/* La perspectiva vive en el contenedor: sin ella, rotateX/rotateY de las capas
+   son giros planos y no se lee volumen alguno. */
+.hero { perspective: 1200px; perspective-origin: 50% 45%; }
+
+/* Cada capa envuelve a su contenido en vez de ser el contenido: los blobs
+   conservan su `animation: float`, que un transform inline les pisaría. */
+.hero__layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* La retícula no lleva data-depth: mueve su propio frustum, no un transform. */
+.hero__lattice {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero__lattice canvas { display: block; width: 100%; height: 100%; }
+
+.hero__parallax {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  will-change: transform;
+}
+
+/* ── Botón de tracking ── */
+.hero__track {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.hero__track:hover {
+  color: var(--text-primary);
+  border-color: rgba(245, 165, 36, .45);
+  transform: translateY(-1px);
+}
+.hero__track--on {
+  color: var(--accent);
+  border-color: rgba(245, 165, 36, .5);
+  background: var(--accent-dim);
+}
+.hero__track-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .55;
+  flex-shrink: 0;
+}
+.hero__track--on .hero__track-dot {
+  opacity: 1;
+  animation: status-pulse 1.6s ease-in-out infinite;
+}
+.hero__track-error {
+  margin-top: 14px;
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================
+   HUD — la prueba de que nada sale de la máquina
+   ========================================== */
+.hud {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 40;
+  width: 250px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(9, 9, 11, .88);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-family: var(--font-body);
+}
+
+.hud__head { display: flex; align-items: center; gap: 8px; }
+.hud__dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e; flex-shrink: 0;
+  animation: status-pulse 2s ease-in-out infinite;
+}
+.hud__title {
+  font-size: .72rem; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-primary);
+}
+.hud__stop {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  font-size: .68rem;
+  padding: 3px 8px;
+  transition: var(--t-fast);
+}
+.hud__stop:hover { color: var(--text-primary); border-color: rgba(255,255,255,.25); }
+
+.hud__preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-sm);
+  background: #000;
+  object-fit: cover;
+  display: block;
+}
+
+.hud__rows { display: flex; flex-direction: column; gap: 5px; }
+.hud__row { display: flex; align-items: baseline; gap: 10px; font-size: .72rem; }
+.hud__label { color: var(--text-muted); }
+.hud__value {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.hud__value--good { color: #4ade80; }
+
+.hud__note {
+  font-size: .68rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+@media (max-width: 640px) {
+  .hud { left: 12px; right: 12px; bottom: 12px; width: auto; }
+  .hud__preview { max-width: 180px; }
+}
+
+/* ==========================================
+   REDUCED MOTION — hoy no existía en ningún lado
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  .hero__blob,
+  .hero__status-dot,
+  .hero__scroll-dot,
+  .hero__role-cursor,
+  .hud__dot,
+  .hero__track--on .hero__track-dot {
+    animation: none !important;
+  }
+  .hero__layer,
+  .hero__parallax { transform: none !important; }
+}
+
+/* La retícula se apaga sobre la columna del copy. Sin esto los puntos compiten
+   con el texto justo donde hay que leer, y además la composición queda plana:
+   con la máscara el volumen pesa a la derecha, que es donde no hay nada. */
+.hero__lattice {
+  -webkit-mask-image: linear-gradient(100deg, rgba(0,0,0,.40) 0%, rgba(0,0,0,.52) 26%, #000 62%);
+          mask-image: linear-gradient(100deg, rgba(0,0,0,.40) 0%, rgba(0,0,0,.52) 26%, #000 62%);
+}
+@media (max-width: 900px) {
+  /* En una columna el texto ocupa todo el ancho, así que la máscara pasa a ser
+     vertical: despejado arriba donde está el nombre, denso abajo. */
+  .hero__lattice {
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.50) 55%, #000 100%);
+            mask-image: linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.50) 55%, #000 100%);
+  }
+}
+
+/* ── Conmutador de fuente: mano derecha o cabeza ── */
+.hud__modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 3px;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.hud__mode {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-size: .68rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  transition: var(--t-fast);
+}
+.hud__mode:hover { color: var(--text-primary); }
+.hud__mode--on {
+  background: var(--accent);
+  color: #09090b;
+  font-weight: 600;
+}
+
+/* Pista de gestos: aparece sólo mientras la cámara está activa. */
+.hero__hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: -34px 0 34px;
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+.hero__hint span { display: inline-flex; align-items: center; gap: 6px; }
+.hero__hint span::before {
+  content: '';
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); opacity: .6; flex: none;
+}
+.hero__hint b { color: var(--text-secondary); font-weight: 600; }
+
+/* El interruptor de sonido vive junto al de apagado: quien quiera silencio no
+   debe tener que buscarlo. */
+.hud__head { flex-wrap: wrap; }
+.hud__sound--on { color: var(--accent); border-color: rgba(245, 165, 36, .4); }
