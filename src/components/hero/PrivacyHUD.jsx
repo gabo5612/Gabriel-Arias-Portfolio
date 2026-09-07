@@ -122,6 +122,9 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
         </button>
       </div>
 
+      <div className="hud__body">
+      <canvas ref={canvasRef} className="hud__preview" aria-label="Webcam preview with detection overlay" />
+      <div className="hud__side">
       <div className="hud__modes" role="group" aria-label="Tracking source">
         <button
           type="button"
@@ -141,7 +144,21 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
         </button>
       </div>
 
-      <canvas ref={canvasRef} className="hud__preview" aria-label="Webcam preview with detection overlay" />
+      {/* Resumen de una línea. En móvil sustituye a la tabla entera: de las ocho
+          filas, sólo dos dicen algo que el visitante necesite — cuánto te ve, y
+          que no sale nada del dispositivo. El resto es telemetría para mí. */}
+      <p className="hud__compact">
+        <span>
+          {mode === 'hand'
+            ? `${stats?.hands ?? 0}/2 hands · ${(stats?.fingers ?? 0).toFixed(1)}/5`
+            : found ? 'head tracked' : 'no head'}
+        </span>
+        <span className="hud__value--good">
+          {net === 0 ? 'nothing left this device' : `${net} requests left`}
+        </span>
+      </p>
+      </div>
+      </div>
 
       <div className="hud__rows">
         {mode === 'hand' && (

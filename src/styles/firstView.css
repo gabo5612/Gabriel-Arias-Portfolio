@@ -297,7 +297,7 @@
   right: 24px;
   bottom: 24px;
   z-index: 40;
-  width: 250px;
+  width: 278px;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -317,7 +317,7 @@
   animation: status-pulse 2s ease-in-out infinite;
 }
 .hud__title {
-  font-size: .72rem; font-weight: 600; letter-spacing: .06em;
+  font-size: .68rem; font-weight: 600; letter-spacing: .06em;
   text-transform: uppercase; color: var(--text-primary);
 }
 .hud__stop {
@@ -359,9 +359,41 @@
   padding-top: 10px;
 }
 
+/* Escritorio: modos arriba, preview debajo — el orden de siempre. */
+.hud__body { display: flex; flex-direction: column-reverse; gap: 12px; }
+.hud__side { display: flex; flex-direction: column; gap: 12px; }
+.hud__compact { display: none; }
+
+/* ── Móvil ──────────────────────────────────────────────────────────────────
+   El panel ocupaba dos tercios de la pantalla y tapaba el propio efecto que
+   viene a explicar. Acá se queda en 30 vh: la tabla de ocho filas se cambia por
+   dos líneas, el preview se encoge y se pone al lado en vez de debajo. Las seis
+   filas que desaparecen son telemetría de desarrollo; las dos que quedan son lo
+   único que el visitante necesita — cuánto te ve, y que no sale nada de acá. */
 @media (max-width: 640px) {
-  .hud { left: 12px; right: 12px; bottom: 12px; width: auto; }
-  .hud__preview { max-width: 180px; }
+  .hud {
+    left: 10px; right: 10px; bottom: 10px; width: auto;
+    max-height: 30vh;
+    padding: 10px 12px;
+    gap: 9px;
+  }
+  .hud__rows, .hud__note { display: none; }
+  .hud__compact {
+    display: flex; flex-direction: column; gap: 2px;
+    font-size: .74rem; color: var(--text-muted); margin: 0;
+  }
+  .hud__body {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: 10px;
+    align-items: center;
+    min-height: 0;
+  }
+  .hud__side { gap: 8px; }
+  .hud__preview { width: 76px; aspect-ratio: 1 / 1; object-fit: cover; }
+  .hud__title { font-size: .66rem; }
+  .hud__stop { font-size: .64rem; padding: 2px 7px; }
+  .hud__mode { font-size: .64rem; padding: 4px 5px; }
 }
 
 /* ==========================================
