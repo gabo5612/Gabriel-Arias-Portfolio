@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import {
-  AdditiveBlending, BufferAttribute, BufferGeometry, Color, LineBasicMaterial,
+  AdditiveBlending, BufferAttribute, BufferGeometry, Color, Group, LineBasicMaterial,
   LineLoop, PerspectiveCamera, Points, Scene, ShaderMaterial, Vector3, WebGLRenderer,
 } from 'three'
 
@@ -104,11 +104,14 @@ const FRAG = /* glsl */`
     vec3 col = mix(warm, uHot,  vGlow  * 0.85);
     col      = mix(col,  uHot2, vGlow2 * 0.90);
 
-    // La caída por distancia no llega a cero: si el fondo se apagara del todo,
-    // el turquesa que le acabamos de dar no se vería nunca.
-    float depthA = 0.56 + 0.44 * vFade;
+    // Piso de brillo alto a propósito. Los códecs de grabación de pantalla
+    // descartan primero el detalle de bajo contraste sobre negro: lo que en el
+    // monitor se ve bien, en un vídeo comprimido desaparece. El coste es un
+    // fondo algo más presente; la alternativa era un efecto que no se puede
+    // enseñar, que no sirve de nada en un portfolio.
+    float depthA = 0.74 + 0.26 * vFade;
     float glow   = max(vGlow, vGlow2);
-    gl_FragColor = vec4(col, (0.34 + glow * 0.62) * depthA * edge);
+    gl_FragColor = vec4(col, (0.52 + glow * 0.48) * depthA * edge);
   }
 `
 
@@ -182,7 +185,7 @@ export default function DepthLattice({ signal, onFail }) {
       uPush:     { value: 46 },
       uPush2:    { value: 46 },
       uTime:    { value: 0 },
-      uDeep:    { value: new Color(0x2dd4bf) },   // turquesa
+      uDeep:    { value: new Color(0x5eead4) },   // turquesa claro — el oscuro se perdía al grabar
       uMid:     { value: new Color(0xf97316) },   // coral
       uNear:    { value: new Color(0xf5a524) },   // --accent de global.css
       uHot:     { value: new Color(0xffe6b8) },   // blanco cálido — mano 1
@@ -211,15 +214,25 @@ export default function DepthLattice({ signal, onFail }) {
     const ringGeo = new BufferGeometry()
     ringGeo.setAttribute('position', new BufferAttribute(ringPos, 3))
 
+    // Tres circunferencias concéntricas, no una. LineBasicMaterial ignora
+    // linewidth en WebGL —siempre dibuja 1 píxel de dispositivo— y una línea de
+    // 1 px es exactamente lo que borra la compresión de vídeo. Apiladas dan una
+    // banda con grosor real que sí sobrevive a una grabación.
     const makeRing = hex => {
       const m = new LineBasicMaterial({
-        color: hex, transparent: true, opacity: 0.5,
+        color: hex, transparent: true, opacity: 0.85,
         blending: AdditiveBlending, depthWrite: false,
       })
-      const l = new LineLoop(ringGeo, m)
-      l.visible = false
-      scene.add(l)
-      return l
+      const g = new Group()
+      for (const k of [1, 1.02, 1.04]) {
+        const l = new LineLoop(ringGeo, m)
+        l.scale.setScalar(k)
+        g.add(l)
+      }
+      g.visible = false
+      g.userData.mat = m
+      scene.add(g)
+      return g
     }
     const ring1 = makeRing(0xf5a524)   // ámbar — la mano que manda la cámara
     const ring2 = makeRing(0x2dd4bf)   // turquesa — la segunda
@@ -332,7 +345,7 @@ export default function DepthLattice({ signal, onFail }) {
       io.disconnect(); ro.disconnect()
       document.removeEventListener('visibilitychange', onVis)
       geo.dispose(); mat.dispose(); ringGeo.dispose()
-      ring1.material.dispose(); ring2.material.dispose()
+      ring1.userData.mat.dispose(); ring2.userData.mat.dispose()
       renderer.dispose()
       if (renderer.domElement.parentNode) renderer.domElement.remove()
     }
