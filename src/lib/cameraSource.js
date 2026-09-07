@@ -23,6 +23,25 @@ const CAL_MS = 1000
 const clamp = (v, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y)
 
+const isMobile = () =>
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(pointer: coarse)').matches || window.innerWidth < 700)
+
+// GPU o CPU para el WASM de MediaPipe.
+//
+// En escritorio la GPU gana sin discusión. En muchos Android NO: el paso por GPU
+// paga copias de textura en cada cuadro que cuestan más de lo que ahorra el
+// cómputo, y el resultado es peor que en CPU. Cuál gana depende del teléfono, así
+// que no se puede decidir a ciegas — de ahí el override por URL, para medirlo en
+// el aparato real: ?delegate=cpu o ?delegate=gpu.
+function pickDelegate() {
+  try {
+    const q = new URLSearchParams(window.location.search).get('delegate')
+    if (q === 'cpu' || q === 'gpu') return q.toUpperCase()
+  } catch { /* sin URL utilizable */ }
+  return isMobile() ? 'CPU' : 'GPU'
+}
+
 // ── Modo cabeza ─────────────────────────────────────────────────────────────
 // Índices de los 6 keypoints de BlazeFace, en el orden que documenta MediaPipe.
 const R_EYE = 0, L_EYE = 1, NOSE = 2, R_EAR = 4, L_EAR = 5
@@ -32,9 +51,9 @@ const FACE = {
   width: 320, height: 240, hz: 24,
   // Rango útil: la cabeza se mueve poco dentro del cuadro, así que satura antes.
   span: 0.5,
-  async create(vision, fileset) {
+  async create(vision, fileset, delegate) {
     return vision.FaceDetector.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: FACE_MODEL, delegate: 'GPU' },
+      baseOptions: { modelAssetPath: FACE_MODEL, delegate },
       runningMode: 'VIDEO',
       minDetectionConfidence: 0.5,
     })
@@ -116,9 +135,9 @@ const HAND = {
   // La mano barre mucho más cuadro que la cabeza: satura más tarde o el efecto
   // se clava en los bordes en cuanto movés el brazo.
   span: 0.95,
-  async create(vision, fileset) {
+  async create(vision, fileset, delegate) {
     return vision.HandLandmarker.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'GPU' },
+      baseOptions: { modelAssetPath: HAND_MODEL, delegate },
       runningMode: 'VIDEO',
       numHands: 2,
       minHandDetectionConfidence: 0.5,
@@ -172,9 +191,17 @@ const MODES = { face: FACE, hand: HAND }
 export async function startCameraSource(mode, onPose, opts = {}) {
   const M = MODES[mode] || HAND
   const { onStats, onVideo } = opts
+  const delegate = pickDelegate()
+
+  // En móvil se baja la resolución de entrada: el detector no necesita más para
+  // encontrar una mano de cerca, y el costo por cuadro cae a la mitad. Es la
+  // palanca más barata que hay contra los 7 fps de un teléfono.
+  const small = isMobile()
+  const vw0 = small ? Math.min(M.width, 320) : M.width
+  const vh0 = small ? Math.min(M.height, 240) : M.height
 
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { width: { ideal: M.width }, height: { ideal: M.height }, facingMode: 'user' },
+    video: { width: { ideal: vw0 }, height: { ideal: vh0 }, facingMode: 'user' },
     audio: false,
   })
 
@@ -188,7 +215,7 @@ export async function startCameraSource(mode, onPose, opts = {}) {
 
   const vision = await import('@mediapipe/tasks-vision')
   const fileset = await vision.FilesetResolver.forVisionTasks(MP_BASE)
-  const detector = await M.create(vision, fileset)
+  const detector = await M.create(vision, fileset, delegate)
 
   // Un filtro por eje. beta alto en x/y porque ahí el lag se nota; z va más
   // suave porque el tamaño es la señal más ruidosa de las tres.
@@ -223,8 +250,8 @@ export async function startCameraSource(mode, onPose, opts = {}) {
     last = now
     if (video.readyState < 2) return
 
-    const vw = video.videoWidth || M.width
-    const vh = video.videoHeight || M.height
+    const vw = video.videoWidth || vw0
+    const vh = video.videoHeight || vh0
 
     const t0 = performance.now()
     let raw
@@ -238,7 +265,7 @@ export async function startCameraSource(mode, onPose, opts = {}) {
     frames++
     if (now - fpsAt > 500) { fps = Math.round((frames * 1000) / (now - fpsAt)); frames = 0; fpsAt = now }
 
-    const base = { fps, latency, mode, target: M.label, vw, vh }
+    const base = { fps, latency, mode, target: M.label, vw, vh, delegate }
 
     if (!raw) {
       // Sin esto, al salir de cuadro `fingers` queda congelado en su último

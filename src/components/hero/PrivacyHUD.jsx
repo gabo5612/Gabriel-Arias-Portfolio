@@ -175,6 +175,10 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
           </>
         )}
         <Row label="Detection" value={`${stats?.fps ?? 0} fps`} />
+        <Row
+          label="Compute"
+          value={`${stats?.delegate ?? '—'} · ${stats?.vw ?? 0}×${stats?.vh ?? 0}`}
+        />
         <Row label="Latency" value={`${Math.round(stats?.latency ?? 0)} ms`} />
         <Row label="Left this device" value={net === 0 ? '0 requests' : `${net} requests`} good={net === 0} />
         <Row label="Uploaded" value="0 bytes" good />

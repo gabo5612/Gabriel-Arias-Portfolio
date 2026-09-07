@@ -119,16 +119,36 @@ const FRAG = /* glsl */`
 // "hueco en la pared"; todo lo demás se deriva de él.
 const SCREEN_W = 520
 const EYE_Z    = 620
-const COLS = 36, ROWS = 22, SLABS = 8
-// Separación en X = SCREEN_W * 1.35 / (COLS - 1) ≈ 20 unidades. Con un dedo el
-// radio cubre unas dos celdas: un racimo pequeño que se ve, en vez del punto
-// único que sobre el papel era elegante y en pantalla era invisible.
-const MIN_R = 44
-// El techo lo fija el anillo, no el campo: la ventana mide SCREEN_W = 520, así
-// que un radio de 300 dibuja un círculo de 600 de diámetro que se sale por los
-// bordes y deja de leerse como anillo. A 190 el diámetro es 380 y entra entero.
-const MAX_R = 190
 const DEPTH_NEAR = -20, DEPTH_FAR = -880
+
+// La rejilla se deriva del aspecto real de la ventana, no de constantes.
+//
+// Antes el alto era SCREEN_W * 0.95 = 494 unidades fijas. En escritorio la
+// ventana mide 325 de alto y sobraba; en un móvil vertical mide 1155 y la
+// retícula cubría el 43% — de ahí la banda de puntos con negro arriba y abajo.
+// Ahora se calculan filas y columnas a partir de las extensiones que hacen
+// falta, manteniendo la separación entre puntos constante.
+function latticeSpec(screenH, cssWidth) {
+  // Separación mayor en pantallas chicas: en un móvil el mismo paso de mundo
+  // ocupa muchos menos píxeles y la retícula se vuelve una nube de ruido.
+  const step  = cssWidth < 700 ? 30 : 21
+  const xExt  = SCREEN_W * 1.35
+  const yExt  = screenH * 1.5            // 1.5 para que sobre en los bordes al asomarse
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
+  return {
+    step, xExt, yExt,
+    cols:  clamp(Math.round(xExt / step), 12, 48),
+    rows:  clamp(Math.round(yExt / step), 12, 64),
+    // Menos láminas en vertical: con tantas filas el conteo se dispara y el
+    // móvil es justo donde menos margen hay.
+    slabs: screenH > SCREEN_W * 1.3 ? 6 : 8,
+  }
+}
+
+// Radios en función del paso de la rejilla, no en absoluto: con paso 30 un radio
+// de 44 ya no alcanza "unas dos celdas", alcanza una y media.
+const minR = step => step * 2.2
+const maxR = step => step * 9.5
 
 export default function DepthLattice({ signal, onFail }) {
   const hostRef = useRef(null)
@@ -154,28 +174,41 @@ export default function DepthLattice({ signal, onFail }) {
     const camera = new PerspectiveCamera(50, 1, 1, 2200)
 
     // ── Geometría: rejilla en X, Y y varias láminas en Z ────────────────────
-    const count = COLS * ROWS * SLABS
-    const pos = new Float32Array(count * 3)
-    const seed = new Float32Array(count)
-    let i = 0
-    for (let s = 0; s < SLABS; s++) {
-      const z = DEPTH_NEAR + (DEPTH_FAR - DEPTH_NEAR) * (s / (SLABS - 1))
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          // Cada lámina se desfasa media celda: alineadas, desde el eje se ven
-          // como una sola rejilla plana y se pierde la sensación de volumen.
-          const jitter = (s % 2) * 0.5
-          pos[i * 3]     = ((c + jitter) / (COLS - 1) - 0.5) * SCREEN_W * 1.35
-          pos[i * 3 + 1] = (r / (ROWS - 1) - 0.5) * SCREEN_W * 0.95
-          pos[i * 3 + 2] = z
-          seed[i] = Math.random()
-          i++
+    // Se reconstruye cuando cambia el aspecto (rotar el teléfono, redimensionar
+    // la ventana). Rellenar unos miles de floats cuesta menos de un milisegundo
+    // y ocurre una vez por cambio, no por cuadro.
+    const geo = new BufferGeometry()
+    let spec = null
+
+    const buildLattice = (screenH, cssWidth) => {
+      const nx = latticeSpec(screenH, cssWidth)
+      if (spec && spec.cols === nx.cols && spec.rows === nx.rows && spec.slabs === nx.slabs) return
+      spec = nx
+      const { cols, rows, slabs, xExt, yExt } = nx
+      const count = cols * rows * slabs
+      const pos = new Float32Array(count * 3)
+      const seed = new Float32Array(count)
+      let i = 0
+      for (let s = 0; s < slabs; s++) {
+        const z = DEPTH_NEAR + (DEPTH_FAR - DEPTH_NEAR) * (s / (slabs - 1))
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            // Cada lámina se desfasa media celda: alineadas, desde el eje se ven
+            // como una sola rejilla plana y se pierde la sensación de volumen.
+            const jitter = (s % 2) * 0.5
+            pos[i * 3]     = ((c + jitter) / (cols - 1) - 0.5) * xExt
+            pos[i * 3 + 1] = (r / (rows - 1) - 0.5) * yExt
+            pos[i * 3 + 2] = z
+            seed[i] = Math.random()
+            i++
+          }
         }
       }
+      geo.setAttribute('position', new BufferAttribute(pos, 3))
+      geo.setAttribute('aSeed', new BufferAttribute(seed, 1))
+      geo.computeBoundingSphere()
     }
-    const geo = new BufferGeometry()
-    geo.setAttribute('position', new BufferAttribute(pos, 3))
-    geo.setAttribute('aSeed', new BufferAttribute(seed, 1))
+    buildLattice(SCREEN_W, host.clientWidth || 1024)
 
     const uniforms = {
       uAttract:  { value: new Vector3(0, 0, -200) },
@@ -261,6 +294,7 @@ export default function DepthLattice({ signal, onFail }) {
       if (!w || !h) return
       renderer.setSize(w, h, false)
       screenH = SCREEN_W * (h / w)
+      buildLattice(screenH, w)
     }
     resize()
     const ro = new ResizeObserver(resize)
@@ -286,7 +320,8 @@ export default function DepthLattice({ signal, onFail }) {
     // suelto que se pierde entre miles.
     const radiusFor = n => {
       const f = Math.max(0, Math.min(5, n))
-      return f <= 0 ? 0 : MIN_R * Math.pow(MAX_R / MIN_R, (f - 1) / 4)
+      const lo = minR(spec.step), hi = maxR(spec.step)
+      return f <= 0 ? 0 : lo * Math.pow(hi / lo, (f - 1) / 4)
     }
 
     const tick = now => {
@@ -308,7 +343,7 @@ export default function DepthLattice({ signal, onFail }) {
       //   1 dedo  →  12     un punto    5 dedos → 288   todo el campo
       const radius = radiusFor(s.fingers ?? 5)
       uniforms.uRadius.value = radius
-      uniforms.uPush.value   = 8 + (radius / MAX_R) * 44
+      uniforms.uPush.value   = 8 + (radius / maxR(spec.step)) * 44
 
       // El anillo va donde el atractor y con su radio, así que sigue la misma
       // perspectiva que la retícula: al asomar la cabeza también se desplaza.
@@ -316,7 +351,7 @@ export default function DepthLattice({ signal, onFail }) {
       ring1.visible = onCam
       if (onCam) {
         ring1.position.copy(uniforms.uAttract.value)
-        ring1.scale.setScalar(Math.max(radius, MIN_R * 0.5))
+        ring1.scale.setScalar(Math.max(radius, minR(spec.step) * 0.5))
       }
 
       // Segunda mano: mismo tratamiento, atractor propio. Sin ella el radio
@@ -326,10 +361,10 @@ export default function DepthLattice({ signal, onFail }) {
         uniforms.uAttract2.value.lerp(attract2, 0.14)
         const r2 = radiusFor(s.fingers2 ?? 0)
         uniforms.uRadius2.value = r2
-        uniforms.uPush2.value   = 8 + (r2 / MAX_R) * 44
+        uniforms.uPush2.value   = 8 + (r2 / maxR(spec.step)) * 44
         ring2.visible = true
         ring2.position.copy(uniforms.uAttract2.value)
-        ring2.scale.setScalar(Math.max(r2, MIN_R * 0.5))
+        ring2.scale.setScalar(Math.max(r2, minR(spec.step) * 0.5))
       } else {
         uniforms.uRadius2.value = 0
         ring2.visible = false
