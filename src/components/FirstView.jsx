@@ -10,13 +10,16 @@ const DepthLattice = React.lazy(() => import("./hero/DepthLattice"));
 const PrivacyHUD  = React.lazy(() => import("./hero/PrivacyHUD"));
 
 /* ── Typewriter hook ── */
+// "I build" pide un objeto, no un cargo: "I build AI Engineer" no significa
+// nada. Cada frase apunta a un proyecto real y verificable — nada de adjetivos
+// sueltos, y ninguna afirmación que no esté respaldada por código público.
 const ROLES = [
-  "AI Engineer",
-  "Front-end Developer",
-  "Full-Stack Developer",
-  "Web Producer",
-  "React Specialist",
-  "WordPress Expert",
+  "AI that runs on your machine",   // shopfloor, crew, QuickTask
+  "RAG pipelines with citations",   // shopfloor, BrandVoice
+  "evals that fail the build",      // groundcheck
+  "local-first desktop apps",       // QuickTask, Typeit, Squish
+  "commercial WordPress plugins",   // TrailKit
+  "Core Web Vitals for Shopify",    // GaboAuditmyweb
 ];
 
 function useTypewriter(words, speed = 75, deleteSpeed = 45, pause = 2000) {
@@ -203,12 +206,6 @@ export default function FirstView() {
           initial="hidden"
           animate="visible"
         >
-          {/* Status */}
-          <motion.div className="hero__status" variants={item}>
-            <div className="hero__status-dot" aria-hidden="true" />
-            Available for work
-          </motion.div>
-
           {/* Greeting */}
           <motion.p className="hero__greeting" variants={item}>
             Hi, I'm

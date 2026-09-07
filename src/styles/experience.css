@@ -152,3 +152,7 @@
     margin: 40px auto 0;
   }
 }
+
+/* El reset global pone margin:0 en p, así que párrafos consecutivos quedarían
+   pegados y volveríamos al muro de texto que veníamos a romper. */
+.timeline-card__description + .timeline-card__description { margin-top: 12px; }

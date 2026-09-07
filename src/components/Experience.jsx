@@ -53,7 +53,12 @@ export default function Experience() {
                   </div>
 
                   {/* Description */}
-                  <p className="timeline-card__description">{exp.description}</p>
+                  {/* Acepta string o array. Un solo bloque de ocho líneas se lee
+                      como una ficha técnica; partirlo en párrafos ya se lee como
+                      alguien contando lo que hizo. */}
+                  {(Array.isArray(exp.description) ? exp.description : [exp.description]).map(par => (
+                    <p key={par.slice(0, 40)} className="timeline-card__description">{par}</p>
+                  ))}
 
                 </div>
               </motion.div>
