@@ -25,6 +25,13 @@ if (!SITE_URL) { console.error('verify-llms: no se pudo leer SITE_URL de src/log
 const errors = []
 if (titles.length === 0) errors.push('no se leyó ningún title: de porfolioCards.js')
 
+// Duplicados. Contar tarjetas contra secciones no los detecta: dos sesiones que
+// agregan la misma tarjeta dejan 3 títulos y 3 secciones de más, los totales
+// siguen cuadrando y el build pasa con la tarjeta repetida en la grilla.
+const dupes = arr => [...new Set(arr.filter((v, i) => arr.indexOf(v) !== i))]
+for (const d of dupes(titles)) errors.push(`porfolioCards.js repite la tarjeta "${d}"`)
+for (const d of dupes(headings)) errors.push(`llms.txt repite la sección "### ${d}"`)
+
 for (const t of titles) {
   if (!headings.includes(t)) errors.push(`llms.txt no tiene la sección "### ${t}"`)
 }
