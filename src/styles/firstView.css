@@ -229,22 +229,75 @@
   will-change: transform;
 }
 
-/* ── Botón de tracking ── */
+/* ── Botón de tracking ──
+   Es lo único de la página que no se puede adivinar leyendo: mueve el hero con
+   la mano o la cabeza, y nadie lo prueba si no parece pulsable. Antes era el
+   más callado de los tres — transparente sobre borde blanco al 8% — al lado de
+   un CTA ámbar sólido, así que se leía como texto deshabilitado.
+   Ahora se lee como acción disponible y respira despacio. La respiración es la
+   que pide el clic: se apaga en cuanto el tracking arranca (ya cumplió), al
+   pasar el puntero (ya te tiene) y con prefers-reduced-motion. */
 .hero__track {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;                 /* recorta el barrido, no la sombra propia */
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(245, 165, 36, .42);
+  animation: track-breathe 3.2s ease-in-out infinite;
 }
+
+/* Barrido de luz. Va en ::after y no en un degradado del fondo para que no
+   pelee con el background que marca el estado. */
+.hero__track::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -50%;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(245, 165, 36, .18),
+    transparent);
+  animation: track-sweep 3.2s ease-in-out infinite;
+}
+
 .hero__track:hover {
-  color: var(--text-primary);
-  border-color: rgba(245, 165, 36, .45);
+  color: #fbbf24;
+  background: rgba(245, 165, 36, .18);
+  border-color: rgba(245, 165, 36, .75);
   transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(245, 165, 36, .22);
+  animation: none;                  /* ya no hace falta llamar la atención */
 }
+.hero__track:hover::after { animation: none; opacity: 0; }
+
+/* Foco de teclado: el mismo peso que el hover, porque quien navega con tab
+   necesita ver dónde está tanto como quien usa el ratón. */
+.hero__track:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  animation: none;
+}
+
 .hero__track--on {
   color: var(--accent);
   border-color: rgba(245, 165, 36, .5);
   background: var(--accent-dim);
+  animation: none;
+  box-shadow: none;
 }
+.hero__track--on::after { animation: none; opacity: 0; }
+
+/* El icono de cámara sólo existe apagado: dice qué va a pasar al hacer clic,
+   que es exactamente lo que el texto no alcanza a decir. Encendido lo sustituye
+   el punto de estado, que sí tiene algo que informar. */
+.hero__track-cam {
+  flex-shrink: 0;
+  opacity: .9;
+}
+
 .hero__track-dot {
   width: 7px;
   height: 7px;
@@ -256,6 +309,16 @@
 .hero__track--on .hero__track-dot {
   opacity: 1;
   animation: status-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes track-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 165, 36, .34), 0 0 16px rgba(245, 165, 36, .10); }
+  70%      { box-shadow: 0 0 0 7px rgba(245, 165, 36, 0), 0 0 24px rgba(245, 165, 36, .20); }
+}
+
+@keyframes track-sweep {
+  0%       { left: -50%; }
+  55%, 100% { left: 130%; }
 }
 .hero__track-error {
   margin-top: 14px;
@@ -378,9 +441,14 @@
   .hero__scroll-dot,
   .hero__role-cursor,
   .hud__dot,
+  .hero__track,
+  .hero__track::after,
   .hero__track--on .hero__track-dot {
     animation: none !important;
   }
+  /* Sin la respiración el botón todavía tiene que verse: se queda con el borde
+     y el fondo ámbar, que no son movimiento. */
+  .hero__track::after { opacity: 0; }
   .hero__layer,
   .hero__parallax { transform: none !important; }
 }

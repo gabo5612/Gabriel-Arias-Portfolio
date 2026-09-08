@@ -244,7 +244,16 @@ export default function FirstView() {
                 className={`btn hero__track${tracking ? ' hero__track--on' : ''}`}
                 aria-pressed={tracking}
               >
-                <span className="hero__track-dot" aria-hidden="true" />
+                {/* Apagado va la cámara, encendido el punto de estado: el icono
+                    dice qué va a pasar, el punto dice qué está pasando. */}
+                {tracking ? (
+                  <span className="hero__track-dot" aria-hidden="true" />
+                ) : (
+                  <svg className="hero__track-cam" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                    <rect x="1" y="4" width="9.5" height="7.5" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+                    <path d="M10.5 7.9l3-1.9v3.5l-3-1.6z" fill="currentColor"/>
+                  </svg>
+                )}
                 {busy
                   ? 'Starting…'
                   : tracking
