@@ -21,8 +21,19 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 // que sí carga de entrada (la señal de profundidad y las capas del hero), no el
 // 3D ni el tracker.
 // Si este número sube, es porque algo que debía diferirse no se difirió.
-const BUDGET_GZIP = 215_000
-const BASELINE_GZIP = 205_504
+//
+// RE-MEDIDO el 2026-09-08 al agregar la sección Architecture: 213 141 gzip,
+// +7 637 sobre la línea anterior. Se subió la línea base a propósito, y el
+// criterio para hacerlo fue este: la sección no trae ninguna dependencia nueva
+// —React, framer-motion y porfolioCards ya los cargaba Projects— y el bloque
+// DEFERRED de más abajo siguió pasando, así que three.js y el modelo de cara
+// continúan fuera del primer render. El aumento es texto y JSX de la sección,
+// no un import() que se volvió estático.
+// Los 700 KB de cada mapa NO entran acá: viven en static/architecture/ y son
+// documentos aparte que sólo se descargan si alguien hace clic.
+// El presupuesto conserva el mismo margen relativo que tenía (~4%).
+const BUDGET_GZIP = 222_000
+const BASELINE_GZIP = 213_141
 
 // Cada módulo pesado con una marca que sobrevive a la minificación. Si el chunk
 // que la contiene resulta ser uno de los que carga index.html, el diferido se

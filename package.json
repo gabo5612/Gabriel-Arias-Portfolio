@@ -10,12 +10,13 @@
   "scripts": {
     "dev": "gatsby develop",
     "start": "gatsby develop",
-    "prebuild": "node scripts/verify-llms.mjs",
+    "prebuild": "node scripts/verify-llms.mjs && node scripts/verify-architecture.mjs",
     "build": "gatsby build",
     "serve": "gatsby serve",
     "dev-m": "gatsby develop -H 0.0.0.0 -p 8000",
     "clean": "gatsby clean",
     "verify:llms": "node scripts/verify-llms.mjs",
+    "verify:arch": "node scripts/verify-architecture.mjs",
     "postbuild": "node scripts/verify-budget.mjs",
     "verify:budget": "node scripts/verify-budget.mjs",
     "test": "node --test test/"

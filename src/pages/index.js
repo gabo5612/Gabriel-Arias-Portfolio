@@ -5,6 +5,7 @@ import About from "../components/About"
 import MySkill from "../components/MySkills"
 import Experience from "../components/Experience"
 import Portfolio from "../components/Portfolio"
+import Architecture from "../components/Architecture"
 import Contact from "../components/Contact"
 import Footer from "../components/Footer"
 import '../styles/global.css'
@@ -19,6 +20,7 @@ const IndexPage = () => {
         <MySkill />
         <Experience />
         <Portfolio />
+        <Architecture />
         <Contact />
       </main>
       <Footer />

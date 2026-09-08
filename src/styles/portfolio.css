@@ -269,3 +269,19 @@
 .project-card__btn--ask:hover {
   color: var(--text-primary);
 }
+
+/* Mismo peso visual que Ask ChatGPT: los dos son enlaces a material de apoyo, no la
+   acción principal de la tarjeta. Con cuatro botones la fila envuelve a dos líneas —
+   ya lo hacía con tres a tres columnas, así que no cambia el alto del overlay. */
+.project-card__btn--arch {
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  gap: 6px;
+}
+
+.project-card__btn--arch:hover {
+  color: var(--accent);
+  border-color: var(--border-accent);
+}

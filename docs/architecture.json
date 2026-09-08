@@ -1,0 +1,330 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "This Portfolio \u2014 Static Site, Local-Only Camera Hero",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "visitor",
+        "label": "What the visitor gets",
+        "focus": [
+          "visitor",
+          "page",
+          "hero"
+        ],
+        "note": "Static HTML from a CDN \u2014 there is no server to talk to."
+      },
+      {
+        "id": "hands",
+        "label": "Move it with your hands",
+        "focus": [
+          "signal",
+          "pointer",
+          "camera",
+          "hud"
+        ],
+        "note": "One depth signal, four interchangeable sources, and a panel that proves nothing left."
+      },
+      {
+        "id": "gates",
+        "label": "The build gates",
+        "focus": [
+          "llmsgate",
+          "build",
+          "budget",
+          "vercel"
+        ],
+        "note": "Two checks that fail the build rather than degrade quietly."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "llmsgate",
+      "type": "security",
+      "label": "verify-llms",
+      "sublabel": "prebuild",
+      "pos": [
+        302,
+        100
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "build",
+      "type": "backend",
+      "label": "Gatsby build",
+      "sublabel": "static output",
+      "pos": [
+        564,
+        100
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "budget",
+      "type": "security",
+      "label": "verify-budget",
+      "sublabel": "postbuild",
+      "pos": [
+        826,
+        100
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "vercel",
+      "type": "cloud",
+      "label": "Vercel",
+      "sublabel": "no server, no origin",
+      "pos": [
+        1088,
+        100
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "visitor",
+      "type": "external",
+      "label": "Visitor",
+      "sublabel": "and their camera",
+      "pos": [
+        40,
+        280
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "page",
+      "type": "frontend",
+      "label": "One Page",
+      "sublabel": "seven sections",
+      "pos": [
+        302,
+        280
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "hero",
+      "type": "frontend",
+      "label": "Depth Hero",
+      "sublabel": "parallax layers",
+      "pos": [
+        564,
+        280
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "signal",
+      "type": "backend",
+      "label": "Depth Signal",
+      "sublabel": "a ref, not state",
+      "pos": [
+        826,
+        280
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "lattice",
+      "type": "cloud",
+      "label": "three.js Lattice",
+      "sublabel": "lazy chunk",
+      "pos": [
+        1088,
+        280
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "pointer",
+      "type": "backend",
+      "label": "Pointer + Gyro",
+      "sublabel": "the default source",
+      "pos": [
+        564,
+        460
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "camera",
+      "type": "backend",
+      "label": "MediaPipe Camera",
+      "sublabel": "WASM served from here",
+      "pos": [
+        826,
+        460
+      ],
+      "size": [
+        142,
+        58
+      ]
+    },
+    {
+      "id": "hud",
+      "type": "security",
+      "label": "Privacy HUD",
+      "sublabel": "0 network requests",
+      "pos": [
+        1088,
+        460
+      ],
+      "size": [
+        142,
+        58
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "build time \u2014 two gates, then a static deploy",
+      "wraps": [
+        "llmsgate",
+        "build",
+        "budget",
+        "vercel"
+      ],
+      "pad": 18
+    },
+    {
+      "kind": "region",
+      "label": "in the visitor's browser \u2014 nothing leaves it",
+      "wraps": [
+        "page",
+        "hero",
+        "signal",
+        "lattice",
+        "pointer",
+        "camera",
+        "hud"
+      ],
+      "pad": 22
+    }
+  ],
+  "connections": [
+    {
+      "from": "llmsgate",
+      "to": "build",
+      "label": "cards vs llms.txt",
+      "variant": "security"
+    },
+    {
+      "from": "build",
+      "to": "budget",
+      "label": "measures the chunks"
+    },
+    {
+      "from": "budget",
+      "to": "vercel",
+      "label": "still deferred",
+      "variant": "emphasis"
+    },
+    {
+      "from": "visitor",
+      "to": "page",
+      "label": "static HTML",
+      "variant": "emphasis"
+    },
+    {
+      "from": "page",
+      "to": "hero",
+      "label": "above the fold"
+    },
+    {
+      "from": "hero",
+      "to": "signal",
+      "label": "reads x \u00b7 y \u00b7 z",
+      "variant": "emphasis"
+    },
+    {
+      "from": "signal",
+      "to": "lattice",
+      "label": "moves its frustum"
+    },
+    {
+      "from": "pointer",
+      "to": "signal",
+      "label": "always available"
+    },
+    {
+      "from": "camera",
+      "to": "signal",
+      "label": "opt-in",
+      "labelAt": [
+        925,
+        399
+      ]
+    },
+    {
+      "from": "camera",
+      "to": "hud",
+      "label": "preview + counters",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "One signal, four sources",
+      "items": [
+        "Pointer, gyroscope, camera hand or camera face \u2014 consumers never know which is live",
+        "The value lives in a ref, not React state",
+        "At 60 fps, state would mean 60 re-renders of the whole hero every second"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The privacy panel has to be true",
+      "items": [
+        "The MediaPipe WASM and both models are served from /mediapipe/ on this origin",
+        "Not from the jsdelivr CDN that MediaPipe reaches for by default",
+        "If they came from outside, the panel that reads '0 network requests' would be a lie"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Two gates on the build",
+      "items": [
+        "Prebuild fails if a project card has no section in llms.txt \u2014 the link would lead nowhere",
+        "Postbuild measures the home page's gzip JS against a recorded baseline",
+        "And proves three.js and the face model are still lazy: a stray static import drags them in silently"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+/* ==========================================
+   ARCHITECTURE — los mapas de sistema
+   ========================================== */
+
+/* Va sobre --bg y no sobre --bg-alt porque queda entre Projects y Contact, que ya
+   alternan; tres bandas del mismo tono seguidas borran la separación entre secciones. */
+.arch {
+  padding: var(--section-py) 0;
+  background: var(--bg);
+}
+
+.arch__inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.arch__title {
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  margin-top: 4px;
+  font-family: var(--font-display);
+}
+
+.arch__lede {
+  margin-top: 16px;
+  max-width: 62ch;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* ── El mapa destacado ──
+   La imagen es una captura del mapa real, no una ilustración, así que se le da el ancho
+   completo y borde propio: recortarla la vuelve ilegible y entonces no prueba nada. */
+.arch__feature {
+  display: block;
+  position: relative;
+  margin-top: 40px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: border-color var(--t-base), transform var(--t-base),
+    box-shadow var(--t-base);
+}
+
+.arch__feature:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+}
+
+.arch__feature:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.arch__feature-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* El fondo del mapa es casi el mismo negro que el sitio; sin esto el borde de la
+     imagen desaparece y parece que la captura sangra fuera de la tarjeta. */
+  background: #0b0e17;
+}
+
+.arch__feature-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card-hover);
+}
+
+.arch__feature-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.arch__feature-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.arch__feature:hover .arch__feature-cta { color: var(--accent-hover); }
+
+/* ── Los tres hechos ── */
+.arch__facts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.arch__fact dt {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: var(--font-body);
+}
+
+.arch__fact dd {
+  margin-top: 8px;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ── La grilla de proyectos ── */
+.arch__sub {
+  margin-top: 64px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.arch__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.arch__card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border-radius: var(--r-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: border-color var(--t-base), background var(--t-base),
+    transform var(--t-base);
+}
+
+.arch__card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+}
+
+.arch__card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.arch__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.arch__card-name {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.arch__card-arrow {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color var(--t-base), transform var(--t-base);
+}
+
+.arch__card:hover .arch__card-arrow {
+  color: var(--accent);
+  transform: translate(1px, -1px);
+}
+
+.arch__card-note {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ── Atribución ──
+   archify es de terceros. La línea es obligatoria, no cortesía: el mapa es autoría
+   propia, el renderizador no. */
+/* --text-muted (#52525b sobre #09090b) da ~2.4:1 y no llega a AA. En un pie de página
+   decorativo pasa; acá no: la atribución de archify es una obligación de la licencia y
+   tiene que poder leerse. --text-secondary da ~7:1. */
+.arch__credit {
+  margin-top: 40px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.arch__credit a {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--border-accent);
+  text-underline-offset: 3px;
+}
+
+.arch__credit a:hover { color: var(--accent); }
+
+@media (min-width: 640px) {
+  .arch__facts { grid-template-columns: repeat(2, 1fr); gap: 24px 32px; }
+  .arch__grid  { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .arch__facts { grid-template-columns: repeat(3, 1fr); }
+  .arch__grid  { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arch__feature,
+  .arch__card,
+  .arch__card-arrow { transition: none; }
+  .arch__feature:hover,
+  .arch__card:hover { transform: none; }
+  .arch__card:hover .arch__card-arrow { transform: none; }
+}

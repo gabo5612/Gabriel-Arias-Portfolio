@@ -99,10 +99,34 @@ export default function Portfolio() {
                     </svg>
                   </a>
 
+                  {/* Architecture map. A self-contained page under
+                      static/architecture/, the same file the project's own repo
+                      carries at docs/architecture.html.
+                      scripts/verify-architecture.mjs fails the build if a card
+                      names a map that is not there, for the same reason as the
+                      llms.txt gate: the button would render and 404. */}
+                  {card.arch && (
+                    <a
+                      href={`/architecture/${card.arch}.html`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-ghost project-card__btn project-card__btn--arch"
+                      aria-label={`Architecture map of ${card.title}`}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                        <rect x="1" y="1.5" width="4" height="3.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                        <rect x="8" y="1.5" width="4" height="3.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                        <rect x="4.5" y="8" width="4" height="3.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                        <path d="M3 5v1.6h7V5M6.5 6.6V8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                      </svg>
+                      Architecture
+                    </a>
+                  )}
+
                   {/* Ask ChatGPT. The prompt points at /llms.txt so the answer
                       comes off this site rather than off the project's name;
                       scripts/verify-llms.mjs keeps that file in step with this
-                      list. Deliberately the quietest button of the three. */}
+                      list. Deliberately the quietest button of the four. */}
                   <a
                     href={askChatGptUrl(card.title)}
                     target="_blank"
