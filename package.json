@@ -19,7 +19,7 @@
     "verify:arch": "node scripts/verify-architecture.mjs",
     "postbuild": "node scripts/verify-budget.mjs",
     "verify:budget": "node scripts/verify-budget.mjs",
-    "test": "node --test test/"
+    "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.0.1",
