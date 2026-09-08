@@ -10,7 +10,7 @@ const porfolioCards = [
     kind: "service",
     title: "GaboAuditmyweb",
     description:
-      "Two 30-day sprints for Shopify stores, sold separately: page speed, and technical SEO. Both start with a free audit produced by an engine I wrote — PageSpeed and CrUX collectors plus 22 technical checks, 129 tests, no dependencies. The site itself ships no framework and makes zero external requests: the fonts are subset and self-hosted, and a build-time check refuses to deploy if the minified output stops matching the source.",
+      "Two 30-day sprints for Shopify stores, page speed and technical SEO, sold separately. I don't bundle them: one month isn't enough to do both properly, and selling both would mean shortchanging one. Each starts with a free audit from an engine I wrote — PageSpeed and CrUX collectors, 22 technical checks, 129 tests, no npm dependencies. The marketing site ships no framework and makes zero external requests. Fonts are subset and self-hosted, and the build refuses to deploy if minification changed what the page actually says.",
     link: "https://gaboauditmyweb.vercel.app",
     demo: "https://gaboauditmyweb.vercel.app",
     github: "https://github.com/gabo5612/GaboAuditmyweb",
@@ -24,7 +24,7 @@ const porfolioCards = [
     img: images.shopfloor,
     title: "shopfloor",
     description:
-      "On-prem assistant for a plant's technical documentation — equipment manuals, welding procedures, SOPs, spare-part catalogues. It runs entirely inside the plant with no internet: Postgres with pgvector, bge-m3 embeddings and a local model. No figure reaches the operator without a deterministic verifier checking it against the cited page, every answer carries document, revision and page, and it abstains instead of guessing. Measured by groundcheck against a 39-question golden set, defects included.",
+      "An assistant for the documentation a plant actually runs on: equipment manuals of several thousand pages, welding procedures, SOPs, spare-part catalogues. It lives inside the plant and never touches the internet. Postgres with pgvector, bge-m3 embeddings, a local model. Before a figure reaches an operator, a verifier checks it against the page it claims to come from, and every answer carries document, revision and page. When the manuals don't cover the question, it says so instead of improvising. groundcheck measures all of this against a 39-question golden set, and the repo publishes what it found — including the answer it pulled from the neighbouring row of a parts table.",
     link: "https://shopfloor-demo.vercel.app",
     demo: "https://shopfloor-demo.vercel.app",
     demoLabel: "Live Demo",
@@ -35,7 +35,7 @@ const porfolioCards = [
     img: images.groundcheck,
     title: "groundcheck",
     description:
-      "An evaluation harness for RAG systems, and the reason the numbers above mean anything. It measures retrieval (recall@k, MRR, precision@k) and then the part most evaluations skip: whether every figure in an answer is literally present in a cited chunk, whether the citation points at the right page and revision, and whether the system stays quiet on questions the corpus cannot answer — 23% of the golden set are negative controls. Deterministic throughout: no model judges another. 179 tests, one runtime dependency, and a CI gate that fails the build when a metric drops.",
+      "I built this one first, on purpose: shopfloor needed something to be measured against before it existed. It scores retrieval the usual way (recall@k, MRR, precision@k), then checks what most evals leave out. Is every number in the answer really in the chunk it cites? Does the citation point at the right page and revision, or at a superseded one? Does the system stay quiet when the corpus has no answer — which is why 23% of the golden set is negative controls, since a system that always answers confidently would otherwise score perfectly. No model grades another model here; every check is a program. 179 tests, one runtime dependency, and CI fails the build when a score drops.",
     link: "https://groundcheck-demo.vercel.app",
     demo: "https://groundcheck-demo.vercel.app",
     demoLabel: "Live Demo",
@@ -46,7 +46,7 @@ const porfolioCards = [
     img: images.feedstock,
     title: "feedstock",
     description:
-      "Input-cost risk for a metals plant, local-first. It ingests raw prices for copper, aluminium, gold, platinum and energy — 12 instruments, 30,302 daily bars — normalises units, derives features, detects anomalies and forecasts with a walk-forward backtest reported against a naive baseline. It is deliberately not a trading bot: the claim it makes is the out-of-sample error of each model, measured and reproducible. The instrument registry stores display names verified against the source, after one ticker turned out to be a Treasury note future rather than zinc.",
+      "Input-cost risk for a metals plant, running local-first. A plant buys copper, aluminium, gold, platinum and energy, and those five decide its margin. This ingests the raw prices — 12 instruments, 30,302 daily bars — normalises units, derives features and forecasts with a walk-forward backtest against a naive baseline. Nobody should read it as a trading bot. The only claim it makes is each model's out-of-sample error, measured and reproducible. The instrument registry now verifies display names against the source's own response, because one ticker I trusted turned out to be a 10-year Treasury note future instead of zinc, and nothing in the output would have told me.",
     link: "https://feedstock-demo.vercel.app",
     demo: "https://feedstock-demo.vercel.app",
     demoLabel: "Live Demo",
@@ -57,7 +57,7 @@ const porfolioCards = [
     img: images.crew,
     title: "crew",
     description:
-      "CLI that dispatches closed-contract coding tasks to local models — Ollama, or any OpenAI-compatible endpoint — and verifies the result deterministically with typecheck, lint and tests. No model ever judges another, so the retry loop costs zero paid tokens.",
+      "A CLI that hands closed-contract coding tasks to local models (Ollama, or anything that speaks the OpenAI API) and then checks the result with typecheck, lint and tests. No model ever grades another model's output, so the retry loop costs nothing in paid tokens. Zero npm dependencies.",
     link: "https://github.com/gabo5612/crew",
     github: "https://github.com/gabo5612/crew",
     tags: ["Node.js", "Ollama", "Local LLMs", "CLI"],
@@ -66,7 +66,7 @@ const porfolioCards = [
     img: images.brandvoice,
     title: "BrandVoice",
     description:
-      "Multi-tenant RAG editorial platform. Documents are parsed, chunked and embedded in batches of 100 into pgvector halfvec(1536) — text-embedding-3-large requested at 1536 dimensions so ingestion and retrieval share one schema — then a five-step Inngest pipeline runs behind a server-side model allowlist, nine-permission RBAC, an audit log and a per-generation cost ledger.",
+      "Multi-tenant RAG editorial platform. Documents get parsed, chunked and embedded into pgvector halfvec(1536), with text-embedding-3-large asked for 1536 dimensions so that ingestion and retrieval agree on one schema. Let those two diverge and cosine distance quietly stops meaning anything. Most of the work was never the AI part: a server-side allowlist of the models the backend may call at all, nine-permission RBAC, an audit log, and a cost ledger per generation.",
     link: "https://brandvoice-demo.vercel.app",
     demo: "https://brandvoice-demo.vercel.app",
     demoLabel: "Live Demo",
@@ -77,7 +77,7 @@ const porfolioCards = [
     img: images.trailKit,
     title: "TrailPlugin",
     description:
-      "Commercial WordPress plugin for adventure routes, POIs and guides, with interactive Leaflet maps and elevation profiles. Licence management runs on a separate Next.js and Supabase backend.",
+      "Commercial WordPress plugin for adventure routes, points of interest and guides, with interactive Leaflet maps and elevation profiles. Licence management lives in a separate Next.js and Supabase backend rather than inside the plugin.",
     link: "https://trailplugin.com",
     demo: "https://trailplugin.com",
     // The plugin is a commercial product, not a sandbox: "Live Demo" would promise
@@ -90,7 +90,7 @@ const porfolioCards = [
     img: images.quicktask,
     title: "QuickTask 2.0",
     description:
-      "Commercial Electron and Playwright app that automates repetitive browser workflows entirely on the local machine — no AI, no external services, nothing leaves the device. The critical step sits behind a manual confirmation lock: it runs everything up to that point, then waits for a human to approve.",
+      "Commercial Electron and Playwright app that automates repetitive browser work on the local machine. No AI, no external services, nothing leaves the device. The last step of a pattern is marked critical: the app runs everything up to it, then stops and waits for a person to approve. That step is usually the one that moves money.",
     link: "https://quicktaskpro.dev",
     tags: ["Electron", "Playwright", "SQLite", "Local-first"],
   },
@@ -98,7 +98,7 @@ const porfolioCards = [
     img: images.squish,
     title: "Squish",
     description:
-      "Local-first image and video compression in two implementations. The web build has no backend at all: the File System Access API writes compressed files straight back to disk preserving subfolders, while decode, resize and encode run across a Web Worker pool sized to navigator.hardwareConcurrency.",
+      "Local-first image and video compression, built twice. The web version has no backend at all: the File System Access API writes compressed files straight back to disk with the original subfolders intact, and decode, resize and encode run on a Web Worker pool sized to navigator.hardwareConcurrency. Safari and Firefox get an explanation instead of a broken interface.",
     link: "https://gabo5612.github.io/squish/",
     demo: "https://gabo5612.github.io/squish/",
     github: "https://github.com/gabo5612/squish",
@@ -108,7 +108,7 @@ const porfolioCards = [
     img: images.typeit,
     title: "Typeit",
     description:
-      "Electron app for macOS and Windows that types text at the operating-system level for sites that block pasting — the keystrokes carry isTrusted, never fire a paste event and never touch the clipboard. A click-through floating bar keeps focus on the target field while it types.",
+      "Electron app for macOS and Windows that types text at the operating-system level, for sites that block pasting. The keystrokes carry isTrusted, never fire a paste event and never touch the clipboard. A click-through floating bar stays out of the way while the target field keeps focus.",
     link: "https://github.com/gabo5612/Typeit",
     github: "https://github.com/gabo5612/Typeit",
     tags: ["Electron", "Node.js", "macOS", "Windows"],
@@ -117,7 +117,7 @@ const porfolioCards = [
     img: images.danielArias,
     title: "Daniel Arias Portfolio",
     description:
-      "Personal portfolio site designed and built from scratch. React and Next.js with Framer Motion transitions, deployed on Vercel.",
+      "Portfolio site I designed and built from scratch for someone else. React, Next.js, Framer Motion transitions, deployed on Vercel.",
     link: "https://daniel-arias-portfolio.vercel.app/",
     demo: "https://daniel-arias-portfolio.vercel.app/",
     github: "https://github.com/gabo5612/Daniel-Arias-Portfolio",

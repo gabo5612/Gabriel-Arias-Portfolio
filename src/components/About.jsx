@@ -73,22 +73,22 @@ export default function About() {
           <AnimatedSection>
             <div className="about__bio">
               <p>
-                Hi! I'm a developer with over 10 years of web experience, now working on{' '}
-                <strong>applied AI engineering</strong> — retrieval systems, agent tooling, and
-                running models locally. Most of what I build shares one constraint: the data
-                never leaves the machine.
+                Hi! I'm a developer with over 10 years of web experience, now doing{' '}
+                <strong>applied AI engineering</strong>: retrieval systems, agent tooling, and
+                running models on local hardware. Nearly everything I build has the same
+                constraint behind it. The data stays on the machine.
               </p>
               <p>
-                In practice that means RAG pipelines over private document corpora on{' '}
-                <strong>pgvector</strong>, a CLI that dispatches coding work to{' '}
-                <strong>local models through Ollama</strong> and verifies the output
-                deterministically — typecheck, lint, tests, with no model grading another
-                model — and desktop automation that runs fully offline.
+                In practice that's RAG pipelines over private document corpora on{' '}
+                <strong>pgvector</strong>, a CLI that sends coding work to{' '}
+                <strong>local models through Ollama</strong> and then checks the output with
+                typecheck, lint and tests instead of asking another model, and desktop
+                automation that still works with the network off.
               </p>
               <p>
-                Underneath that is a decade of production web work in{' '}
-                <strong>React, Next.js, Node.js, WordPress</strong>, and <strong>Shopify</strong>,
-                plus SEO and accessibility engineering. I'm currently open to new opportunities.
+                Under all of that sits a decade of production web work in{' '}
+                <strong>React, Next.js, Node.js, WordPress</strong> and <strong>Shopify</strong>,
+                plus SEO and accessibility engineering. I'm open to new work right now.
               </p>
             </div>
           </AnimatedSection>

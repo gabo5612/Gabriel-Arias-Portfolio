@@ -26,8 +26,9 @@ export default function Contact() {
           </h2>
 
           <p className="contact__subtitle">
-            I'm currently open to new opportunities. Whether you have a project
-            in mind, a question, or just want to say hi — my inbox is always open.
+            I'm open to new work right now. If you're hiring for something that has
+            to run on your own hardware or inside your own network, that's the work
+            I want. A question or a plain hello is welcome too.
           </p>
 
           <div className="contact__actions">
