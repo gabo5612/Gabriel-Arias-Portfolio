@@ -158,8 +158,12 @@ const porfolioCards = [
       "Three languages sharing one component tree instead of three sites.",
     description:
       "Portfolio site I designed and built from scratch for someone else. React, Next.js, Framer Motion transitions, deployed on Vercel.",
-    link: "https://daniel-arias-portfolio.vercel.app/",
-    demo: "https://daniel-arias-portfolio.vercel.app/",
+    link: "https://danielariascello.com/es",
+    demo: "https://danielariascello.com/es",
+    // Live on its own domain now, not a preview deployment: "Live Demo" would
+    // undersell it. The root routes by locale, so the Spanish path is linked
+    // directly rather than letting the redirect pick.
+    demoLabel: "Visit site",
     github: "https://github.com/gabo5612/Daniel-Arias-Portfolio",
     tags: ["React", "Next.js", "Framer Motion", "Vercel"],
   },

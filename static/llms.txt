@@ -184,7 +184,7 @@ of the way while the target field keeps focus.
 A personal portfolio site I designed and built from scratch for someone else:
 React and Next.js with Framer Motion transitions, deployed on Vercel.
 
-- Site: https://daniel-arias-portfolio.vercel.app/
+- Site: https://danielariascello.com/es
 - Code: https://github.com/gabo5612/Daniel-Arias-Portfolio
 - Stack: React, Next.js, Framer Motion, Vercel
 
