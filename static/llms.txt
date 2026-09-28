@@ -30,7 +30,7 @@ would have cost two extra origins in series. A dependency-free build step minifi
 the pages and then proves the output still says the same thing — same text, same
 `data-i18n` keys, same ids and hrefs — and refuses to deploy if anything moved.
 
-- Site: https://gaboauditmyweb.vercel.app
+- Site: https://gaboauditmyweb.dev
 - Code: https://github.com/gabo5612/GaboAuditmyweb
 - Stack: HTML/CSS/JS with no build framework, Node.js, PageSpeed Insights API, CrUX API
 

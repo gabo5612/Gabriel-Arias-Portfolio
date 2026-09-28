@@ -9,9 +9,7 @@ import images from "./imgPortoflio";
 
 const porfolioCards = [
   // The one paid offer in this grid, so it carries `kind: "service"` and the
-  // grid renders it as such. `link`/`demo` point at the Vercel project's new
-  // name — dead until the project is renamed in the Vercel dashboard, see
-  // GaboAuditmyweb/PENDIENTES.md.
+  // grid renders it as such. `link`/`demo` point at the site's own domain.
   {
     img: images.gaboAuditMyWeb,
     kind: "service",
@@ -21,8 +19,8 @@ const porfolioCards = [
       "The marketing site and the audit engine behind it, as the two separate halves they are.",
     description:
       "Two 30-day sprints for Shopify stores, page speed and technical SEO, sold separately. I don't bundle them: one month isn't enough to do both properly, and selling both would mean shortchanging one. Each starts with a free audit from an engine I wrote — PageSpeed and CrUX collectors, 22 technical checks, 129 tests, no npm dependencies. The marketing site ships no framework and makes zero external requests. Fonts are subset and self-hosted, and the build refuses to deploy if minification changed what the page actually says.",
-    link: "https://gaboauditmyweb.vercel.app",
-    demo: "https://gaboauditmyweb.vercel.app",
+    link: "https://gaboauditmyweb.dev",
+    demo: "https://gaboauditmyweb.dev",
     github: "https://github.com/gabo5612/GaboAuditmyweb",
     tags: ["Shopify", "Core Web Vitals", "Technical SEO", "Node.js", "PageSpeed API"],
   },
