@@ -15,8 +15,7 @@ const PrivacyHUD  = React.lazy(() => import("./hero/PrivacyHUD"));
 // sueltos, y ninguna afirmación que no esté respaldada por código público.
 const ROLES = [
   "AI that runs on your machine",   // shopfloor, crew, QuickTask
-  "RAG pipelines with citations",   // shopfloor, BrandVoice
-  "evals that fail the build",      // groundcheck
+  "RAG pipelines",   // shopfloor, BrandVoice
   "local-first desktop apps",       // QuickTask, Typeit, Squish
   "commercial WordPress plugins",   // TrailKit
   "Core Web Vitals for Shopify",    // GaboAuditmyweb
