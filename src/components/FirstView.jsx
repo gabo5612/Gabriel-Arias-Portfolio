@@ -7,6 +7,12 @@ import { useParallaxLayers } from "../hooks/useParallaxLayers";
 // three.js entra sólo por aquí. scripts/verify-budget.mjs falla el build si
 // aparece en un chunk del primer render.
 const DepthLattice = React.lazy(() => import("./hero/DepthLattice"));
+const CircleScene  = React.lazy(() => import("./hero/CircleScene"));
+
+// Sandbox: ?scene=lattice vuelve a la retícula original del portfolio.
+const SCENE = typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).get('scene') === 'lattice'
+  ? DepthLattice : CircleScene;
 const PrivacyHUD  = React.lazy(() => import("./hero/PrivacyHUD"));
 
 /* ── Typewriter hook ── */
@@ -191,7 +197,7 @@ export default function FirstView() {
         {/* La retícula no lleva data-depth: mueve su propio frustum. */}
         {lattice && (
           <Suspense fallback={null}>
-            <DepthLattice signal={signal} onFail={onLatticeFail} />
+            <SCENE signal={signal} onFail={onLatticeFail} />
           </Suspense>
         )}
       </div>
@@ -270,9 +276,9 @@ export default function FirstView() {
             <p className="hero__hint">
               {mode === 'hand' ? (
                 <>
-                  <span><b>Open your hand</b> to widen the field</span>
-                  <span><b>Make a fist</b> to close it</span>
-                  <span><b>Move closer</b> to zoom in</span>
+                  <span><b>Move your hand</b> to tilt the circle</span>
+                  <span><b>Twist your wrist</b> to roll it</span>
+                  <span><b>Open / close</b> to resize</span>
                 </>
               ) : (
                 <>
