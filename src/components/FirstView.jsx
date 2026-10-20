@@ -8,11 +8,12 @@ import { useParallaxLayers } from "../hooks/useParallaxLayers";
 // aparece en un chunk del primer render.
 const DepthLattice = React.lazy(() => import("./hero/DepthLattice"));
 const CircleScene  = React.lazy(() => import("./hero/CircleScene"));
+const GlobeScene   = React.lazy(() => import("./hero/GlobeScene"));
 
-// Sandbox: ?scene=lattice vuelve a la retícula original del portfolio.
-const SCENE = typeof window !== 'undefined'
-  && new URLSearchParams(window.location.search).get('scene') === 'lattice'
-  ? DepthLattice : CircleScene;
+// Sandbox: ?scene=circle | lattice cambia de experimento; por defecto el globo.
+const SCENES = { lattice: DepthLattice, circle: CircleScene, globe: GlobeScene };
+const SCENE = SCENES[typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).get('scene')] || GlobeScene;
 const PrivacyHUD  = React.lazy(() => import("./hero/PrivacyHUD"));
 
 /* ── Typewriter hook ── */
@@ -276,9 +277,9 @@ export default function FirstView() {
             <p className="hero__hint">
               {mode === 'hand' ? (
                 <>
-                  <span><b>Move your hand</b> to tilt the circle</span>
-                  <span><b>Twist your wrist</b> to roll it</span>
-                  <span><b>Open / close</b> to resize</span>
+                  <span><b>Move your hand</b> to spin the globe</span>
+                  <span><b>Open your hand</b> to lift the dots</span>
+                  <span><b>Move closer</b> to zoom in</span>
                 </>
               ) : (
                 <>

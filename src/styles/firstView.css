@@ -518,3 +518,29 @@
    debe tener que buscarlo. */
 .hud__head { flex-wrap: wrap; }
 .hud__sound--on { color: var(--accent); border-color: rgba(245, 165, 36, .4); }
+
+/* Sandbox — etiqueta de la zona del globo que está al frente. Arriba: abajo a
+   la derecha la tapa el panel de privacidad. */
+.globe__zone {
+  position: absolute;
+  z-index: 1;
+  right: 32px;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: var(--font-display);
+}
+.globe__zone-label {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.globe__zone-name {
+  font-size: 22px;
+  font-weight: 600;
+  transition: color var(--t-base);
+}
+.hero__lattice canvas { position: absolute; inset: 0; }
