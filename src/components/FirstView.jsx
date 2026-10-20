@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import "../styles/firstView.css";
-import { motion } from "framer-motion";
 import { useDepthSignal } from "../hooks/useDepthSignal";
-import { useParallaxLayers } from "../hooks/useParallaxLayers";
 
 // three.js entra sólo por aquí. scripts/verify-budget.mjs falla el build si
 // aparece en un chunk del primer render.
@@ -16,80 +14,10 @@ const SCENE = SCENES[typeof window !== 'undefined'
   && new URLSearchParams(window.location.search).get('scene')] || GlobeScene;
 const PrivacyHUD  = React.lazy(() => import("./hero/PrivacyHUD"));
 
-/* ── Typewriter hook ── */
-// "I build" pide un objeto, no un cargo: "I build AI Engineer" no significa
-// nada. Cada frase apunta a un proyecto real y verificable — nada de adjetivos
-// sueltos, y ninguna afirmación que no esté respaldada por código público.
-const ROLES = [
-  "AI that runs on your machine",   // shopfloor, crew, QuickTask
-  "RAG pipelines",   // shopfloor, BrandVoice
-  "local-first desktop apps",       // QuickTask, Typeit, Squish
-  "commercial WordPress plugins",   // TrailKit
-  "Core Web Vitals for Shopify",    // GaboAuditmyweb
-];
-
-function useTypewriter(words, speed = 75, deleteSpeed = 45, pause = 2000) {
-  const [text,       setText]       = useState('');
-  const [wordIdx,    setWordIdx]    = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isPaused,   setIsPaused]   = useState(false);
-
-  useEffect(() => {
-    const word = words[wordIdx % words.length];
-
-    if (isPaused) {
-      const t = setTimeout(() => { setIsPaused(false); setIsDeleting(true); }, pause);
-      return () => clearTimeout(t);
-    }
-
-    const t = setTimeout(() => {
-      if (!isDeleting) {
-        const next = word.substring(0, text.length + 1);
-        setText(next);
-        if (next === word) setIsPaused(true);
-      } else {
-        const next = word.substring(0, text.length - 1);
-        setText(next);
-        if (next === '') { setIsDeleting(false); setWordIdx(i => i + 1); }
-      }
-    }, isDeleting ? deleteSpeed : speed);
-
-    return () => clearTimeout(t);
-  }, [text, wordIdx, isDeleting, isPaused, words, speed, deleteSpeed, pause]);
-
-  return text;
-}
-
-/* ── Framer variants ── */
-const container = {
-  hidden:  {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
-};
-
-const item = {
-  hidden:  { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0,  transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] } },
-};
-
-/* El typewriter llama a setText por cada letra: ~13 renders por segundo. Vive
-   aislado y memoizado para que ese ritmo no arrastre a FirstView, cuyos hijos
-   incluyen una escena de WebGL que reconstruirse cuesta carísimo. */
-const RoleLine = React.memo(function RoleLine() {
-  const role = useTypewriter(ROLES);
-  return (
-    <motion.div className="hero__role-wrapper" variants={item} aria-live="polite">
-      <span className="hero__role-prefix">I build</span>
-      <span className="hero__role">{role}</span>
-      <span className="hero__role-cursor" aria-hidden="true" />
-    </motion.div>
-  );
-});
-
 export default function FirstView() {
   const rootRef = useRef(null);
 
   const { signal, source, reduced, activateCamera, activateGyro, deactivate } = useDepthSignal();
-  useParallaxLayers(rootRef, signal, !reduced);
 
   const [lattice, setLattice] = useState(false);
   const [stats, setStats]     = useState(null);
@@ -185,119 +113,39 @@ export default function FirstView() {
   return (
     <section className="hero" id="home" aria-label="Hero" ref={rootRef}>
 
-      {/* Animated background */}
-      <div className="hero__bg" aria-hidden="true">
-        <div className="hero__layer" data-depth="1">
-          <div className="hero__grid" />
-        </div>
-        <div className="hero__layer" data-depth="0.7">
-          <div className="hero__blob hero__blob--1" />
-          <div className="hero__blob hero__blob--2" />
-          <div className="hero__blob hero__blob--3" />
-        </div>
-        {/* La retícula no lleva data-depth: mueve su propio frustum. */}
-        {lattice && (
+      {lattice && (
+        <div className="hero__bg" aria-hidden="true">
           <Suspense fallback={null}>
             <SCENE signal={signal} onFail={onLatticeFail} />
           </Suspense>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Content — el wrapper toma el parallax para no pisar los transforms
-          que framer-motion escribe en los hijos. */}
-      <div className="hero__parallax" data-depth="-0.16">
-        <motion.div
-          className="hero__content"
-          variants={container}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Greeting */}
-          <motion.p className="hero__greeting" variants={item}>
-            Hi, I'm
-          </motion.p>
-
-          {/* Name */}
-          <motion.h1 className="hero__name" variants={item}>
-            Gabriel Arias
-          </motion.h1>
-
-          {/* Typewriter */}
-          <RoleLine />
-
-          {/* Description */}
-          <motion.p className="hero__description" variants={item}>
-            Full-stack developer passionate about crafting clean, performant web experiences.
-            Specializing in React, WordPress, Shopify, and modern web technologies since 2014.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div className="hero__actions" variants={item}>
-            <a href="#projects" className="btn btn-primary">
-              View My Work
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M2.5 7h9M7 2.5l4.5 4.5L7 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Sandbox: sin el copy del hero, el único control es encender la cámara. */}
+      <div className="sandbox__controls">
+        {canTrack && !reduced && (
+          <button
+            type="button"
+            onClick={onTrack}
+            className={`btn hero__track${tracking ? ' hero__track--on' : ''}`}
+            aria-pressed={tracking}
+          >
+            {tracking ? (
+              <span className="hero__track-dot" aria-hidden="true" />
+            ) : (
+              <svg className="hero__track-cam" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                <rect x="1" y="4" width="9.5" height="7.5" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+                <path d="M10.5 7.9l3-1.9v3.5l-3-1.6z" fill="currentColor"/>
               </svg>
-            </a>
-            <a href="#contact" className="btn btn-ghost">
-              Contact Me
-            </a>
-
-            {canTrack && !reduced && (
-              <button
-                type="button"
-                onClick={onTrack}
-                className={`btn hero__track${tracking ? ' hero__track--on' : ''}`}
-                aria-pressed={tracking}
-              >
-                {/* Apagado va la cámara, encendido el punto de estado: el icono
-                    dice qué va a pasar, el punto dice qué está pasando. */}
-                {tracking ? (
-                  <span className="hero__track-dot" aria-hidden="true" />
-                ) : (
-                  <svg className="hero__track-cam" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-                    <rect x="1" y="4" width="9.5" height="7.5" rx="2" stroke="currentColor" strokeWidth="1.4"/>
-                    <path d="M10.5 7.9l3-1.9v3.5l-3-1.6z" fill="currentColor"/>
-                  </svg>
-                )}
-                {busy
-                  ? 'Starting…'
-                  : tracking
-                    ? 'Stop tracking'
-                    : mode === 'hand' ? 'Move with your hands' : 'Move with your head'}
-              </button>
             )}
-          </motion.div>
-
-          {error && <motion.p className="hero__track-error" variants={item}>{error}</motion.p>}
-
-          {/* Sin esto la función es adivinanza: la cámara enciende y nadie sabe
-              qué gesto hace qué. Tres frases, sólo mientras está activa. */}
-          {camOn && !error && (
-            <p className="hero__hint">
-              {mode === 'hand' ? (
-                <>
-                  <span><b>Move your hand</b> to spin the globe</span>
-                  <span><b>Open your hand</b> to lift the dots</span>
-                  <span><b>Move closer</b> to zoom in</span>
-                </>
-              ) : (
-                <>
-                  <span><b>Lean side to side</b> to look around</span>
-                  <span><b>Move closer</b> to zoom in</span>
-                </>
-              )}
-            </p>
-          )}
-
-          {/* Scroll indicator */}
-          <motion.div className="hero__scroll" variants={item} aria-hidden="true">
-            <div className="hero__scroll-indicator">
-              <div className="hero__scroll-dot" />
-            </div>
-            <span>Scroll down</span>
-          </motion.div>
-        </motion.div>
+            {busy
+              ? 'Starting…'
+              : tracking
+                ? 'Stop tracking'
+                : mode === 'hand' ? 'Move with your hands' : 'Move with your head'}
+          </button>
+        )}
+        {error && <p className="hero__track-error">{error}</p>}
       </div>
 
       {camOn && (

@@ -179,10 +179,6 @@ export default function GlobeScene({ signal, onFail }) {
       renderer.setSize(w, h, false)
       camera.aspect = w / h
       camera.updateProjectionMatrix()
-      // En pantallas anchas el globo se corre a la derecha, fuera de la columna
-      // del texto (que además la máscara de .hero__lattice oscurece).
-      globe.position.x = camera.aspect > 1.2 ? Math.min(330, 190 * camera.aspect) : 0
-      globe.position.y = camera.aspect > 1.2 ? 0 : -120
     }
     resize()
     const ro = new ResizeObserver(resize)

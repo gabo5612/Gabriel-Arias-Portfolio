@@ -544,3 +544,17 @@
   transition: color var(--t-base);
 }
 .hero__lattice canvas { position: absolute; inset: 0; }
+
+/* Sandbox — solo el globo: sin máscara lateral y con el control abajo al centro. */
+.hero__lattice { -webkit-mask-image: none; mask-image: none; }
+.sandbox__controls {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
