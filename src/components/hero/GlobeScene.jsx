@@ -125,12 +125,29 @@ const SWIPE_FINGERS = 3.5
 const SWIPE_COOLDOWN = 900
 const MORPH_MS = 1100
 
+// Mano abierta, de frente. Se dibuja inline: un ícono descargado sería una
+// petición más, y el panel de privacidad las cuenta.
+const HandIcon = () => (
+  <svg viewBox="0 0 40 48" width="34" height="40" aria-hidden="true">
+    <g fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 26V10a2.5 2.5 0 0 1 5 0v12" />
+      <path d="M17 21V6a2.5 2.5 0 0 1 5 0v15" />
+      <path d="M22 21V8a2.5 2.5 0 0 1 5 0v14" />
+      <path d="M27 22v-9a2.5 2.5 0 0 1 5 0v15c0 9-5.5 15-13 15-5 0-8-2.5-11-7l-5-8a2.6 2.6 0 0 1 4.3-2.9L12 29" />
+    </g>
+  </svg>
+)
+
 const hex = c => `#${c.toString(16).padStart(6, '0')}`
 
 export default function GlobeScene({ signal, onFail }) {
   const hostRef = useRef(null)
   const labelRef = useRef(null)
   const shapeRef = useRef(null)
+  const guideRef = useRef(null)
+  const fillRRef = useRef(null)
+  const fillLRef = useRef(null)
+  const capRef = useRef(null)
 
   useEffect(() => {
     const host = hostRef.current
@@ -188,6 +205,32 @@ export default function GlobeScene({ signal, onFail }) {
     points.frustumCulled = false
     globe.add(points)
 
+    // ── Ayuda visual del gesto ──────────────────────────────────────────────
+    // Todo por refs y atributos: se actualiza en el mismo rAF que la escena, sin
+    // pasar por React. `data-state` lo lee el CSS: idle (sin mano → demo
+    // animada), closed (mano vista pero cerrada), open (lista para el swipe).
+    let flashTimer = 0, guideState = ''
+    const setGuide = (state, caption) => {
+      const g = guideRef.current
+      if (!g || state === guideState) return
+      guideState = state
+      g.dataset.state = state
+      if (capRef.current) capRef.current.textContent = caption
+    }
+    const flash = dir => {
+      const g = guideRef.current
+      if (!g) return
+      g.dataset.flash = dir > 0 ? 'next' : 'prev'
+      clearTimeout(flashTimer)
+      flashTimer = setTimeout(() => { delete g.dataset.flash }, 700)
+    }
+    const setMeter = p => {
+      // p ∈ [-1, 1]: cuánto del recorrido que pide el swipe ya hiciste, y hacia
+      // dónde. Se llena desde el centro hacia el lado del movimiento.
+      if (fillRRef.current) fillRRef.current.style.transform = `scaleX(${Math.max(0, p)})`
+      if (fillLRef.current) fillLRef.current.style.transform = `scaleX(${Math.max(0, -p)})`
+    }
+
     // ── Morph ───────────────────────────────────────────────────────────────
     let current = 0, morphAt = -Infinity
     const showShape = () => {
@@ -209,6 +252,7 @@ export default function GlobeScene({ signal, onFail }) {
       to.needsUpdate = true
       morphAt = now
       showShape()
+      flash(dir)
     }
 
     const onKey = e => {
@@ -269,8 +313,16 @@ export default function GlobeScene({ signal, onFail }) {
           heldX = hist[0].x; heldY = hist[0].y
           hist.length = 0
         }
+        const open = s.fingers >= SWIPE_FINGERS
+        setGuide(open ? 'open' : 'closed',
+          open ? 'Swipe right for next · left for previous' : 'Open your hand to swipe')
+        setMeter(open && now > cooldown ? Math.max(-1, Math.min(1, dx / SWIPE_DX)) : 0)
       } else {
         hist.length = 0
+        setGuide('idle', s.source === 'hand'
+          ? 'Show your hand to the camera'
+          : 'Open hand, swipe sideways  ·  or ← →')
+        setMeter(0)
       }
       uniforms.uMorph.value = Math.min(1, (now - morphAt) / MORPH_MS)
 
@@ -321,6 +373,7 @@ export default function GlobeScene({ signal, onFail }) {
       io.disconnect(); ro.disconnect()
       document.removeEventListener('visibilitychange', onVis)
       window.removeEventListener('keydown', onKey)
+      clearTimeout(flashTimer)
       geo.dispose(); mat.dispose()
       renderer.dispose()
       if (renderer.domElement.parentNode) renderer.domElement.remove()
@@ -333,6 +386,20 @@ export default function GlobeScene({ signal, onFail }) {
         <span className="globe__zone-label">Facing</span>
         <span ref={labelRef} className="globe__zone-name" />
         <span ref={shapeRef} className="globe__zone-label" />
+      </div>
+
+      <div ref={guideRef} className="gesture" data-state="idle">
+        <div className="gesture__stage">
+          <span className="gesture__arrow gesture__arrow--l">‹</span>
+          <span className="gesture__hand"><HandIcon /></span>
+          <span className="gesture__arrow gesture__arrow--r">›</span>
+        </div>
+        <div className="gesture__meter">
+          <span ref={fillLRef} className="gesture__fill gesture__fill--l" />
+          <span ref={fillRRef} className="gesture__fill gesture__fill--r" />
+          <span className="gesture__notch" />
+        </div>
+        <span ref={capRef} className="gesture__caption" />
       </div>
     </div>
   )

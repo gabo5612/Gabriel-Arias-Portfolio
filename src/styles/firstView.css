@@ -558,3 +558,97 @@
   align-items: center;
   gap: 10px;
 }
+
+/* Sandbox — ayuda visual del swipe.
+   idle   → la mano hace el gesto sola, en bucle: así se ve qué hay que hacer.
+   closed → mano detectada pero cerrada: se apaga, falta abrirla.
+   open   → lista: la mano se queda quieta y el medidor muestra el recorrido. */
+.gesture {
+  position: absolute;
+  left: 50%;
+  bottom: 108px;
+  transform: translateX(-50%);
+  width: min(320px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  transition: color var(--t-base);
+}
+.gesture__stage {
+  position: relative;
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.gesture__arrow {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--text-muted);
+  transition: color var(--t-fast), transform var(--t-fast);
+}
+.gesture__hand {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  margin-left: -17px;
+  transition: opacity var(--t-base), color var(--t-base);
+}
+.gesture[data-state="idle"] .gesture__hand { animation: gesture-swipe 2.4s cubic-bezier(.5, 0, .3, 1) infinite; }
+.gesture[data-state="closed"] .gesture__hand { opacity: .35; }
+.gesture[data-state="open"] { color: var(--accent); }
+
+@keyframes gesture-swipe {
+  0%, 15%  { transform: translateX(-70px); opacity: 0; }
+  25%      { opacity: 1; }
+  55%      { transform: translateX(70px); opacity: 1; }
+  70%, 100% { transform: translateX(90px); opacity: 0; }
+}
+
+.gesture__meter {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, .08);
+  overflow: hidden;
+}
+.gesture__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: var(--accent);
+  transform: scaleX(0);
+}
+.gesture__fill--r { left: 50%; transform-origin: left center; }
+.gesture__fill--l { right: 50%; transform-origin: right center; }
+.gesture__notch {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-muted);
+}
+.gesture__caption {
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+/* Al cambiar de forma: la flecha del lado elegido se enciende y el medidor se
+   llena entero de ese lado, para que se vea que el gesto se contó. */
+.gesture[data-flash="next"] .gesture__arrow--r,
+.gesture[data-flash="prev"] .gesture__arrow--l { color: var(--accent); transform: scale(1.4); }
+.gesture[data-flash="next"] .gesture__fill--r,
+.gesture[data-flash="prev"] .gesture__fill--l { transform: scaleX(1) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gesture[data-state="idle"] .gesture__hand { animation: none; }
+}
