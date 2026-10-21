@@ -10,10 +10,12 @@ npm install
 npm run dev          # http://localhost:5180        el sitio
                      # http://localhost:5180/?lab   los experimentos del hero (globo)
                      #   ?lab&scene=circle | lattice
-npm test             # node --test: router, gestos, formas
+npm test             # node --test: router, gestos, formas, perfil de la mano
+npm run e2e          # Chromium + mano simulada (ver "Pruebas de punta a punta")
 npm run build
-npm run sync         # trae proyectos/experiencia/skills del portfolio
+npm run sync         # trae proyectos/experiencia/skills del portfolio (portadas → WebP)
 npm run make:model   # regenera public/models/knot.glb
+npm run make:models  # regenera public/models/projects/*.glb con Blender (headless)
 ```
 
 `?delegate=cpu|gpu` sigue forzando el backend de MediaPipe.
@@ -41,10 +43,38 @@ directos funcionan.
 | Pellizco pulgar–índice mientras apuntás | clic en lo que está bajo el cursor |
 | Cursor quieto 1.25 s sobre un link o botón | lo abre (un anillo se llena alrededor del cursor) |
 | Apuntando: flechas en los bordes | izquierda/derecha cambian de página; en el detalle de un proyecto, arriba/abajo pasan al anterior/siguiente |
+| Las dos palmas abiertas | separarlas/juntarlas acerca o aleja la figura (0.6–1.4×); girarlas como un volante la rota; al soltar vuelve sola |
+| (teléfono) botón **Tilt** | inclinar el teléfono mueve la cámara por el giroscopio, en lugar de la mano |
 
 El cursor se congela donde empezaste a cerrar el pellizco, porque juntar el pulgar arrastra
 la punta del índice. Con la palma abierta, la mano además agarra la formación y mueve la
 cámara (paralaje).
+
+**Calibración.** Los umbrales (palma abierta, apuntar, pellizco, recorrido del swipe, zona
+muerta del scroll) tienen valores por defecto, pero el panel de la cámara ofrece **Tune to
+your hand**: seis poses de unos segundos, y `engine/handProfile.js` deriva los umbrales de lo
+medido (medianas, acotadas para que una calibración mala no deje la mano inservible). Se
+guarda en `localStorage` de este navegador y se aplica en vivo.
+
+**Panel de la cámara.** Compacto: la vista previa con "Local · 0 sent" y dos íconos (sonido,
+apagar). Telemetría y la nota de la CSP, detrás de **More**. `?fakehud` (sólo en dev) lo
+muestra sin cámara, para diseñarlo.
+
+### Títulos de partículas
+
+Al llegar a una página o abrir un proyecto, partículas salen de la figura y forman el título
+del panel letra por letra, en su sitio exacto; el texto real aparece al llegar las últimas.
+Al irse, el título se deshace en partículas. `engine/titleParticles.js` rasteriza el título
+palabra por palabra desde el DOM (con la fuente computada de cada una) y la nube vive en el
+espacio de la cámara, así que pantalla → 3D es directo aunque la cámara vuele.
+
+### Una formación por proyecto
+
+`blender/build_models.py` construye un modelo procedural por proyecto (velocímetro, fábrica,
+lupa con check, velas, engranajes, globo de diálogo con pluma, montañas con pin, engranaje con
+play, prensa, teclas, cello) y los exporta a `public/models/projects/<id>.glb` (3–27 KB). Abrir
+un proyecto transforma la formación en su modelo. Están pensados como silueta: casi planos, de
+frente (`face: true` evita que giren hasta quedar de canto).
 
 ### El cursor (mouse o dedo)
 
@@ -65,6 +95,19 @@ window.__depth.pose({ hands: 1, fingers: 1, point: 1, px: .2, py: .5 })  // curs
 window.__depth.pose({ pinch: 1 })                                // clic
 ```
 
+## Pruebas de punta a punta
+
+`npm run e2e` levanta Vite en modo dev (puerto 5191), abre Chromium headless con WebGL por
+software y recorre el sitio con la mano simulada por `window.__depth` (sólo existe en dev).
+19 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
+de partículas, lupa de texto, agarre de la figura, scroll/swipe/pellizco/espera con la mano,
+flechas de borde, dos manos, calibración completa, giroscopio, reduced motion, móvil, y que un
+recorrido entero no haga peticiones fuera del sitio (fuentes aparte). Falla también ante
+cualquier error de consola o respuesta ≥ 400.
+
+Playwright no es dependencia: `npm i --no-save playwright@1.63.0`. Si su Chromium no está
+descargado, usa el Google Chrome instalado.
+
 ## Estructura
 
 ```
@@ -72,7 +115,9 @@ src/
   engine/            reutilizable, no sabe nada del portfolio
     signal/          useDepthSignal (puntero/mano/cabeza/giroscopio → una señal),
                      cameraSource (MediaPipe local), oneEuro, useCameraControl
-    gestures.js      swipe, modo de la mano, joystick de scroll, clic por pellizco (puros)
+    gestures.js      swipe, modo de la mano, dos manos, joystick de scroll, pellizco, espera (puros)
+    handProfile.js   umbrales de la mano: por defecto o calibrados (localStorage)
+    titleParticles.js  títulos que se forman y se deshacen en partículas
     stage.js         renderer + cámara + resize + pausa fuera de pantalla
     pointCloud.js    nube morfable: forma y paleta viajan punto a punto
     dust.js          polvo alrededor del circuito (la sensación de velocidad)

@@ -183,9 +183,15 @@ export function useDepthSignal() {
         if (sourceRef.current !== 'hand') { sourceRef.current = 'hand'; setSource('hand') }
       },
       stop: () => deactivate(),
+      // Lo que leen los consumidores, ya suavizado: para que un test compruebe
+      // el efecto de una entrada sin mirar píxeles.
+      read: () => ({ ...signal.current }),
+      // El giroscopio pide un toque en iOS; acá se enciende directo, y un
+      // test lo alimenta con DeviceOrientationEvent sintéticos.
+      tilt: () => activateGyro(),
     }
     return () => { delete window.__depth }
-  }, [deactivate])
+  }, [deactivate, activateGyro])
 
   // Soltar la cámara si el componente se va: un unmount no debe dejar el LED
   // del portátil encendido.
