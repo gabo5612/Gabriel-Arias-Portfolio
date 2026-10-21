@@ -249,6 +249,27 @@ await check('tilting the phone drives the camera', async page => {
   assert(s.source === 'gyro' && s.x > 0.3, `source ${s.source}, x ${s.x?.toFixed(2)}`)
 })
 
+await check('"Fly to my projects" launches a paper plane that lands in the projects figure', async page => {
+  await open(page)
+  const seen = page.evaluate(() => new Promise(r => {
+    const pts = []
+    const t0 = performance.now()
+    const f = () => {
+      const p = window.__plane?.()
+      if (p?.on && p.z < 1) pts.push(p)
+      if (performance.now() - t0 < 3500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
+    }
+    requestAnimationFrame(f)
+  }))
+  await page.click('text=Fly to my projects')
+  const { pts, end } = await seen
+  await waitHash(page, '#/projects')
+  const onScreen = pts.filter(p => p.sx > 0 && p.sx < 1440 && p.sy > 0 && p.sy < 900)
+  assert(pts.length >= 3, `plane seen in only ${pts.length} frames`)
+  assert(onScreen.length / pts.length > 0.8, `plane off-screen in ${pts.length - onScreen.length} of ${pts.length} frames`)
+  assert(!end.on, 'plane still flying after the trip')
+})
+
 // ── Sonido ──────────────────────────────────────────────────────────────────
 // No se puede escuchar, pero sí medir: el pico de la salida (un analizador que
 // existe sólo en desarrollo) sube al volar y al tocar la figura, nunca satura,

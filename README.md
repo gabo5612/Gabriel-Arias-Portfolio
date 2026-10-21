@@ -60,6 +60,14 @@ guarda en `localStorage` de este navegador y se aplica en vivo.
 apagar). Telemetría y la nota de la CSP, detrás de **More**. `?fakehud` (sólo en dev) lo
 muestra sin cámara, para diseñarlo.
 
+### El avión de papel
+
+**Fly to my projects** lo hace literal: el botón suelta un avión de papel (`engine/paperPlane.js`)
+que despega desde el botón, vuela delante de la cámara zigzagueando y ladeándose, con dos
+estelas de partículas, y se estrella contra la formación de Projects, que estalla al
+recibirlo. Tiene su propio zumbido de hélice. El botón avisa con el evento `world-plane`
+antes de navegar; cualquier otro botón puede hacer lo mismo.
+
 ### Títulos de partículas
 
 Al llegar a una página o abrir un proyecto, partículas salen de la figura y forman el título
@@ -122,7 +130,7 @@ window.__depth.pose({ pinch: 1 })                                // clic
 
 `npm run e2e` levanta Vite en modo dev (puerto 5191), abre Chromium headless con WebGL por
 software y recorre el sitio con la mano simulada por `window.__depth` (sólo existe en dev).
-20 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
+21 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
 de partículas, lupa de texto, agarre de la figura, scroll/swipe/pellizco/espera con la mano,
 flechas de borde, dos manos, calibración completa, giroscopio, reduced motion, móvil, y que un
 recorrido entero no haga peticiones fuera del sitio (fuentes aparte). El sonido no se

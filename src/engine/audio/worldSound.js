@@ -332,6 +332,44 @@ export const sound = {
     tone(55, { at: t, dur: d * 0.6, gain: 0.07, attack: d * 0.25, glideTo: 82.5, wet: 0.2 })
   },
 
+  // El avión de papel: un zumbido de hélice (dos sierras desafinadas que
+  // baten) que se acerca, sube un poco de tono y al final cae, como al pasar
+  // de largo. Cruza de izquierda a derecha.
+  plane(ms) {
+    if (!live()) return
+    const t = ctx.currentTime, d = ms / 1000
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2
+    lp.frequency.setValueAtTime(300, t)
+    lp.frequency.linearRampToValueAtTime(1400, t + d * 0.5)
+    lp.frequency.linearRampToValueAtTime(500, t + d)
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.exponentialRampToValueAtTime(0.05, t + d * 0.2)
+    g.gain.setValueAtTime(0.05, t + d * 0.75)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d)
+    const flutter = ctx.createOscillator(); flutter.frequency.value = 22
+    const fg = ctx.createGain(); fg.gain.value = 0.35
+    const amp = ctx.createGain(); amp.gain.value = 0.65
+    flutter.connect(fg); fg.connect(amp.gain)
+    const oscs = [0, 7].map(cents => {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.detune.value = cents
+      o.frequency.setValueAtTime(130, t)
+      o.frequency.linearRampToValueAtTime(175, t + d * 0.6)
+      o.frequency.linearRampToValueAtTime(120, t + d)
+      o.connect(lp); o.start(t); o.stop(t + d + 0.05)
+      return o
+    })
+    lp.connect(amp); amp.connect(g)
+    const out = bus(0, 0.35)
+    const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null
+    if (p) {
+      p.pan.setValueAtTime(-0.6, t); p.pan.linearRampToValueAtTime(0.5, t + d)
+      g.connect(p); p.connect(out)
+    } else g.connect(out)
+    flutter.start(t); flutter.stop(t + d + 0.05)
+    oscs[0].onended = () => { g.disconnect(); p?.disconnect() }
+  },
+
   // Llegada: el acorde de la estación como campanas, de izquierda a derecha.
   arrive(i) {
     if (!live()) return

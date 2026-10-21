@@ -10,6 +10,7 @@ import { pointer } from './pointer'
 import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 import { sound } from '../engine/audio/worldSound'
+import { createPaperPlane } from '../engine/paperPlane'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
@@ -87,6 +88,27 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     const dust = createDust(curve, { count: small ? 3000 : 9000, far: FAR * 0.8 })
     scene.add(dust.points)
     stage.own(dust)
+
+    // ── Avión de papel ──────────────────────────────────────────────────────
+    // "Fly to my projects" lo dice literal: el botón suelta un avión que
+    // despega desde donde está el botón, vuela por el circuito delante de la
+    // cámara (que lo sigue) y se estrella contra la formación de destino, que
+    // estalla al recibirlo. El botón avisa con el evento 'world-plane' justo
+    // antes de navegar; el vuelo siguiente lo lleva.
+    const paper = createPaperPlane({ trail: small ? 360 : 700 })
+    scene.add(paper.group, paper.points)
+    stage.own(paper)
+    let planeReq = null, planeFlight = null
+    const planeStart = new Vector3(), planePos = new Vector3(), ndcV = new Vector3(), fwd = new Vector3()
+    const onPlane = e => { planeReq = { x: e.detail?.x, y: e.detail?.y, at: performance.now() } }
+    window.addEventListener('world-plane', onPlane)
+    // Sólo en desarrollo: para inspeccionar el vuelo del avión desde las pruebas.
+    if (import.meta.env.DEV) {
+      window.__plane = () => {
+        const v = paper.group.position.clone().project(camera)
+        return { on: paper.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
+      }
+    }
 
     // ── Formaciones ─────────────────────────────────────────────────────────
     const cache = new Map()
@@ -188,6 +210,20 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       travelDir = Math.sign(end - cur)
       flightMs = 1500 + 520 * Math.max(0, Math.abs(end - cur) - 1)
       flightAt = now
+      planeFlight = null
+      if (planeReq && now - planeReq.at < 1500) {
+        // Con avión el viaje se alarga un poco: es para verlo.
+        flightMs *= 1.35
+        // Despega del botón: su centro en pantalla, a 140 unidades de la cámara.
+        const { w, h } = stage.size
+        ndcV.set(((planeReq.x ?? w * 0.3) / w) * 2 - 1, -((planeReq.y ?? h * 0.7) / h) * 2 + 1, 0.5)
+          .unproject(camera).sub(camera.position).normalize()
+        planeStart.copy(camera.position).addScaledVector(ndcV, 140)
+        paper.show(planeStart)
+        planeFlight = { to: page }
+        sound.plane(flightMs)
+      }
+      planeReq = null
       lookFrom.copy(look)
       active = page
       sound.fly(travelDir, flightMs, page)
@@ -380,6 +416,8 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         .addScaledVector(right, hx * amp)
         .addScaledVector(up, -hy * amp * 0.6)
       if (onCam) camera.position.addScaledVector(T[active], hz * 200)
+      // Con avión, la cámara lo persigue: la mirada se le va detrás.
+      if (planeFlight && flying) look.lerp(paper.group.position, 0.2 * Math.sin(Math.PI * e))
       camera.lookAt(look)
 
       const w = stage.size.w, h = stage.size.h
@@ -508,6 +546,31 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       formP.update(now)
       dissolveP.update(now)
 
+      // El avión vuela en el cuadro de la cámara: siempre delante y un poco
+      // abajo, zigzagueando, como un avión que se persigue. (Sobre el circuito
+      // quedaría fuera de cuadro: durante el vuelo la cámara mira hacia la
+      // formación de destino, no a lo largo del camino.) La estela queda en el
+      // mundo, así que se estira detrás: es lo que dice que va rápido.
+      // Despega del botón y termina dentro de la figura de destino.
+      if (planeFlight) {
+        camera.updateMatrixWorld()
+        camera.getWorldDirection(fwd)
+        right.crossVectors(fwd, up).normalize()
+        planePos.copy(camera.position)
+          .addScaledVector(fwd, 260)
+          .addScaledVector(right, Math.sin(now * 0.0017) * 70)
+          .addScaledVector(up, -45 + Math.sin(now * 0.0026) * 22)
+        if (raw < 0.25) planePos.lerpVectors(planeStart, planePos, easeInOut(raw / 0.25))
+        if (raw > 0.7) planePos.lerp(A[planeFlight.to], easeInOut((raw - 0.7) / 0.3))
+        paper.moveTo(planePos, now, up)
+        if (!flying) {
+          paper.hide()
+          poke(stations[planeFlight.to])
+          planeFlight = null
+        }
+      }
+      paper.update(now)
+
       // El sonido de la figura: cuánto está el cursor encima, dónde, y qué
       // tan rápido gira por el arrastre (o la inercia que dejó).
       sound.figure(a.over || drag ? 1 : 0, pointer.x / w, pointer.y / h, Math.hypot(a.vx, a.vy), a.zoom)
@@ -523,6 +586,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
       window.removeEventListener('world-poke', onHandPoke)
+      window.removeEventListener('world-plane', onPlane)
       host.style.cursor = ''
       stage.dispose()
     }
