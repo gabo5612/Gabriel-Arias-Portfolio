@@ -19,7 +19,9 @@ const clamp = (v, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 const ZERO = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, fingers: 5, x2: 0, y2: 0, fingers2: 0, hands: 0,
   // Cursor de la mano: punta del índice en pantalla (0..1), pellizco y pose
   // de apuntar (0..1). Ya llegan filtrados con one-euro.
-  px: 0.5, py: 0.5, pinch: 0, point: 0 }
+  px: 0.5, py: 0.5, pinch: 0, point: 0,
+  // Medidas crudas de la mano, sin umbral: las usa la calibración.
+  rIdx: 0, rOth: 0, rPinch: 1 }
 
 export function useDepthSignal() {
   // Lo que leen los consumidores: ya suavizado.
@@ -102,6 +104,9 @@ export function useDepthSignal() {
       s.py = target.current.py
       s.pinch = target.current.pinch
       s.point = target.current.point
+      s.rIdx = target.current.rIdx
+      s.rOth = target.current.rOth
+      s.rPinch = target.current.rPinch
       s.source = src
     }
     raf = requestAnimationFrame(tick)

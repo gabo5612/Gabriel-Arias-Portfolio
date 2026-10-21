@@ -1,4 +1,5 @@
 import { createOneEuro } from './oneEuro.mjs'
+import { profile } from '../handProfile.js'
 
 // Fuente de pose por cámara, con dos modos: mano derecha (por defecto) y cabeza.
 //
@@ -127,24 +128,31 @@ function countFingers(lm) {
   return n
 }
 
-// Apuntar "como con un lápiz": índice estirado, medio/anular/meñique
-// plegados. El pulgar no cuenta — se mueve para pellizcar y no debe sacarte
-// del modo puntero justo al hacer clic.
-function pointing(lm) {
+// Extensión del índice y suma de medio + anular + meñique (cada uno 0..1).
+// Es lo que separa apuntar "como con un lápiz" (índice estirado, el resto
+// plegado) de la palma y del puño. El pulgar no cuenta: se mueve para
+// pellizcar y no debe sacarte del modo puntero justo al hacer clic.
+function indexAndOthers(lm) {
   const w = lm[WRIST]
   const e = ([tip, pip]) => {
     const d = dist(w, lm[pip])
     return d > 1e-6 ? ext(dist(w, lm[tip]) / d) : 0
   }
   const [index, ...rest] = FINGERS.map(e)
-  const others = rest.reduce((a, b) => a + b, 0)
-  return index > 0.55 && others < 1.2 ? 1 : 0
+  return [index, rest.reduce((a, b) => a + b, 0)]
 }
 
-// Pellizco pulgar–índice, 0 (separados) a 1 (juntos). Por razón contra el
-// tamaño de la palma, no en píxeles: así vale igual cerca o lejos de la cámara.
-const pinchOf = (lm, palm) =>
-  Math.min(1, Math.max(0, (0.75 - dist(lm[4], lm[8]) / palm) / (0.75 - 0.25)))
+// Los umbrales salen del perfil de la mano (engine/handProfile.js): los
+// valores por defecto, o los que midió la calibración de esta persona.
+const pointing = (index, others) =>
+  index > profile.point.indexMin && others < profile.point.othersMax ? 1 : 0
+
+// Pellizco pulgar–índice, 0 (separados) a 1 (juntos), a partir de la razón
+// distancia / tamaño de la palma: así vale igual cerca o lejos de la cámara.
+const pinchOf = ratio => {
+  const { near, far } = profile.pinch
+  return Math.min(1, Math.max(0, (far - ratio) / (far - near)))
+}
 
 const HAND = {
   label: 'hand',
@@ -194,8 +202,13 @@ const HAND = {
         // Punta del índice en coordenadas del cuadro (0..1, sin espejar) y
         // pellizco: lo que necesita el cursor de la mano.
         tip: lm[8],
-        pinch: pinchOf(lm, s),
-        point: pointing(lm),
+        ...(() => {
+          const [idx, oth] = indexAndOthers(lm)
+          const ratio = dist(lm[4], lm[8]) / s
+          // Las medidas crudas viajan también: la calibración las necesita
+          // para derivar umbrales, y no puede medir a través de ellos.
+          return { pinch: pinchOf(ratio), point: pointing(idx, oth), rIdx: idx, rOth: oth, rPinch: ratio }
+        })(),
         lm,
       }
     }
@@ -349,6 +362,7 @@ export async function startCameraSource(mode, onPose, opts = {}) {
         py: f.py(clamp((raw.tip.y - BOX.y0) / (BOX.y1 - BOX.y0), 0, 1), t),
         pinch: f.pinch(raw.pinch, t),
         point: f.point(raw.point, t),
+        rIdx: raw.rIdx, rOth: raw.rOth, rPinch: raw.rPinch,
       }),
     })
     onStats?.({

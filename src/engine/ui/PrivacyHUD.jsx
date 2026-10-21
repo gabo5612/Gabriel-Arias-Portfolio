@@ -27,7 +27,7 @@ function Row({ label, value, good }) {
   )
 }
 
-export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, onStop }) {
+export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, onStop, onCalibrate, calibrated }) {
   const [net, setNet] = useState(0)
   // Cerrado por defecto: el panel acompaña, no compite con la página.
   const [more, setMore] = useState(false)
@@ -144,9 +144,18 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
         </div>
       </div>
 
-      <button type="button" className="hud__more" aria-expanded={more} onClick={() => setMore(m => !m)}>
-        {more ? 'Less' : 'More'}
-      </button>
+      <div className="hud__bar">
+        {/* Sin calibrar, la invitación se ve sin abrir nada: es lo que más
+            mejora la experiencia y cuesta veinte segundos. */}
+        {onCalibrate && (
+          <button type="button" className="hud__tune" onClick={onCalibrate}>
+            {calibrated ? 'Recalibrate' : 'Tune to your hand'}
+          </button>
+        )}
+        <button type="button" className="hud__more" aria-expanded={more} onClick={() => setMore(m => !m)}>
+          {more ? 'Less' : 'More'}
+        </button>
+      </div>
 
       {more && (
         <div className="hud__details">

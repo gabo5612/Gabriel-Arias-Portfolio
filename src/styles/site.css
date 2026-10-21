@@ -585,6 +585,70 @@ p.projects__kind { margin: -12px 0 14px; }
 .site .gesture[data-flash="next"] .gesture__arrow--r,
 .site .gesture[data-flash="prev"] .gesture__arrow--l { color: var(--paper); }
 
+/* ── Calibración ─────────────────────────────────────────────────────────
+   Una tarjeta sobre el lado del mundo, no un modal a pantalla completa: la
+   persona tiene que poder ver la figura reaccionar mientras calibra. */
+.calib {
+  position: absolute;
+  z-index: 45;
+  right: max(var(--gutter), 240px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(320px, calc(100% - 32px));
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  background: rgba(5, 7, 13, .82);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.calib__title { font-family: var(--display); font-weight: 700; font-stretch: 90%; font-size: 1.35rem; }
+.calib__ring {
+  --p: 0;
+  width: 92px; height: 92px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(rgba(245, 165, 36, .8) calc(var(--p) * 360deg), rgba(236, 232, 222, .08) 0);
+  position: relative;
+}
+/* El hueco del anillo es un disco del color del fondo encima del degradado:
+   una máscara recortaría también el número. */
+.calib__ring::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.calib__count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.calib__count { z-index: 1; }
+.calib__count small { font-size: .8rem; color: var(--fog); font-weight: 400; }
+.calib__say { font-size: 1rem; line-height: 1.45; color: var(--paper); min-height: 2.9em; }
+.calib__hint { font-size: .78rem; color: var(--fog); margin-top: -6px; }
+.calib__actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.calib__actions .btn { padding: 8px 14px; font-size: .8rem; }
+.calib__summary { width: 100%; display: grid; gap: 4px; font-size: .82rem; }
+.calib__summary div { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 4px; }
+.calib__summary dt { color: var(--fog); }
+
+@media (max-width: 860px), (max-aspect-ratio: 21/20) {
+  .calib { right: 50%; transform: translate(50%, -50%); }
+}
+
 /* ── Foco y accesibilidad ─────────────────────────────────────────────── */
 .site a:focus-visible, .site button:focus-visible {
   outline: 2px solid var(--amber);

@@ -7,6 +7,7 @@ import { resolveShape } from '../engine/shapes/sources'
 import { SHAPES } from '../engine/shapes/procedural'
 import { handMode, twoHands } from '../engine/gestures'
 import { pointer } from './pointer'
+import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
@@ -329,7 +330,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     stage.start((now, dt) => {
       const s = signal.current
       const onCam = s.source === 'hand' || s.source === 'face'
-      mode = handMode(s, mode)
+      mode = handMode(s, mode, { fingers: profile.open })
       // Apuntando o con las dos manos, la mano no es cámara: el mundo se queda
       // donde estaba al empezar el gesto.
       if (mode !== 'point' && mode !== 'two') { hx = s.x; hy = s.y; hz = s.z }

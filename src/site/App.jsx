@@ -7,6 +7,7 @@ import { profile } from '../content'
 import { PAGES } from './pages'
 import { useNavigation } from './useNavigation'
 import { useTextLens } from './useTextLens'
+import { calibrated } from '../engine/handProfile'
 import Nav from './ui/Nav'
 import RouteMap from './ui/RouteMap'
 import '../styles/engine.css'
@@ -17,6 +18,7 @@ import '../styles/site.css'
 const World = React.lazy(() => import('./World'))
 const PrivacyHUD = React.lazy(() => import('../engine/ui/PrivacyHUD'))
 const HandControls = React.lazy(() => import('./ui/HandControls'))
+const Calibration = React.lazy(() => import('./ui/Calibration'))
 
 // El panel sale rápido y entra cuando la cámara ya está frenando: así el texto
 // aparece al llegar, no durante el vuelo. Cambiar de ítem dentro de una página
@@ -45,6 +47,7 @@ export default function App() {
   const { state, dir, go } = useNavigation(PAGES)
   const page = PAGES[state.page]
   const [world, setWorld] = useState(false)
+  const [calibrating, setCalibrating] = useState(false)
   const routeRef = useRef(null)
   const mainRef = useRef(null)
   // La lupa de texto sigue al mouse siempre y al dedo cuando apuntás.
@@ -111,7 +114,7 @@ export default function App() {
 
       {(cam.camOn || depth.source === 'hand') && (
         <Suspense fallback={null}>
-          <HandControls signal={depth.signal} pages={PAGES} state={state} go={go} />
+          <HandControls signal={depth.signal} pages={PAGES} state={state} go={go} paused={calibrating} />
         </Suspense>
       )}
       {/* Sólo en desarrollo: ?fakehud muestra el panel con datos de ejemplo,
@@ -119,13 +122,21 @@ export default function App() {
       {import.meta.env.DEV && !cam.camOn && FAKE_HUD && (
         <Suspense fallback={null}>
           <PrivacyHUD stats={FAKE_HUD} video={null} mode="hand" muted={false}
-            onMute={() => {}} onStop={() => {}} />
+            onMute={() => {}} onStop={() => {}}
+            onCalibrate={() => setCalibrating(true)} calibrated={calibrated} />
         </Suspense>
       )}
       {cam.camOn && (
         <Suspense fallback={null}>
           <PrivacyHUD stats={cam.stats} video={cam.video} mode={cam.mode}
-            muted={cam.muted} onMute={cam.toggleMute} onStop={cam.stop} />
+            muted={cam.muted} onMute={cam.toggleMute} onStop={cam.stop}
+            onCalibrate={() => setCalibrating(true)} calibrated={calibrated} />
+        </Suspense>
+      )}
+
+      {calibrating && (cam.camOn || depth.source === 'hand') && (
+        <Suspense fallback={null}>
+          <Calibration signal={depth.signal} onClose={() => setCalibrating(false)} />
         </Suspense>
       )}
 

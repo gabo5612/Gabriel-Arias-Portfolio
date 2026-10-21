@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed } from '../../engine/gestures'
 import { fromHand, releaseHand } from '../pointer'
+import { EVENT, profile } from '../../engine/handProfile'
 
 // Todo lo que la mano hace en el sitio, en un solo bucle sobre la señal:
 //
@@ -20,8 +21,9 @@ const CLICKABLE = 'a[href], button:not([disabled]), [role="button"]'
 
 // Más sensible que el detector por defecto (0.5 en 260 ms): en el sitio el
 // swipe es LA forma de moverse, y un barrido moderado tiene que alcanzar. La
-// deriva lenta sigue sin contar (ver test/gestures.test.mjs).
-const SITE_SWIPE = { axes: 'x', dx: 0.36, ms: 320 }
+// deriva lenta sigue sin contar (ver test/gestures.test.mjs). El recorrido
+// exacto sale del perfil de la mano: 0.36 por defecto, o el calibrado.
+const siteSwipe = () => ({ axes: 'x', dx: profile.swipe.dx, ms: 320, fingers: profile.open })
 
 const HandIcon = () => (
   <svg viewBox="0 0 40 48" width="30" height="36" aria-hidden="true">
@@ -34,7 +36,7 @@ const HandIcon = () => (
   </svg>
 )
 
-export default function HandControls({ signal, pages, state, go }) {
+export default function HandControls({ signal, pages, state, go, paused = false }) {
   const guideRef = useRef(null)
   const fillRRef = useRef(null)
   const fillLRef = useRef(null)
@@ -43,11 +45,14 @@ export default function HandControls({ signal, pages, state, go }) {
   const edgesRef = useRef(null)
   // El bucle vive lo que vive el componente; lo que cambia con la navegación
   // se lee de un ref para no reiniciarlo en cada página.
-  const live = useRef({ pages, state, go })
-  live.current = { pages, state, go }
+  const live = useRef({ pages, state, go, paused })
+  live.current = { pages, state, go, paused }
 
   useEffect(() => {
-    const swipe = createSwipeDetector(SITE_SWIPE)
+    let swipe = createSwipeDetector(siteSwipe())
+    // Una calibración nueva cambia el recorrido del swipe: se rehace el detector.
+    const onProfile = () => { swipe = createSwipeDetector(siteSwipe()) }
+    window.addEventListener(EVENT, onProfile)
     const pinch = createPinchClick()
     const dwell = createDwell({ ms: 1250 })
     let raf = 0, last = performance.now(), mode = 'none'
@@ -85,9 +90,18 @@ export default function HandControls({ signal, pages, state, go }) {
       const dt = Math.min(64, now - last)
       last = now
       const s = signal.current
-      const { pages, state, go } = live.current
+      const { pages, state, go, paused } = live.current
       const N = pages.length
-      mode = handMode(s, mode)
+      // Calibrando: la mano se mide, no manda. Nada de navegar ni hacer clic.
+      if (paused) {
+        cursorRef.current.dataset.on = ''
+        edgesRef.current.dataset.on = ''
+        guideRef.current.style.visibility = 'hidden'
+        releaseHand(); setHover(null); pinch.reset(); dwell.reset(); swipe.reset()
+        return
+      }
+      guideRef.current.style.visibility = ''
+      mode = handMode(s, mode, { fingers: profile.open })
       // Las flechas de borde existen sólo mientras apuntás: con la palma
       // abierta ya está el swipe, y sin mano no hay con qué tocarlas.
       const edgesOn = mode === 'point' ? '1' : ''
@@ -143,7 +157,7 @@ export default function HandControls({ signal, pages, state, go }) {
       // lateral no debe arrastrar el texto de paso.
       let scrolling = ''
       if (mode === 'open' && Math.abs(sw.progress) < 0.3) {
-        const v = scrollSpeed(s.y)
+        const v = scrollSpeed(s.y, { dead: profile.scroll.dead })
         const el = document.querySelector('.site__main .panel:last-child [data-scroll]')
         if (v && el) {
           // scrollTop es entero en muchos navegadores: se acumula el resto o
@@ -171,6 +185,7 @@ export default function HandControls({ signal, pages, state, go }) {
     return () => {
       cancelAnimationFrame(raf)
       clearTimeout(flashTimer)
+      window.removeEventListener(EVENT, onProfile)
       setHover(null)
       releaseHand()
     }

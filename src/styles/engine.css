@@ -184,8 +184,19 @@
 .hud__icon:hover { color: #fff; background: rgba(0, 0, 0, .75); }
 .hud__icon--on { color: rgba(255, 255, 255, .9); }
 
+.hud__bar { display: flex; align-items: center; gap: 6px; }
+.hud__tune {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .35);
+  padding: 2px 9px;
+  font-size: .66rem;
+  color: var(--text-secondary);
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.hud__tune:hover { color: var(--text-primary); border-color: rgba(255, 255, 255, .25); }
 .hud__more {
-  align-self: flex-end;
+  margin-left: auto;
   border: 0;
   background: none;
   padding: 2px 4px;
