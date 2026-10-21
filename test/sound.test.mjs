@@ -1,19 +1,20 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { NOTES, SEMIS } from '../src/engine/audio/scale.js'
-import { stationChord, wordNote } from '../src/engine/audio/worldSound.js'
+import { STATIONS, stationChord, wordNote } from '../src/engine/audio/worldSound.js'
 
 // Lo que se puede comprobar sin Web Audio: que todo lo que suena cae en la
 // escala, que cada estación tiene su acorde, y que la lupa sube con la altura.
 
-test('every station chord is three notes of the scale, and neighbours differ', () => {
-  for (let i = 0; i < 6; i++) {
-    const c = stationChord(i)
-    assert.equal(c.length, 3)
-    c.forEach(s => assert.ok(SEMIS.includes(s), `${s} not in scale`))
-    assert.notDeepEqual(c, stationChord(i + 1))
+test('every station has its own chord in the scale, root and brightness', () => {
+  const inScale = semi => SEMIS.includes(((semi % 12) + 12) % 12)
+  for (let i = 0; i < STATIONS.length; i++) {
+    stationChord(i).forEach(s => assert.ok(inScale(s), `station ${i}: ${s} not in scale`))
   }
-  assert.deepEqual(stationChord(-1), stationChord(5))
+  // Distinguibles: ni dos raíces ni dos brillos iguales.
+  assert.equal(new Set(STATIONS.map(s => s.chord[0])).size, STATIONS.length)
+  assert.equal(new Set(STATIONS.map(s => s.lp)).size, STATIONS.length)
+  assert.deepEqual(stationChord(-1), stationChord(STATIONS.length - 1))
 })
 
 test('the text harp is higher at the top of the screen and stays in the scale', () => {

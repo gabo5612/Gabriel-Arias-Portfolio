@@ -31,13 +31,25 @@ const KEY = 'siteSound'
 const PAD = 0.055          // nivel del fondo
 const FIG_HZ = 30          // actualización de las voces continuas
 
-// Acorde de la estación i: tres notas de la escala, separadas por un grado,
-// desde una raíz distinta por estación. Intervalos de cuarta: suena abierto,
-// sin la carga de un mayor o un menor.
-export function stationChord(i) {
-  const base = [0, 2, 4, 1, 3, 5][((i % 6) + 6) % 6]
-  return [SEMIS[base], SEMIS[base + 2], SEMIS[base + 4]]
-}
+// La identidad sonora de cada estación. No basta con cambiar de acorde: con
+// notas vecinas y el mismo timbre, seis acordes de la misma escala suenan
+// casi igual. Cada estación tiene además su registro (raíz distinta, del Mi
+// grave del recorrido por la experiencia al La agudo del contacto), su brillo
+// (el corte del filtro) y su movimiento (pulso de amplitud, respiración del
+// filtro). Los semitonos son desde 220 Hz y todos caen en la pentatónica.
+// En el registro medio a propósito: por debajo de ~200 Hz los parlantes de un
+// portátil casi no suenan, y el fondo desaparecería justo donde más se usa.
+export const STATIONS = [
+  { chord: [0, 7, 12, 19], lp: 1000, breathe: 0.06, pulse: 0 },        // Home: La y quintas, abierto
+  { chord: [3, 7, 10, 15], lp: 1300, breathe: 0.08, pulse: 0 },        // About: Do–Mi–Sol, cálido y luminoso
+  { chord: [5, 10, 15, 22], lp: 2200, breathe: 0.18, pulse: 0 },       // Skills: cuartas, aireado y brillante
+  { chord: [-5, 0, 7, 10], lp: 650, breathe: 0.04, pulse: 0 },         // Experience: Mi grave, oscuro, lento
+  { chord: [10, 15, 19, 22], lp: 1600, breathe: 0.1, pulse: 2.4 },     // Projects: Sol, con pulso: hay cosas en marcha
+  { chord: [12, 19, 24, 27], lp: 2600, breathe: 0.12, pulse: 0.8 },    // Contact: La agudo, liviano, invita
+]
+const stationOf = i => STATIONS[((i % STATIONS.length) + STATIONS.length) % STATIONS.length]
+export const stationChord = i => stationOf(i).chord
+const padHz = semi => hz(semi + 12)
 
 // La altura de una palabra: arriba agudo, abajo grave, en el registro alto.
 export const wordNote = y01 => noteIn(1 - y01, 7, 15)
@@ -75,7 +87,7 @@ function build() {
   master = ctx.createGain(); master.gain.value = 0.8
   master.connect(comp); comp.connect(out); out.connect(ctx.destination)
   if (import.meta.env?.DEV) {
-    analyser = ctx.createAnalyser(); analyser.fftSize = 2048
+    analyser = ctx.createAnalyser(); analyser.fftSize = 8192
     out.connect(analyser)
   }
 
@@ -157,23 +169,42 @@ function noise() {
 // que lo hace respirar) y un filtro que un LFO muy lento abre y cierra.
 function makePad() {
   const g = ctx.createGain(); g.gain.value = 0
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700; lp.Q.value = 0.6
-  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.06
-  const lfoG = ctx.createGain(); lfoG.gain.value = 260
+  const st = stationOf(station)
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = st.lp; lp.Q.value = 0.6
+  const lfo = ctx.createOscillator(); lfo.frequency.value = st.breathe
+  const lfoG = ctx.createGain(); lfoG.gain.value = 300
   lfo.connect(lfoG); lfoG.connect(lp.frequency); lfo.start()
-  lp.connect(g)
+  // El pulso: un LFO de amplitud. trem.gain = 1 - prof/2 + seno·prof/2.
+  const trem = ctx.createGain(); trem.gain.value = 1
+  const pulse = ctx.createOscillator(); pulse.frequency.value = st.pulse || 1
+  const pulseG = ctx.createGain(); pulseG.gain.value = 0
+  pulse.connect(pulseG); pulseG.connect(trem.gain); pulse.start()
+  lp.connect(trem); trem.connect(g)
   g.connect(master)
   const s = ctx.createGain(); s.gain.value = 0.8; g.connect(s); s.connect(verb)
-  const oscs = stationChord(station).flatMap((semi, k) => [-5, 5].map(cents => {
+  const oscs = st.chord.flatMap((semi, k) => [-5, 5].map(cents => {
     const o = ctx.createOscillator()
     o.type = k === 0 ? 'triangle' : 'sine'
-    o.frequency.value = hz(semi)
+    o.frequency.value = padHz(semi)
     o.detune.value = cents
-    const og = ctx.createGain(); og.gain.value = k === 0 ? 0.32 : 0.22
+    const og = ctx.createGain(); og.gain.value = k === 0 ? 0.3 : 0.16
     o.connect(og); og.connect(lp); o.start()
     return { o, k }
   }))
-  return { g, lp, oscs }
+  return { g, lp, oscs, lfo, trem, pulse, pulseG }
+}
+
+// Lleva el fondo a la estación i: notas, brillo, respiración y pulso. `at` y
+// `tc` son cuándo empieza y cuánto tarda (constante de tiempo, en segundos).
+function applyStation(i, at, tc) {
+  const st = stationOf(i)
+  st.chord.forEach((semi, k) => pad.oscs.filter(v => v.k === k)
+    .forEach(v => v.o.frequency.setTargetAtTime(padHz(semi), at, tc)))
+  pad.lfo.frequency.setTargetAtTime(st.breathe, at, tc)
+  const depth = st.pulse ? 0.55 : 0
+  pad.trem.gain.setTargetAtTime(1 - depth / 2, at, tc)
+  pad.pulseG.gain.setTargetAtTime(depth / 2, at, tc)
+  if (st.pulse) pad.pulse.frequency.setTargetAtTime(st.pulse, at, tc)
 }
 
 // La figura bajo el cursor: aire con resonancia (un filtro estrecho sobre
@@ -213,7 +244,12 @@ export const sound = {
   async unlock() {
     if (!ctx && !build()) return
     if (ctx.state !== 'running' && on) { try { await ctx.resume() } catch { return } }
-    if (live()) setTarget(pad.g.gain, PAD, 1.2)
+    if (!live()) return
+    // Lo que se navegó antes de que hubiera sonido: el fondo arranca en la
+    // estación donde estás, no en la primera.
+    applyStation(station, ctx.currentTime, 0.05)
+    pad.lp.frequency.setTargetAtTime(stationOf(station).lp, ctx.currentTime, 0.05)
+    setTarget(pad.g.gain, PAD, 1.2)
   },
 
   setOn(next) {
@@ -234,9 +270,11 @@ export const sound = {
     }, 400)
     else {
       ctx.resume().then(() => {
+        applyStation(station, ctx.currentTime, 0.05)
+        pad.lp.frequency.setTargetAtTime(stationOf(station).lp, ctx.currentTime, 0.05)
         setTarget(pad.g.gain, PAD, 1.2)
         const t = ctx.currentTime + 0.05
-        stationChord(station).forEach((s, k) => tone(hz(s + 24), { at: t + k * 0.07, dur: 0.6, gain: 0.04, pan: k - 1, wet: 0.6 }))
+        stationChord(station).slice(0, 3).forEach((s, k) => tone(hz(s + 24), { at: t + k * 0.07, dur: 0.6, gain: 0.04, pan: k - 1, wet: 0.6 }))
       }).catch(() => {})
     }
   },
@@ -254,8 +292,7 @@ export const sound = {
   station(i) {
     station = i
     if (!ctx) return
-    stationChord(i).forEach((semi, k) => pad.oscs.filter(v => v.k === k)
-      .forEach(v => setTarget(v.o.frequency, hz(semi), 0.3)))
+    applyStation(i, ctx.currentTime, 0.3)
   },
 
   // Despegue hacia la estación `to`. El acorde se desliza durante el vuelo,
@@ -264,11 +301,11 @@ export const sound = {
     station = to
     if (!live()) return
     const t = ctx.currentTime, d = ms / 1000
-    stationChord(to).forEach((semi, k) => pad.oscs.filter(v => v.k === k)
-      .forEach(v => v.o.frequency.setTargetAtTime(hz(semi), t + d * 0.15, d * 0.22)))
+    applyStation(to, t + d * 0.15, d * 0.22)
+    // El filtro se abre a mitad de vuelo y aterriza en el brillo del destino.
     const f = pad.lp.frequency
     f.cancelScheduledValues(t); f.setValueAtTime(f.value, t)
-    f.linearRampToValueAtTime(2200, t + d * 0.5); f.linearRampToValueAtTime(700, t + d)
+    f.linearRampToValueAtTime(3200, t + d * 0.5); f.linearRampToValueAtTime(stationOf(to).lp, t + d)
 
     const n = noise()
     const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1
@@ -296,7 +333,7 @@ export const sound = {
   arrive(i) {
     if (!live()) return
     const t = ctx.currentTime
-    stationChord(i).forEach((s, k) => bell(hz(s + 12), t + k * 0.09, 0.05, (k - 1) * 0.45))
+    stationChord(i).forEach((s, k) => bell(padHz(s + 12), t + k * 0.09, 0.045, (k / 3 - 0.5) * 0.9))
   },
 
   // Chispas del título. Formar: suben y se aprietan hacia el final, como letras
@@ -316,7 +353,7 @@ export const sound = {
       })
     }
     // El título está entero: una nota final que lo asienta.
-    if (form) tone(hz(stationChord(station)[0] + 36), { at: t + d * 0.85, dur: 1.2, gain: 0.03, wet: 0.8, delay: 0.3 })
+    if (form) tone(padHz(stationChord(station)[0] + 24), { at: t + d * 0.85, dur: 1.2, gain: 0.03, wet: 0.8, delay: 0.3 })
   },
 
   // Clic sobre la figura: un golpe grave y el estallido de chispas.
@@ -390,6 +427,16 @@ export const sound = {
     let peak = 0
     for (const v of buf) peak = Math.max(peak, Math.abs(v))
     return peak
+  },
+  // Sólo en desarrollo: la frecuencia más fuerte de la salida, en Hz (para
+  // comprobar que el fondo cambia de estación a estación).
+  dominant() {
+    if (!analyser) return 0
+    const bins = new Float32Array(analyser.frequencyBinCount)
+    analyser.getFloatFrequencyData(bins)
+    let k = 1
+    for (let i = 1; i < bins.length; i++) if (bins[i] > bins[k]) k = i
+    return Math.round((k * ctx.sampleRate) / analyser.fftSize)
   },
   get state() { return ctx?.state ?? 'none' },
 }

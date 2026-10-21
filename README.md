@@ -95,7 +95,7 @@ el botón del altavoz en la barra, o el del panel de la cámara; se recuerda en 
 
 | Qué pasa | Qué suena |
 |---|---|
-| Estar en una estación | Un acorde de fondo propio de esa estación |
+| Estar en una estación | Un fondo propio: cada sección tiene su nota base, su brillo y su movimiento (Home La, About Do, Skills Re brillante, Experience Mi grave y oscuro, Projects Sol con pulso, Contact La agudo) — tabla `STATIONS` en `worldSound.js` |
 | Volar a otra | El acorde se desliza al de destino, aire que cruza de un oído al otro, un grave que empuja |
 | Llegar | Tres campanas con el acorde de la estación |
 | Título que se forma / se deshace | Chispas que suben / que bajan |
