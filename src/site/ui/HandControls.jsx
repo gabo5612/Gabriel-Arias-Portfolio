@@ -6,7 +6,7 @@ import { fromHand, releaseHand } from '../pointer'
 //
 //   palma abierta   swipe lateral = otra estación; mano baja o alta = scroll
 //   índice (lápiz)  cursor en la punta del dedo; pellizco = clic, o quedarse
-//                   3 s quieto sobre un link/botón (el anillo se va llenando)
+//                   2 s quieto sobre un link/botón (el anillo se va llenando)
 //
 // Las acciones pasan por el mismo `go` que el teclado y el clic va al mismo
 // elemento que recibiría el mouse, así que la mano no tiene reglas propias.
@@ -40,7 +40,7 @@ export default function HandControls({ signal, pages, state, go }) {
   useEffect(() => {
     const swipe = createSwipeDetector({ axes: 'x' })
     const pinch = createPinchClick()
-    const dwell = createDwell({ ms: 3000 })
+    const dwell = createDwell({ ms: 2000 })
     let raf = 0, last = performance.now(), mode = 'none'
     let flashTimer = 0, shown = '', hover = null, carry = 0
 
@@ -141,7 +141,7 @@ export default function HandControls({ signal, pages, state, go }) {
       const prev = pages[(state.page - 1 + N) % N].label
       const next = pages[(state.page + 1) % N].label
       if (mode === 'none') set('idle', 'Show your hand to the camera')
-      else if (mode === 'point') set('point', hover ? 'Hold still to open, or pinch to open now' : 'Point at a link. Pinch, or hold still for 3 seconds')
+      else if (mode === 'point') set('point', hover ? 'Hold still to open, or pinch to open now' : 'Point at a link. Pinch, or hold still for 2 seconds')
       else if (mode === 'closed') set('closed', 'Open your hand to move, or point your index to use it as a cursor')
       else if (scrolling) set('open', scrolling === 'down' ? 'Scrolling down' : 'Scrolling up', scrolling)
       else set('open', `Swipe for ${prev} or ${next}. Hold your hand low or high to scroll`)

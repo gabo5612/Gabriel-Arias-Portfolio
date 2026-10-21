@@ -451,7 +451,7 @@ p.projects__kind { margin: -12px 0 14px; }
 .hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(245, 165, 36, .35); }
 
 /* Mantener para abrir: un anillo exterior que se llena en sentido horario en
-   los 3 s. Es la única pista de que quedarse quieto hace algo, así que tiene
+   los 2 s. Es la única pista de que quedarse quieto hace algo, así que tiene
    que verse aunque el contador recién empiece. */
 .hand-cursor__dwell {
   position: absolute;
