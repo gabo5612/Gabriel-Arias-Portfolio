@@ -8,6 +8,9 @@ export const page = {
   scene: {
     // Muchos puntos sueltos que forman un sistema: una galaxia.
     shape: { type: 'galaxy' },
+    // Plana: girando sobre el eje vertical queda de canto, una raya. Gira
+    // sobre su propio eje, como una galaxia.
+    spin: 'z',
     palette: [0x2dd4bf, 0x7dd3fc, 0x38bdf8, 0x5eead4, 0xa5f3fc, 0x0ea5e9],
   },
 }

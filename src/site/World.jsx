@@ -290,6 +290,11 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           ty = mine ? hy * (onCam ? 0.4 : 0.15) : 0
         } else if (mine && onCam && s.source === 'hand') {
           tx = hx * Math.PI; ty = hy * Math.PI / 2
+        } else if (st.page.scene.spin === 'z') {
+          // Formas planas: el giro va al eje propio (z) y el vertical sólo
+          // se inclina con el puntero, para que nunca quede de canto.
+          st.spin += dt * 0.00007
+          tx = mine ? hx * 0.45 : 0; ty = mine ? hy * 0.25 : 0
         } else {
           st.spin += dt * 0.00007
           tx = st.spin + (mine ? hx * 0.45 : 0); ty = mine ? hy * 0.25 : 0
@@ -305,7 +310,8 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           else st.ux *= 0.985
         }
         st.ux = Math.max(-1.3, Math.min(1.3, st.ux))
-        st.inner.rotation.set(st.rotX + st.ux, st.rotY + st.uy, 0)
+        const rz = !st.flat && st.page.scene.spin === 'z' ? st.spin : 0
+        st.inner.rotation.set(st.rotX + st.ux, st.rotY + st.uy, rz)
         st.outer.scale.setScalar(scale)
         st.outer.updateMatrixWorld()
 

@@ -10,7 +10,8 @@ import * as contact from './Contact'
 // `page` (id, label, scene) y un componente por defecto, y una línea acá.
 //
 // scene.shape acepta cualquier spec de engine/shapes/sources.js, incluido
-// { type: 'model', url } para traer un diseño hecho en Blender.
+// { type: 'model', url } para traer un diseño hecho en Blender. scene.spin:
+// 'z' para formas planas, que girando sobre el eje vertical quedan de canto.
 const modules = [home, about, skills, experience, projects, contact]
 
 export const PAGES = modules.map(m => ({ ...m.page, Component: m.default }))

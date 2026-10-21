@@ -108,7 +108,11 @@
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 4vh 12px 6vh 0;
+  /* Aire a los lados con margen negativo: la distorsión del texto empuja las
+     palabras hasta ~20 px fuera de su sitio, y un contenedor con scroll recorta
+     todo lo que sale de su caja. El texto queda alineado donde estaba. */
+  padding: 4vh 28px 6vh;
+  margin-inline: -28px;
   scrollbar-width: thin;
   scrollbar-color: rgba(236, 232, 222, .18) transparent;
   /* El texto se funde en los bordes en vez de cortarse contra una línea. */
@@ -512,7 +516,7 @@ p.projects__kind { margin: -12px 0 14px; }
     background: linear-gradient(180deg, rgba(5, 7, 13, 0) 30%, rgba(5, 7, 13, .78) 50%, rgba(5, 7, 13, .94) 100%);
   }
   .site[data-page="home"] .site__main { top: 38vh; }
-  .panel__scroll { padding: 2vh 0 4vh; }
+  .panel__scroll { padding: 2vh 16px 4vh; margin-inline: -16px; }
   .panel__scroll > * { margin-block: 0 auto; }
   .home__name { font-size: clamp(3.2rem, 15vw, 5rem); margin-bottom: 18px; }
   .home__tagline { margin-bottom: 24px; }
