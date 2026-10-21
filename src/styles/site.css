@@ -455,7 +455,7 @@ p.projects__kind { margin: -12px 0 14px; }
 .hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(245, 165, 36, .35); }
 
 /* Mantener para abrir: un anillo exterior que se llena en sentido horario en
-   los 1.5 s. Es la única pista de que quedarse quieto hace algo, así que tiene
+   los 1.25 s. Es la única pista de que quedarse quieto hace algo, así que tiene
    que verse aunque el contador recién empiece. */
 .hand-cursor__dwell {
   position: absolute;
@@ -476,6 +476,74 @@ p.projects__kind { margin: -12px 0 14px; }
 .site .is-hand-hover { outline: 2px solid rgba(245, 165, 36, .7); outline-offset: 3px; }
 .site .is-hand-press { transform: scale(.96); transition: transform 120ms ease; }
 .projects__row.is-hand-hover { outline: none; padding-left: 12px; background: linear-gradient(90deg, rgba(245, 165, 36, .1), transparent); }
+
+/* ── Flechas de borde (modo puntero) ──────────────────────────────────────
+   Franjas altas pegadas a los bordes: el cursor de la mano llega al borde de
+   la pantalla con sólo llevar el dedo al borde del cuadro, así que son el
+   blanco más fácil que hay. Dejar el dedo encima llena el anillo y cambia de
+   página. */
+.edge-nav { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.edge-nav__btn {
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  color: var(--paper);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease, background 200ms ease, transform 200ms ease;
+}
+.edge-nav__btn--prev {
+  left: 0;
+  border-radius: 0 18px 18px 0;
+  background: linear-gradient(90deg, rgba(245, 165, 36, .16), transparent);
+  transform: translateX(-12px);
+}
+.edge-nav__btn--next {
+  right: 0;
+  border-radius: 18px 0 0 18px;
+  background: linear-gradient(270deg, rgba(245, 165, 36, .16), transparent);
+  transform: translateX(12px);
+}
+/* Arriba/abajo: bandas horizontales sobre el lado del mundo, no al centro —
+   abajo al centro vive la guía del gesto. */
+.edge-nav__btn--up, .edge-nav__btn--down {
+  top: auto; bottom: auto;
+  left: 60%; right: 7%;
+  width: auto;
+  height: 64px;
+  flex-direction: row;
+  gap: 10px;
+}
+.edge-nav__btn--up {
+  top: var(--nav-h);
+  border-radius: 0 0 18px 18px;
+  background: linear-gradient(180deg, rgba(245, 165, 36, .16), transparent);
+  transform: translateY(-12px);
+}
+.edge-nav__btn--down {
+  bottom: var(--route-h);
+  border-radius: 18px 18px 0 0;
+  background: linear-gradient(0deg, rgba(245, 165, 36, .16), transparent);
+  transform: translateY(12px);
+}
+.edge-nav__btn--up .edge-nav__label, .edge-nav__btn--down .edge-nav__label { writing-mode: horizontal-tb; transform: none; }
+.edge-nav__btn--up.is-hand-hover { background: linear-gradient(180deg, rgba(245, 165, 36, .38), transparent); }
+.edge-nav__btn--down.is-hand-hover { background: linear-gradient(0deg, rgba(245, 165, 36, .38), transparent); }
+.edge-nav[data-on="1"] .edge-nav__btn { opacity: 1; pointer-events: auto; transform: none; }
+.edge-nav__arrow { font-size: 2.6rem; line-height: 1; color: var(--amber); }
+.edge-nav__label { font-size: .78rem; color: var(--fog); writing-mode: vertical-rl; }
+.edge-nav__btn--prev .edge-nav__label { transform: rotate(180deg); }
+.edge-nav__btn.is-hand-hover { outline: none; }
+.edge-nav__btn--prev.is-hand-hover { background: linear-gradient(90deg, rgba(245, 165, 36, .38), transparent); }
+.edge-nav__btn--next.is-hand-hover { background: linear-gradient(270deg, rgba(245, 165, 36, .38), transparent); }
+.edge-nav__btn.is-hand-hover .edge-nav__label { color: var(--paper); }
 
 /* La guía del gesto cambia con el modo: apuntar no muestra el medidor del
    swipe, y el scroll enciende la flecha del sentido. */

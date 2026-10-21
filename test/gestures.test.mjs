@@ -145,3 +145,12 @@ test('nothing under the cursor means no progress', () => {
   const d = createDwell()
   assert.deepEqual(d.push(null, 0, 0, 5000), { progress: 0, fire: false })
 })
+
+test('the site’s more sensitive swipe catches a moderate sweep the default misses', () => {
+  const SITE = { dx: 0.36, ms: 320 }
+  const moderate = [{ x: -0.2, y: 0 }, { x: 0.2, y: 0 }]
+  assert.equal(sweep(createSwipeDetector(), ...moderate, 300).swipes.length, 0)
+  assert.equal(sweep(createSwipeDetector(SITE), ...moderate, 300).swipes.length, 1)
+  // Y sigue sin confundir una deriva lenta con un swipe.
+  assert.equal(sweep(createSwipeDetector(SITE), { x: -0.9, y: 0 }, { x: 0.9, y: 0 }, 2000).swipes.length, 0)
+})

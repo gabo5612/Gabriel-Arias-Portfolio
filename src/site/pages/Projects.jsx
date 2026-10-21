@@ -8,6 +8,9 @@ export const page = {
   id: 'projects',
   label: 'Projects',
   items: projects.map(p => p.id),
+  // Nombre legible de un ítem: lo usan las flechas de la mano para decir a
+  // dónde llevan.
+  itemLabel: id => byId[id]?.title ?? id,
   scene: {
     shape: { type: 'cube' },
     palette: [0xf5a524, 0x2dd4bf, 0xf97316, 0x7dd3fc, 0xfbbf24, 0x4ade80],
