@@ -96,7 +96,14 @@ export default function HandControls({ signal, pages, state, go }) {
       // ── Cursor ────────────────────────────────────────────────────────────
       const cur = cursorRef.current
       if (mode === 'point') {
-        const r = pinch.push(s.pinch ?? 0, (s.px ?? 0.5) * window.innerWidth, (s.py ?? 0.5) * window.innerHeight)
+        // Hasta el último píxel visible, no hasta innerWidth: ése ya está
+        // fuera de la pantalla y elementFromPoint no encontraría la flecha
+        // del borde, que es justo adonde lleva el dedo al extremo del cuadro.
+        const r = pinch.push(
+          s.pinch ?? 0,
+          (s.px ?? 0.5) * (window.innerWidth - 1),
+          (s.py ?? 0.5) * (window.innerHeight - 1),
+        )
         fromHand(r.x, r.y, now)
         cur.style.transform = `translate3d(${r.x}px, ${r.y}px, 0)`
         cur.style.setProperty('--pinch', (s.pinch ?? 0).toFixed(3))

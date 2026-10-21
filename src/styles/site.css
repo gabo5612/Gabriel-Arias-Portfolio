@@ -478,73 +478,94 @@ p.projects__kind { margin: -12px 0 14px; }
 .projects__row.is-hand-hover { outline: none; padding-left: 12px; background: linear-gradient(90deg, rgba(236, 232, 222, .05), transparent); }
 
 /* ── Flechas de borde (modo puntero) ──────────────────────────────────────
-   Franjas altas pegadas a los bordes: el cursor de la mano llega al borde de
-   la pantalla con sólo llevar el dedo al borde del cuadro, así que son el
-   blanco más fácil que hay. Dejar el dedo encima llena el anillo y cambia de
-   página. */
+   Cápsulas chicas y discretas: a los costados a media altura (el cursor de la
+   mano llega al borde con sólo llevar el dedo al borde del cuadro), y arriba/
+   abajo sobre el lado del mundo en el detalle de un proyecto. Dejar el dedo
+   encima llena el anillo y cambia. Son pista, no protagonistas. */
 .edge-nav { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
 .edge-nav__btn {
   position: absolute;
-  top: 22%;
-  bottom: 22%;
-  width: 76px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 0;
-  color: var(--paper);
+  border: 1px solid rgba(236, 232, 222, .1);
+  border-radius: 999px;
+  background: rgba(236, 232, 222, .035);
+  color: var(--fog);
+  font-size: .75rem;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 220ms ease, background 200ms ease, transform 200ms ease;
+  transition: opacity 220ms ease, background 200ms ease, border-color 200ms ease, transform 200ms ease;
 }
-.edge-nav__btn--prev {
-  left: 0;
-  border-radius: 0 18px 18px 0;
-  background: linear-gradient(90deg, rgba(236, 232, 222, .04), transparent);
-  transform: translateX(-12px);
-}
-.edge-nav__btn--next {
-  right: 0;
-  border-radius: 18px 0 0 18px;
-  background: linear-gradient(270deg, rgba(236, 232, 222, .04), transparent);
-  transform: translateX(12px);
-}
-/* Arriba/abajo: bandas horizontales sobre el lado del mundo, no al centro —
-   abajo al centro vive la guía del gesto. */
-.edge-nav__btn--up, .edge-nav__btn--down {
-  top: auto; bottom: auto;
-  left: 60%; right: 7%;
-  width: auto;
-  height: 64px;
-  flex-direction: row;
-  gap: 10px;
-}
-.edge-nav__btn--up {
-  top: var(--nav-h);
-  border-radius: 0 0 18px 18px;
-  background: linear-gradient(180deg, rgba(236, 232, 222, .04), transparent);
-  transform: translateY(-12px);
-}
-.edge-nav__btn--down {
-  bottom: var(--route-h);
-  border-radius: 18px 18px 0 0;
-  background: linear-gradient(0deg, rgba(236, 232, 222, .04), transparent);
-  transform: translateY(12px);
-}
-.edge-nav__btn--up .edge-nav__label, .edge-nav__btn--down .edge-nav__label { writing-mode: horizontal-tb; transform: none; }
-.edge-nav__btn--up.is-hand-hover { background: linear-gradient(180deg, rgba(236, 232, 222, .1), transparent); }
-.edge-nav__btn--down.is-hand-hover { background: linear-gradient(0deg, rgba(236, 232, 222, .1), transparent); }
 .edge-nav[data-on="1"] .edge-nav__btn { opacity: 1; pointer-events: auto; transform: none; }
-.edge-nav__arrow { font-size: 2.2rem; line-height: 1; color: rgba(236, 232, 222, .45); transition: color 200ms ease; }
-.edge-nav__btn.is-hand-hover .edge-nav__arrow { color: rgba(236, 232, 222, .85); }
-.edge-nav__label { font-size: .78rem; color: var(--fog); writing-mode: vertical-rl; }
-.edge-nav__btn--prev .edge-nav__label { transform: rotate(180deg); }
-.edge-nav__btn.is-hand-hover { outline: none; }
-.edge-nav__btn--prev.is-hand-hover { background: linear-gradient(90deg, rgba(236, 232, 222, .1), transparent); }
-.edge-nav__btn--next.is-hand-hover { background: linear-gradient(270deg, rgba(236, 232, 222, .1), transparent); }
-.edge-nav__btn.is-hand-hover .edge-nav__label { color: var(--paper); }
+.edge-nav__btn.is-hand-hover {
+  outline: none;
+  background: rgba(236, 232, 222, .09);
+  border-color: rgba(236, 232, 222, .25);
+  color: var(--paper);
+}
+.edge-nav__arrow { position: relative; font-size: 1.1rem; line-height: 1; color: inherit; }
+
+/* Costados: el botón es una zona invisible pegada al borde, más grande que lo
+   que se ve: el cursor de la mano llega justo hasta x = 0, y una cápsula
+   separada del borde quedaría fuera de su alcance. Lo visible es ::before. */
+.edge-nav__btn--prev, .edge-nav__btn--next {
+  top: 50%;
+  width: 60px;
+  height: 150px;
+  margin-top: -75px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.edge-nav__btn--prev { left: 0; transform: translateX(-8px); }
+.edge-nav__btn--next { right: 0; transform: translateX(8px); }
+.edge-nav__btn--prev::before, .edge-nav__btn--next::before {
+  content: '';
+  position: absolute;
+  top: 27px;
+  width: 34px;
+  height: 96px;
+  border: 1px solid rgba(236, 232, 222, .1);
+  border-radius: 999px;
+  background: rgba(236, 232, 222, .035);
+  transition: background 200ms ease, border-color 200ms ease;
+}
+.edge-nav__btn--prev::before { left: 10px; }
+.edge-nav__btn--next::before { right: 10px; }
+.edge-nav__btn--prev { padding-right: 6px; }
+.edge-nav__btn--next { padding-left: 6px; }
+.edge-nav__btn--prev.is-hand-hover, .edge-nav__btn--next.is-hand-hover { background: none; }
+.edge-nav__btn--prev.is-hand-hover::before, .edge-nav__btn--next.is-hand-hover::before {
+  background: rgba(236, 232, 222, .09);
+  border-color: rgba(236, 232, 222, .25);
+}
+.edge-nav__btn--prev .edge-nav__label,
+.edge-nav__btn--next .edge-nav__label {
+  position: absolute;
+  top: 50%;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  translate: 0 -50%;
+}
+.edge-nav__btn--prev .edge-nav__label { left: 52px; }
+.edge-nav__btn--next .edge-nav__label { right: 52px; }
+.edge-nav__btn.is-hand-hover .edge-nav__label { opacity: 1; }
+
+/* Arriba/abajo: píldora horizontal centrada sobre el mundo, no al centro de
+   la pantalla — abajo al centro vive la guía del gesto. `translate` va aparte
+   de `transform` para que la animación de entrada no pise el centrado. */
+.edge-nav__btn--up, .edge-nav__btn--down {
+  left: 76%;
+  translate: -50% 0;
+  height: 32px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.edge-nav__btn--up { top: calc(var(--nav-h) + 8px); transform: translateY(-8px); }
+.edge-nav__btn--down { bottom: calc(var(--route-h) + 8px); transform: translateY(8px); }
 
 /* La guía del gesto cambia con el modo: apuntar no muestra el medidor del
    swipe, y el scroll enciende la flecha del sentido. */
