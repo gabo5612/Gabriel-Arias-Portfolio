@@ -173,8 +173,12 @@ await check('open palm held low scrolls the text, high scrolls back', async page
 
 await check('open-palm swipe changes page', async page => {
   await open(page, '#/about')
+  // La mano aparece a un lado y se queda quieta: si un cuadro se traba, el
+  // salto de "sin mano" a x = -0.3 podría leerse como un swipe. Se espera a
+  // que se asiente y se comprueba que no movió nada antes de barrer.
   await pose(page, { ...OPEN, x: -0.3 })
-  await wait(500)
+  await wait(1100)
+  assert((await hash(page)) === '#/about', `the hand moved the page just by appearing (${await hash(page)})`)
   await pose(page, { ...OPEN, x: 0.3 })
   await waitHash(page, '#/skills')
 })
@@ -243,6 +247,38 @@ await check('tilting the phone drives the camera', async page => {
   }
   const s = await page.evaluate(() => window.__depth.read())
   assert(s.source === 'gyro' && s.x > 0.3, `source ${s.source}, x ${s.x?.toFixed(2)}`)
+})
+
+// ── Sonido ──────────────────────────────────────────────────────────────────
+// No se puede escuchar, pero sí medir: el pico de la salida (un analizador que
+// existe sólo en desarrollo) sube al volar y al tocar la figura, nunca satura,
+// y el botón lo apaga del todo.
+const peakDuring = (page, ms) => page.evaluate(ms => new Promise(r => {
+  let p = 0
+  const id = setInterval(() => { p = Math.max(p, window.__sound.level()) }, 20)
+  setTimeout(() => { clearInterval(id); r(p) }, ms)
+}), ms)
+
+await check('sound: wakes on the first click, reacts to flight and poke, turns off', async page => {
+  await open(page)
+  await page.mouse.click(20, 880)                      // el primer gesto, en el vacío
+  await wait(1500)
+  const pad = await peakDuring(page, 800)
+  await page.keyboard.press('ArrowRight')
+  const flight = await peakDuring(page, 2200)
+  await wait(800)
+  await page.mouse.move(1040, 430); await wait(300)
+  await page.mouse.click(1040, 430)
+  const poke = await peakDuring(page, 600)
+  assert(pad > 0.01, `silent background (${pad.toFixed(3)})`)
+  assert(flight > pad * 1.5, `flight ${flight.toFixed(3)} vs background ${pad.toFixed(3)}`)
+  assert(poke > pad * 1.5, `poke ${poke.toFixed(3)} vs background ${pad.toFixed(3)}`)
+  assert(Math.max(flight, poke) < 0.9, 'output close to clipping')
+  await page.click('.nav__sound')
+  await wait(800)
+  const off = await peakDuring(page, 400)
+  assert(off === 0, `still sounding after turning it off (${off})`)
+  assert((await page.getAttribute('.nav__sound', 'aria-pressed')) === 'false', 'button not pressed=false')
 })
 
 // ── Otros mundos ────────────────────────────────────────────────────────────

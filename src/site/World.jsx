@@ -9,6 +9,7 @@ import { handMode, twoHands } from '../engine/gestures'
 import { pointer } from './pointer'
 import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
+import { sound } from '../engine/audio/worldSound'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
@@ -168,6 +169,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       return out
     }
     stationLook(active, look)
+    sound.station(active)
 
     const go = (page, dir) => {
       const now = performance.now()
@@ -188,6 +190,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       flightAt = now
       lookFrom.copy(look)
       active = page
+      sound.fly(travelDir, flightMs, page)
     }
 
     // El título del panel visible (la página en curso o el detalle abierto).
@@ -213,6 +216,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           to[i * 3 + 2] = from[i * 3 + 2] - 80 - Math.random() * 260
         }
       }, st.page.scene.palette, now, 900)
+      sound.sparkle('dissolve', 900)
       return el.closest('.panel')
     }
 
@@ -240,6 +244,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         el.style.transition = 'opacity .5s ease'
         el.style.opacity = ''
       })
+      sound.sparkle('form', 1300)
       return true
     }
 
@@ -284,7 +289,11 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     const hit = new Vector3(), toCamN = new Vector3(), fieldT = new Vector3()
     let drag = null
 
-    const poke = st => { if (st.pos) st.cloud.morphTo(st.pos, null, performance.now(), { burst: 80 }) }
+    const poke = st => {
+      if (!st.pos) return
+      st.cloud.morphTo(st.pos, null, performance.now(), { burst: 80 })
+      sound.poke()
+    }
     const onDown = e => {
       const st = stations[active]
       if (e.button !== 0 || !st.over || !e.target.closest?.('.world')) return
@@ -326,6 +335,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     // Dos manos abiertas: el par de manos al empezar el gesto, y el zoom/giro
     // que tenía la figura en ese momento, para que el gesto sea relativo.
     let pair = null
+    let wasFlying = false
 
     stage.start((now, dt) => {
       const s = signal.current
@@ -339,6 +349,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       const flying = raw < 1
       const e = easeInOut(raw)
       t = fromT + (toT - fromT) * e
+      // Se llega cuando el vuelo termina, no cuando empieza el siguiente.
+      if (wasFlying && !flying) sound.arrive(active)
+      wasFlying = flying
       const speed = flying ? Math.sin(Math.PI * raw) : 0
       dust.uniforms.uSpeed.value += (speed - dust.uniforms.uSpeed.value) * 0.15
       dust.uniforms.uTime.value = now
@@ -492,6 +505,10 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       }
       formP.update(now)
       dissolveP.update(now)
+
+      // El sonido de la figura: cuánto está el cursor encima, dónde, y qué
+      // tan rápido gira por el arrastre (o la inercia que dejó).
+      sound.figure(a.over || drag ? 1 : 0, pointer.x / w, pointer.y / h, Math.hypot(a.vx, a.vy), a.zoom)
 
       travelRef.current?.(wrap01(t / N), flying)
     })

@@ -7,6 +7,7 @@ import { profile } from '../content'
 import { PAGES } from './pages'
 import { useNavigation } from './useNavigation'
 import { useTextLens } from './useTextLens'
+import { useSiteSound, useSound } from './useSiteSound'
 import { calibrated } from '../engine/handProfile'
 import Nav from './ui/Nav'
 import RouteMap from './ui/RouteMap'
@@ -42,7 +43,11 @@ const FAKE_HUD = import.meta.env.DEV && new URLSearchParams(window.location.sear
 
 export default function App() {
   const depth = useDepthSignal()
-  const cam = useCameraControl(depth)
+  // En el sitio la mano no tiene voces propias (el zumbido por dedos del
+  // lab): el mundo ya suena con lo que la mano hace, y hay un solo botón.
+  const cam = useCameraControl({ ...depth, voices: false })
+  const snd = useSound()
+  useSiteSound()
   const tilt = useTilt(depth)
   const { state, dir, go } = useNavigation(PAGES)
   const page = PAGES[state.page]
@@ -121,15 +126,15 @@ export default function App() {
           para diseñarlo sin encender la cámara. */}
       {import.meta.env.DEV && !cam.camOn && FAKE_HUD && (
         <Suspense fallback={null}>
-          <PrivacyHUD stats={FAKE_HUD} video={null} mode="hand" muted={false}
-            onMute={() => {}} onStop={() => {}}
+          <PrivacyHUD stats={FAKE_HUD} video={null} mode="hand" muted={!snd.on}
+            onMute={snd.toggle} onStop={() => {}}
             onCalibrate={() => setCalibrating(true)} calibrated={calibrated} />
         </Suspense>
       )}
       {cam.camOn && (
         <Suspense fallback={null}>
           <PrivacyHUD stats={cam.stats} video={cam.video} mode={cam.mode}
-            muted={cam.muted} onMute={cam.toggleMute} onStop={cam.stop}
+            muted={!snd.on} onMute={snd.toggle} onStop={cam.stop}
             onCalibrate={() => setCalibrating(true)} calibrated={calibrated} />
         </Suspense>
       )}

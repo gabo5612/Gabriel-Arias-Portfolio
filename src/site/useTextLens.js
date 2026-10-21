@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { fromMouse, pointer } from './pointer'
+import { sound } from '../engine/audio/worldSound'
 
 // La lupa: las palabras cerca del cursor (mouse o dedo) se apartan de él, se
 // tuercen y se encienden. Cada palabra del panel es un <span class="w"> (lo genera <Rich>),
@@ -45,6 +46,9 @@ export function useTextLens(rootRef, enabled = true) {
     // Las animaciones de entrada mueven el panel: se re-mide un rato después.
     let settle = setInterval(() => { dirty = true }, 700)
 
+    // La palabra más cerca del cursor. Cuando cambia, la lupa toca una nota:
+    // pasar el cursor por un párrafo suena como pasar el dedo por un arpa.
+    let best = null, lastPluck = 0
     let raf = 0
     const tick = () => {
       raf = requestAnimationFrame(tick)
@@ -54,6 +58,7 @@ export function useTextLens(rootRef, enabled = true) {
       const px = pointer.x, py = pointer.y
 
       const next = new Map()
+      let top = null, topT = 0.55
       if (R) {
         for (let i = 0; i < cache.length; i++) {
           const c = cache[i]
@@ -67,9 +72,17 @@ export function useTextLens(rootRef, enabled = true) {
           // ante un imán. Justo encima del cursor la dirección no existe; se
           // empuja hacia arriba para que la palabra no tiemble entre lados.
           const inv = d > 1 ? 1 / d : 0
-          next.set(words[i], [k * k * (3 - 2 * k), d > 1 ? ex * inv : 0, d > 1 ? ey * inv : -1])
+          const t = k * k * (3 - 2 * k)
+          next.set(words[i], [t, d > 1 ? ex * inv : 0, d > 1 ? ey * inv : -1])
+          if (t > topT) { topT = t; top = i }
         }
       }
+      const now = performance.now()
+      if (top !== null && words[top] !== best && now - lastPluck > 45) {
+        best = words[top]; lastPluck = now
+        const c = cache[top]
+        sound.pluck((c.y - dy) / window.innerHeight, (c.x / window.innerWidth) * 2 - 1)
+      } else if (top === null) best = null
       for (const w of lit) {
         if (next.has(w)) continue
         w.style.removeProperty('--t'); w.style.removeProperty('--dx'); w.style.removeProperty('--dy')

@@ -7,7 +7,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // Recibe lo que devuelve useDepthSignal(): la señal es una sola por página, y
 // quien la crea decide quién más la lee.
 
-export function useCameraControl({ signal, reduced, activateCamera, deactivate }) {
+// voices: false deja la cámara sin las voces por dedo (el sitio tiene su
+// propio sonido, engine/audio/worldSound.js).
+export function useCameraControl({ signal, reduced, activateCamera, deactivate, voices = true }) {
   const [canTrack, setCanTrack] = useState(false)
   // La mano manda por defecto: barre mucho más rango que la cabeza, así que el
   // efecto se nota sin que nadie tenga que adivinar qué hacer.
@@ -52,6 +54,7 @@ export function useCameraControl({ signal, reduced, activateCamera, deactivate }
       setCamOn(true)
       // El audio va con la cámara y por el mismo import diferido: quien no
       // active el tracking no descarga ni ejecuta nada de esto.
+      if (!voices) return
       if (!voicesRef.current) {
         const { createHeroVoices } = await import('../audio/heroVoices')
         voicesRef.current = createHeroVoices()
@@ -67,7 +70,7 @@ export function useCameraControl({ signal, reduced, activateCamera, deactivate }
     } finally {
       setBusy(false)
     }
-  }, [activateCamera, signal, muted])
+  }, [activateCamera, signal, muted, voices])
 
   const toggle = useCallback(() => {
     if (camOn) { stop(); return }

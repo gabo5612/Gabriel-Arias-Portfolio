@@ -90,7 +90,25 @@
   color: var(--paper);
   background: rgba(236, 232, 222, .08);
 }
-.nav__track { margin-left: auto; }
+.nav__sound { margin-left: auto; }
+.nav__track { margin-left: -20px; }
+.sound-btn {
+  display: grid;
+  place-items: center;
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  color: var(--fog);
+  background: transparent;
+  border: 1px solid rgba(236, 232, 222, .12);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.sound-btn:hover { color: var(--paper); border-color: rgba(236, 232, 222, .3); }
+.sound-btn[aria-pressed="true"] { color: var(--paper); }
+.sound-btn:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+/* Las ondas laten despacio mientras suena: dice que el sonido está vivo. */
+.sound-btn__waves { animation: sound-breathe 2.4s ease-in-out infinite; transform-origin: 9px 9px; }
+@keyframes sound-breathe { 50% { opacity: .45; } }
 .hero__track--compact { padding: 8px 14px; font-size: .82rem; }
 
 /* ── Panel ────────────────────────────────────────────────────────────── */
@@ -690,12 +708,14 @@ p.projects__kind { margin: -12px 0 14px; }
 }
 
 @media (max-width: 480px) {
-  .nav__track { padding: 7px 11px; }
+  .nav__track { padding: 7px 11px; margin-left: 0; }
+  .sound-btn { width: 32px; height: 32px; }
   .route__step { font-size: .82rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .home__caret { animation: none; }
+  .sound-btn__waves { animation: none; }
   .w { transform: none; transition: none; }
   .projects__row { transition: none; }
 }

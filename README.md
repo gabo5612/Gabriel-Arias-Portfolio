@@ -87,6 +87,29 @@ frente (`face: true` evita que giren hasta quedar de canto).
   desdoblan en rojo/cian. `site/useTextLens.js` escribe `--t`, `--dx` y `--dy` por palabra;
   la fuerza (`--push`, `--twist`, `--split`) se ajusta en `site.css`.
 
+### Sonido
+
+Todo sintetizado en vivo con Web Audio (`engine/audio/worldSound.js`): cero archivos, cero
+peticiones. Despierta con el primer clic o tecla (el navegador no deja antes) y se apaga con
+el botón del altavoz en la barra, o el del panel de la cámara; se recuerda en este navegador.
+
+| Qué pasa | Qué suena |
+|---|---|
+| Estar en una estación | Un acorde de fondo propio de esa estación |
+| Volar a otra | El acorde se desliza al de destino, aire que cruza de un oído al otro, un grave que empuja |
+| Llegar | Tres campanas con el acorde de la estación |
+| Título que se forma / se deshace | Chispas que suben / que bajan |
+| Cursor sobre la figura | Un soplo que canta según la posición; más fuerte si la girás rápido |
+| Clic en la figura | Un golpe grave y un estallido de chispas |
+| Cursor sobre el texto | Un arpa: cada palabra es una nota, más aguda cuanto más arriba |
+| Algo clicable / clic | Un tic / dos notas que suben (también con la mano) |
+| Anillo de espera del dedo | Una nota que sube escalón a escalón |
+| Dos manos | Separarlas abre el fondo, juntarlas lo apaga |
+
+Todo está en la misma pentatónica (`audio/scale.js`), así que nada choca con nada, y comparte
+una reverb y un eco sintéticos: los sonidos sueltos parecen ocurrir en el mismo lugar. La
+pestaña oculta suspende el audio. En el lab siguen las voces por dedo (`heroVoices.js`).
+
 **Probar sin webcam (sólo en `npm run dev`):**
 
 ```js
@@ -99,10 +122,12 @@ window.__depth.pose({ pinch: 1 })                                // clic
 
 `npm run e2e` levanta Vite en modo dev (puerto 5191), abre Chromium headless con WebGL por
 software y recorre el sitio con la mano simulada por `window.__depth` (sólo existe en dev).
-19 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
+20 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
 de partículas, lupa de texto, agarre de la figura, scroll/swipe/pellizco/espera con la mano,
 flechas de borde, dos manos, calibración completa, giroscopio, reduced motion, móvil, y que un
-recorrido entero no haga peticiones fuera del sitio (fuentes aparte). Falla también ante
+recorrido entero no haga peticiones fuera del sitio (fuentes aparte). El sonido no se
+escucha pero se mide: un analizador (sólo en dev) comprueba que el vuelo y el clic en la
+figura suben el nivel, que nada satura y que el botón lo deja en silencio exacto. Falla también ante
 cualquier error de consola o respuesta ≥ 400.
 
 Playwright no es dependencia: `npm i --no-save playwright@1.63.0`. Si su Chromium no está
@@ -122,7 +147,8 @@ src/
     pointCloud.js    nube morfable: forma y paleta viajan punto a punto
     dust.js          polvo alrededor del circuito (la sensación de velocidad)
     shapes/          procedural.js (7 formas) y sources.js (procedural | text | model)
-    audio/, ui/      voces Web Audio, PrivacyHUD, TrackButton
+    audio/           worldSound (el sonido del sitio), heroVoices (lab), scale (la pentatónica)
+    ui/              PrivacyHUD, TrackButton, TiltButton
   content/           lo que dice el sitio
     data/*.json      GENERADO por `npm run sync` desde el portfolio — no editar
     profile.js       lo que vive dentro de componentes del portfolio (bio, contacto)
@@ -132,7 +158,8 @@ src/
     useNavigation.js teclado, rueda, touch, historial
     World.jsx        el circuito, las estaciones y el vuelo
     pointer.js       un solo puntero (mouse o dedo) para la lupa
-    useTextLens.js   la lupa de texto
+    useTextLens.js   la lupa de texto (y el arpa)
+    useSiteSound.js  despertar/silenciar el audio, tic y clic de lo clicable
     ui/              Nav, RouteMap (el circuito visto desde arriba), HandControls
   lab/               los experimentos originales del hero, intactos
 ```

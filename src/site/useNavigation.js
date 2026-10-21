@@ -12,6 +12,7 @@ import { parseHash, same, step, toHash } from './router'
 const SCROLLER = '[data-scroll]'
 const WHEEL_GAP = 260      // ms sin eventos = empieza otro gesto de rueda
 const WHEEL_DIST = 70      // recorrido acumulado que dispara
+const WHEEL_LOCK = 900     // tras cambiar de página, la rueda no vuelve a disparar antes
 
 function isTyping(el) {
   return el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))
@@ -92,12 +93,17 @@ export function useNavigation(pages, { onChange } = {}) {
   // estaciones. Y si el gesto empezó con el panel pudiendo desplazarse, es del
   // panel entero, aunque llegue al borde a mitad de camino.
   useEffect(() => {
-    let last = 0, acc = 0, fired = false, owned = false
+    let last = 0, acc = 0, fired = false, owned = false, firedAt = -Infinity
     const onWheel = e => {
       if (e.ctrlKey) return                     // pinch-zoom del trackpad
       const now = performance.now()
       const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
-      if (now - last > WHEEL_GAP) {
+      // El hueco entre eventos se mide en tiempo de reloj, y justo después de
+      // cambiar de página el hilo principal puede trabarse (monta el panel, el
+      // mundo arma la figura): los eventos del MISMO gesto llegan con un hueco
+      // artificial y parecerían otro gesto. Hasta WHEEL_LOCK después de
+      // disparar, todo es continuación.
+      if (now - last > WHEEL_GAP && now - firedAt > WHEEL_LOCK) {
         acc = 0; fired = false
         owned = canScroll(e.target.closest?.(SCROLLER), e.deltaY)
       }
@@ -105,7 +111,7 @@ export function useNavigation(pages, { onChange } = {}) {
       if (owned || fired) return
       acc += d
       if (Math.abs(acc) > WHEEL_DIST) {
-        fired = true
+        fired = true; firedAt = now
         go({ type: 'page', dir: acc > 0 ? 1 : -1 })
       }
     }

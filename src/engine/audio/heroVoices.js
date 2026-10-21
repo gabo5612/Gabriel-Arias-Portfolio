@@ -8,12 +8,7 @@
 // temblor del tracker en desafinación; sobre una escala pentatónica el mismo
 // temblor sólo desliza entre notas que ya suenan bien juntas.
 
-// La menor pentatónica, de La2 a La5, en semitonos desde 110 Hz.
-// Pentatónica a propósito: no tiene semitonos, así que CUALQUIER par de notas
-// de esta tabla es consonante. Con dos manos sonando a la vez eso no es un
-// lujo — es lo que impide que un gesto cualquiera produzca un choque.
-const SEMIS = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24, 27, 29, 31, 34, 36]
-const NOTES = SEMIS.map(n => 110 * Math.pow(2, n / 12))
+import { NOTES } from './scale.js'
 
 // Ventana de cada voz dentro de la tabla. Se solapan poco para que las manos
 // ocupen registros distintos y se oigan como dos cosas, no como una.

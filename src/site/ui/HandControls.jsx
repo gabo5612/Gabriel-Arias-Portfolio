@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed } from '../../engine/gestures'
 import { fromHand, releaseHand } from '../pointer'
 import { EVENT, profile } from '../../engine/handProfile'
+import { sound } from '../../engine/audio/worldSound'
 
 // Todo lo que la mano hace en el sitio, en un solo bucle sobre la señal:
 //
@@ -73,6 +74,7 @@ export default function HandControls({ signal, pages, state, go, paused = false 
       hover = el
       hover?.classList.add('is-hand-hover')
       cursorRef.current.dataset.over = el ? '1' : ''
+      if (el) sound.tick()
     }
     const clickAt = (x, y) => {
       const el = document.elementFromPoint(x, y)?.closest(CLICKABLE)
@@ -98,6 +100,7 @@ export default function HandControls({ signal, pages, state, go, paused = false 
         edgesRef.current.dataset.on = ''
         guideRef.current.style.visibility = 'hidden'
         releaseHand(); setHover(null); pinch.reset(); dwell.reset(); swipe.reset()
+        sound.dwell(0)
         return
       }
       guideRef.current.style.visibility = ''
@@ -128,11 +131,13 @@ export default function HandControls({ signal, pages, state, go, paused = false 
         // de hacer clic y no deben sumarse.
         const dw = r.down || (s.pinch ?? 0) > 0.3 ? { progress: 0, fire: false } : dwell.push(hover, r.x, r.y, now)
         cur.style.setProperty('--dwell', dw.progress.toFixed(3))
+        sound.dwell(dw.fire ? 0 : dw.progress)
         if (r.click) { clickAt(r.x, r.y); dwell.spend(hover) }
         else if (dw.fire) clickAt(r.x, r.y)
       } else {
         cur.dataset.on = ''
         cur.style.setProperty('--dwell', '0')
+        sound.dwell(0)
         pinch.reset()
         dwell.reset()
         releaseHand()
@@ -185,6 +190,7 @@ export default function HandControls({ signal, pages, state, go, paused = false 
     return () => {
       cancelAnimationFrame(raf)
       clearTimeout(flashTimer)
+      sound.dwell(0)
       window.removeEventListener(EVENT, onProfile)
       setHover(null)
       releaseHand()

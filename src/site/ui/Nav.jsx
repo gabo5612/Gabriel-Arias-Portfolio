@@ -1,6 +1,7 @@
 import React from 'react'
 import TrackButton from '../../engine/ui/TrackButton'
 import TiltButton from '../../engine/ui/TiltButton'
+import SoundButton from './SoundButton'
 
 export default function Nav({ pages, state, go, cam, tilt, name }) {
   return (
@@ -27,6 +28,7 @@ export default function Nav({ pages, state, go, cam, tilt, name }) {
           ))}
         </ul>
       </nav>
+      <SoundButton className="nav__sound" />
       {/* En el teléfono, inclinarlo; en el resto, la mano. */}
       {tilt.available
         ? <TiltButton tilt={tilt} compact className="nav__track" />
