@@ -114,3 +114,31 @@ export function createPinchClick({ press = 0.7, release = 0.4, settle = 0.2 } = 
     reset() { down = false; held = null },
   }
 }
+
+// Mantener para abrir: si el cursor se queda quieto sobre el mismo objetivo
+// `ms`, dispara una vez. Es el clic de quien no quiere (o no puede) pellizcar.
+//
+// "Quieto" con tolerancia (`slop` px): un dedo en el aire nunca está quieto
+// del todo, y sin margen el contador no llegaría nunca. Moverse más que eso o
+// cambiar de objetivo reinicia. Después de disparar, el mismo objetivo no
+// vuelve a disparar hasta que el cursor lo deje: quedarse encima de un link
+// recién abierto no debe abrirlo cada tres segundos.
+export function createDwell({ ms = 3000, slop = 28 } = {}) {
+  let target = null, since = 0, ax = 0, ay = 0, spent = null
+  return {
+    push(t, x, y, now) {
+      if (t !== spent) spent = null
+      if (!t || t === spent) { target = null; return { progress: 0, fire: false } }
+      if (t !== target || Math.hypot(x - ax, y - ay) > slop) {
+        target = t; since = now; ax = x; ay = y
+      }
+      const progress = Math.min(1, (now - since) / ms)
+      if (progress < 1) return { progress, fire: false }
+      spent = t; target = null
+      return { progress: 1, fire: true }
+    },
+    // Quien ya hizo clic de otra forma (pellizco) sobre `t` lo da por usado.
+    spend(t) { spent = t; target = null },
+    reset() { target = null; spent = null },
+  }
+}

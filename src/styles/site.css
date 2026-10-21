@@ -450,6 +450,23 @@ p.projects__kind { margin: -12px 0 14px; }
 }
 .hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(245, 165, 36, .35); }
 
+/* Mantener para abrir: un anillo exterior que se llena en sentido horario en
+   los 3 s. Es la única pista de que quedarse quieto hace algo, así que tiene
+   que verse aunque el contador recién empiece. */
+.hand-cursor__dwell {
+  position: absolute;
+  left: 0; top: 0;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(var(--amber) calc(var(--dwell, 0) * 360deg), rgba(236, 232, 222, .14) 0);
+  -webkit-mask: radial-gradient(circle, transparent 23px, #000 24px, #000 27px, transparent 28px);
+          mask: radial-gradient(circle, transparent 23px, #000 24px, #000 27px, transparent 28px);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.hand-cursor[data-over="1"] .hand-cursor__dwell { opacity: 1; }
+
 /* Lo que está bajo el dedo se ve como bajo el mouse, y el pellizco se ve
    como un clic. */
 .site .is-hand-hover { outline: 2px solid rgba(245, 165, 36, .7); outline-offset: 3px; }

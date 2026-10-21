@@ -39,6 +39,7 @@ directos funcionan.
 | Palma abierta, mantenida baja o alta | desplaza el texto (joystick: más lejos del centro, más rápido) |
 | Índice estirado, resto plegado ("lápiz") | cursor en la punta del dedo; la cámara y la formación se congelan |
 | Pellizco pulgar–índice mientras apuntás | clic en lo que está bajo el cursor |
+| Cursor quieto 3 s sobre un link o botón | lo abre (un anillo se llena alrededor del cursor) |
 
 El cursor se congela donde empezaste a cerrar el pellizco, porque juntar el pulgar arrastra
 la punta del índice. Con la palma abierta, la mano además agarra la formación y mueve la

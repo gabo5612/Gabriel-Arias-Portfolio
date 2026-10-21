@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createPinchClick, createSwipeDetector, handMode, scrollSpeed } from '../src/engine/gestures.js'
+import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed } from '../src/engine/gestures.js'
 
 const hand = (x, y = 0, fingers = 5) => ({ source: 'hand', hands: 1, x, y, fingers })
 
@@ -112,4 +112,36 @@ test('cursor freezes where the pinch started closing', () => {
   assert.deepEqual([r.x, r.y], [110, 100])
   p.push(0.1, 150, 150)
   assert.deepEqual([p.push(0, 160, 160).x], [160])
+})
+
+test('dwell fires once after holding still on the same target', () => {
+  const d = createDwell({ ms: 3000 })
+  const link = {}
+  let fired = 0
+  for (let t = 0; t <= 3500; t += 100) if (d.push(link, 200 + (t % 300 ? 5 : 0), 100, t).fire) fired++
+  assert.equal(fired, 1)
+  // Sigue encima: no repite.
+  for (let t = 3600; t <= 9000; t += 100) if (d.push(link, 200, 100, t).fire) fired++
+  assert.equal(fired, 1)
+  // Sale y vuelve: puede disparar otra vez.
+  d.push(null, 0, 0, 9100)
+  let again = false
+  for (let t = 9200; t <= 12300; t += 100) again ||= d.push(link, 200, 100, t).fire
+  assert.ok(again)
+})
+
+test('moving past the slop or switching target restarts the count', () => {
+  const d = createDwell({ ms: 3000, slop: 28 })
+  const a = {}, b = {}
+  d.push(a, 0, 0, 0)
+  assert.equal(d.push(a, 10, 10, 2000).progress.toFixed(2), '0.67')
+  assert.equal(d.push(a, 60, 0, 2100).progress, 0)       // se movió de más
+  assert.equal(d.push(b, 60, 0, 2500).progress, 0)       // otro objetivo
+  assert.equal(d.push(b, 62, 2, 5400).fire, false)
+  assert.equal(d.push(b, 62, 2, 5500).fire, true)
+})
+
+test('nothing under the cursor means no progress', () => {
+  const d = createDwell()
+  assert.deepEqual(d.push(null, 0, 0, 5000), { progress: 0, fire: false })
 })
