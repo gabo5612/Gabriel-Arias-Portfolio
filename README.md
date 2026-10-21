@@ -60,6 +60,14 @@ guarda en `localStorage` de este navegador y se aplica en vivo.
 apagar). Telemetría y la nota de la CSP, detrás de **More**. `?fakehud` (sólo en dev) lo
 muestra sin cámara, para diseñarlo.
 
+### Bienvenida
+
+La primera visita abre con una pantalla (`site/ui/Welcome.jsx`) que dice lo único que no se
+descubre mirando: que el sitio suena y que se maneja con la mano (o inclinando el teléfono).
+El mismo botón lo enciende: **Enter with sound and camera** (o *and tilt*), **Sound only**, o
+entrar sin nada. Se recuerda en `localStorage` (`welcomed`); `?nowelcome` la salta. La
+presentación del título con partículas espera a que se cierre.
+
 ### El biplano
 
 **Fly to my projects** lo hace literal: la esfera de Home se reordena, con sus mismos puntos,

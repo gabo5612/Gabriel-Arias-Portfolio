@@ -67,6 +67,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms))
 const assert = (cond, msg) => { if (!cond) throw new Error(msg) }
 
 async function open(page, hash = '#/', { query = '', world = true } = {}) {
+  // La bienvenida tiene su propia prueba; el resto entra como quien ya la vio.
+  await page.addInitScript(() => { try { localStorage.setItem('welcomed', '1') } catch {} })
   await page.goto(`${BASE}${query}${hash}`)
   await page.waitForSelector('.panel')
   if (world) await page.waitForSelector('.world canvas', { timeout: 10000 })
@@ -223,16 +225,32 @@ await check('calibration measures six poses and saves a profile', async page => 
   await open(page, '#/about', { query: '?fakehud' })
   await pose(page, { hands: 1, fingers: 1, point: 0, x: 0, y: 0, rIdx: 0.2, rOth: 1, rPinch: 1 })
   await page.click('.hud__tune')
-  const steps = [
-    [{ fingers: 4.8, rIdx: 1, rOth: 2.9, rPinch: 1.1 }, 2100],
-    [{ fingers: 0.6, rIdx: 0.05, rOth: 0.2, rPinch: 0.6 }, 2100],
-    [{ fingers: 1.6, rIdx: 0.95, rOth: 0.3, rPinch: 0.9 }, 2100],
-    [{ fingers: 1.4, rIdx: 0.6, rOth: 0.3, rPinch: 0.12 }, 1900],
-    [{ fingers: 4.8, rIdx: 1, rOth: 2.9, rPinch: 1.1, x: -0.45 }, 700],
-    [{ x: 0.45 }, 900], [{ x: -0.45 }, 900], [{ x: 0.45 }, 900],
-    [{ x: 0, y: 0.5 }, 2300],
-  ]
-  for (const [p, ms] of steps) { await pose(page, p); await wait(ms) }
+  // Cada pose cuenta tiempo sólo mientras se sostiene, y cada cuadro aporta
+  // como mucho 64 ms: en un headless lento, una espera fija no alcanza. Se
+  // sostiene la pose hasta que el asistente pasa al paso siguiente.
+  const stepNow = () => page.evaluate(() =>
+    document.querySelector('.calib__title')?.textContent.includes('Tuned') ? 99 : parseInt(document.querySelector('.calib__count')?.textContent || '0'))
+  const hold = async (p, ms = 10000) => {
+    const from = await stepNow()
+    await pose(page, p)
+    const end = Date.now() + ms
+    while (Date.now() < end && (await stepNow()) === from) await wait(100)
+    assert((await stepNow()) !== from, `calibration stuck on step ${from}`)
+  }
+  await hold({ fingers: 4.8, rIdx: 1, rOth: 2.9, rPinch: 1.1 })
+  await hold({ fingers: 0.6, rIdx: 0.05, rOth: 0.2, rPinch: 0.6 })
+  await hold({ fingers: 1.6, rIdx: 0.95, rOth: 0.3, rPinch: 0.9 })
+  await hold({ fingers: 1.4, rIdx: 0.6, rOth: 0.3, rPinch: 0.12 })
+  // Swipe: dos barridos, cada uno con su pausa quieta (así se registra).
+  await pose(page, { fingers: 4.8, rIdx: 1, rOth: 2.9, rPinch: 1.1, x: -0.45 }); await wait(700)
+  for (const x of [0.45, -0.45, 0.45, -0.45]) {
+    if ((await stepNow()) !== 5) break
+    await pose(page, { x }); await wait(900)
+  }
+  // El paso del swipe termina por cantidad o por tiempo (9 s): se espera
+  // a estar de verdad en el último antes de sostener la mano baja.
+  for (let end = Date.now() + 10000; Date.now() < end && (await stepNow()) === 5;) await wait(100)
+  await hold({ x: 0, y: 0.5 })
   assert((await page.textContent('.calib__title')).includes('Tuned'), 'wizard did not finish')
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('handProfile') || 'null'))
   assert(saved && saved.swipe && saved.pinch.far > saved.pinch.near, 'no usable profile saved')
@@ -257,7 +275,7 @@ await check('"Fly to my projects" turns the sphere into a dot biplane that flies
     const f = () => {
       const p = window.__plane?.()
       if (p?.on && p.z < 1) pts.push(p)
-      if (performance.now() - t0 < 5500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
+      if (performance.now() - t0 < 8500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
     }
     requestAnimationFrame(f)
   }))
@@ -268,6 +286,38 @@ await check('"Fly to my projects" turns the sphere into a dot biplane that flies
   assert(pts.length >= 3, `plane seen in only ${pts.length} frames`)
   assert(onScreen.length / pts.length > 0.8, `plane off-screen in ${pts.length - onScreen.length} of ${pts.length} frames`)
   assert(!end.on, 'plane still flying after the trip')
+})
+
+await check('the biplane flies again when pressed while the camera is still flying home', async page => {
+  await open(page)
+  await page.evaluate(() => { window.__seen = 0; const f = () => { if (window.__plane?.().on) window.__seen++; requestAnimationFrame(f) }; requestAnimationFrame(f) })
+  await page.click('text=Fly to my projects')
+  await waitHash(page, '#/projects')
+  await wait(6500)
+  await page.click('.nav__links >> text=Home')
+  // El panel aparece antes de que la cámara termine de llegar: se toca ahí.
+  await page.waitForSelector('text=Fly to my projects')
+  await wait(300)
+  await page.evaluate(() => { window.__seen = 0 })
+  await page.click('text=Fly to my projects')
+  await waitHash(page, '#/projects', 6000)
+  await wait(3500)
+  const seen = await page.evaluate(() => window.__seen)
+  assert(seen > 5, `second trip had no plane (${seen} frames)`)
+})
+
+await check('first visit: the welcome screen, then remembered', async page => {
+  await page.goto(BASE)
+  await page.waitForSelector('.welcome')
+  assert(await page.isVisible('text=Enter with sound and camera'), 'no camera option on desktop')
+  await page.click('text=Sound only')
+  await page.waitForSelector('.welcome', { state: 'detached' })
+  await wait(400)
+  assert((await page.evaluate(() => window.__sound.state)) === 'running', 'sound did not wake')
+  await page.reload()
+  await page.waitForSelector('.panel')
+  await wait(800)
+  assert(!(await page.$('.welcome')), 'welcome shown again')
 })
 
 // ── Sonido ──────────────────────────────────────────────────────────────────

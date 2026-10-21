@@ -77,7 +77,8 @@ export function createParticlePlane({ count, size, far, trail = 700, trailColor 
   points.frustumCulled = false
 
   let head = 0, rollV = 0, scale0 = 1
-  const q0 = new Quaternion(), qModelInv = new Quaternion()
+  const q0 = new Quaternion(), qModelInv = new Quaternion(), qFly = new Quaternion()
+  let flyInit = false
   const dummy = new Object3D()
   const prev = new Vector3(), vel = new Vector3(), lastVel = new Vector3(), side = new Vector3()
   const tip = new Vector3(), back = new Vector3(), m = new Vector3(), s = new Vector3()
@@ -108,24 +109,33 @@ export function createParticlePlane({ count, size, far, trail = 700, trailColor 
       scale0 = s.x
       model.scale.setScalar(scale0)
       bank.rotation.z = 0
-      prev.copy(m); lastVel.set(0, 0, 0); rollV = 0
+      prev.copy(m); lastVel.set(0, 0, 0); rollV = 0; flyInit = false
       holder.visible = true
     },
     hide() { holder.visible = false },
 
     // k ∈ [0, 1]: cuánto ya despegó. 0 = todavía con el giro y la escala de
     // la formación; 1 = mirando hacia donde va, a escala de vuelo.
-    place(p, now, up, k, flyScale) {
+    // aim (opcional): un punto al que apuntar la nariz en vez de seguir la
+    // velocidad — al llegar, la cámara frena, la velocidad se achica y
+    // cualquier movimiento lateral la haría girar de golpe.
+    place(p, now, up, k, flyScale, aim = null, roll = null) {
       vel.subVectors(p, prev)
       holder.position.copy(p)
-      if (vel.lengthSq() > 1e-4) {
+      // El rumbo no salta: se acerca al deseado un poco por cuadro.
+      if (aim || vel.lengthSq() > 0.25) {
         dummy.position.copy(p)
-        dummy.lookAt(back.copy(p).add(vel))
-        holder.quaternion.slerpQuaternions(q0, dummy.quaternion, k)
+        dummy.lookAt(aim || back.copy(p).add(vel))
+        if (!flyInit) { qFly.copy(dummy.quaternion); flyInit = true }
+        else qFly.slerp(dummy.quaternion, 0.08)
+      }
+      if (flyInit) holder.quaternion.slerpQuaternions(q0, qFly, k)
+      if (vel.lengthSq() > 1e-4) {
         // Ladeo: cuánto gira el rumbo hacia un lado; se inclina hacia adentro.
         side.crossVectors(lastVel, vel)
         const turn = lastVel.lengthSq() ? side.dot(up) / (lastVel.length() * vel.length() + 1e-6) : 0
-        rollV += (Math.max(-0.8, Math.min(0.8, -turn * 18)) * k - rollV) * 0.12
+        const want = roll ?? Math.max(-0.8, Math.min(0.8, -turn * 18))
+        rollV += (want * k - rollV) * 0.12
         bank.rotation.z = rollV
         lastVel.copy(vel)
       }

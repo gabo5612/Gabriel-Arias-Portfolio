@@ -11,6 +11,7 @@ import { useSiteSound, useSound } from './useSiteSound'
 import { calibrated } from '../engine/handProfile'
 import Nav from './ui/Nav'
 import RouteMap from './ui/RouteMap'
+import Welcome, { shouldWelcome } from './ui/Welcome'
 import '../styles/engine.css'
 import '../styles/site.css'
 
@@ -28,13 +29,17 @@ const panel = {
   enter: ({ dir, fly }) => ({ opacity: 0, x: dir * 28, filter: 'blur(6px)' }),
   center: ({ fly }) => ({
     opacity: 1, x: 0, filter: 'blur(0px)',
-    transition: { delay: fly ? 0.75 : 0.05, duration: 0.55, ease: [0.2, 0.7, 0.2, 1] },
+    transition: { delay: fly ? flyDelay(fly) : 0.05, duration: 0.55, ease: [0.2, 0.7, 0.2, 1] },
   }),
   exit: ({ dir }) => ({
     opacity: 0, x: dir * -28, filter: 'blur(6px)',
     transition: { duration: 0.22, ease: 'easeIn' },
   }),
 }
+// `fly` es cuántas estaciones cruza el vuelo (0 = no vuela). El vuelo dura
+// 1.5 s más 0.9 s por estación de más (World.jsx); el panel entra cuando la
+// cámara ya está frenando, no a mitad de camino.
+const flyDelay = n => 0.75 + 0.9 * Math.max(0, n - 1)
 const still = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
 
 const FAKE_HUD = import.meta.env.DEV && new URLSearchParams(window.location.search).has('fakehud')
@@ -59,13 +64,24 @@ export default function App() {
   // reducido y con un tope: si el mundo no llega, el título sale igual.
   const [intro, setIntro] = useState(() =>
     !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  // Primera visita: la bienvenida va delante, y la presentación del título
+  // espera a que se cierre (si no, pasaría detrás, sin que nadie la vea).
+  // ?nowelcome la salta (pruebas, enlaces para compartir).
+  const [welcome, setWelcome] = useState(() =>
+    shouldWelcome() && !new URLSearchParams(window.location.search).has('nowelcome'))
+  if (welcome) document.documentElement.dataset.welcome = 'on'
+  const closeWelcome = useCallback(() => {
+    delete document.documentElement.dataset.welcome
+    setWelcome(false)
+    window.dispatchEvent(new Event('welcome-done'))
+  }, [])
   useEffect(() => {
-    if (!intro) return
+    if (!intro || welcome) return
     const done = () => setIntro(false)
     const id = setTimeout(done, 6000)
     window.addEventListener('world-title', done)
     return () => { clearTimeout(id); window.removeEventListener('world-title', done) }
-  }, [intro])
+  }, [intro, welcome])
   const routeRef = useRef(null)
   const mainRef = useRef(null)
   // La lupa de texto sigue al mouse siempre y al dedo cuando apuntás.
@@ -93,7 +109,14 @@ export default function App() {
   // congela: App se re-renderiza ~20 veces por segundo con la cámara encendida
   // (las estadísticas del HUD) y la animación de entrada no debe re-decidirse.
   const shown = useRef({ key, page: state.page, fly: false })
-  if (shown.current.key !== key) shown.current = { key, page: state.page, fly: shown.current.page !== state.page }
+  if (shown.current.key !== key) {
+    // Las mismas cuentas que el mundo: con dirección, el camino en ese
+    // sentido; sin ella (un clic en la barra), el corto.
+    const N = PAGES.length, from = shown.current.page, to = state.page
+    const fwd = (to - from + N) % N, back = (from - to + N) % N
+    const n = from === to ? 0 : dir > 0 ? fwd : dir < 0 ? back : Math.min(fwd, back)
+    shown.current = { key, page: state.page, fly: n }
+  }
   const fly = shown.current.fly
 
   return (
@@ -157,6 +180,8 @@ export default function App() {
           <Calibration signal={depth.signal} onClose={() => setCalibrating(false)} />
         </Suspense>
       )}
+
+      {welcome && <Welcome cam={cam} tilt={tilt} onDone={closeWelcome} />}
 
       <p className="sr-only" aria-live="polite">
         {page.label}{itemTitle ? `: ${itemTitle}` : ''}, section {state.page + 1} of {PAGES.length}

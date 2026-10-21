@@ -721,3 +721,84 @@ p.projects__kind { margin: -12px 0 14px; }
   .w { transform: none; transition: none; }
   .projects__row { transition: none; }
 }
+
+/* ── Bienvenida ───────────────────────────────────────────────────────── */
+/* El mundo sigue vivo detrás, desenfocado: la pantalla es una puerta, no una
+   pared. Una sola secuencia de entrada: título, cada línea, botones. */
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: rgba(5, 7, 13, .55);
+  backdrop-filter: blur(7px) saturate(1.2);
+  -webkit-backdrop-filter: blur(7px) saturate(1.2);
+  animation: welcome-in .6s ease both;
+}
+.welcome[data-leaving] { animation: welcome-out .45s ease both; }
+.welcome__card { width: min(34rem, 100%); }
+.welcome__title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-stretch: 75%;
+  font-size: clamp(2.1rem, 5.4vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  color: var(--paper);
+  margin: 0 0 28px;
+  animation: welcome-rise .8s .15s cubic-bezier(.2, .7, .2, 1) both;
+}
+.welcome__list { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 18px; }
+.welcome__item {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 16px;
+  align-items: center;
+  color: var(--fog);
+  line-height: 1.5;
+  animation: welcome-rise .7s cubic-bezier(.2, .7, .2, 1) both;
+}
+.welcome__item:nth-child(1) { animation-delay: .45s; }
+.welcome__item:nth-child(2) { animation-delay: .65s; }
+.welcome__item p { margin: 0; }
+.welcome__item strong { color: var(--paper); font-weight: 600; }
+.welcome__art { width: 52px; height: 52px; color: var(--amber); }
+/* Ondas del parlante: salen una tras otra, como si ya sonara. */
+.welcome__wave { animation: welcome-wave 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * .25s); }
+/* La mano saluda y deja un trazo: el dedo es el cursor. */
+.welcome__art--hand > g { transform-origin: 32px 56px; animation: welcome-wag 2.4s ease-in-out infinite; }
+.welcome__trail { stroke-dasharray: 60; animation: welcome-draw 2.4s ease-in-out infinite; opacity: .6; }
+.welcome__art--tilt rect { transform-origin: 32px 32px; animation: welcome-tilt 2.4s ease-in-out infinite; }
+.welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  animation: welcome-rise .7s .85s cubic-bezier(.2, .7, .2, 1) both;
+}
+.welcome__quiet {
+  background: none;
+  border: 0;
+  padding: 8px 4px;
+  color: var(--fog);
+  font: inherit;
+  font-size: .9rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.welcome__quiet:hover { color: var(--paper); }
+.welcome__quiet:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+@keyframes welcome-in { from { opacity: 0; } }
+@keyframes welcome-out { to { opacity: 0; } }
+@keyframes welcome-rise { from { opacity: 0; transform: translateY(14px); filter: blur(4px); } }
+@keyframes welcome-wave { 0%, 100% { opacity: .15; } 40% { opacity: 1; } }
+@keyframes welcome-wag { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes welcome-draw { 0% { stroke-dashoffset: 60; } 60%, 100% { stroke-dashoffset: 0; } }
+@keyframes welcome-tilt { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .welcome, .welcome__title, .welcome__item, .welcome__actions,
+  .welcome__wave, .welcome__art--hand > g, .welcome__trail, .welcome__art--tilt rect { animation: none; }
+}

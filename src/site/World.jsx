@@ -30,7 +30,9 @@ const LOOP_R = 2200
 const VIEW_D = 900
 const SIZE = 240
 const FAR = 5200
+const CLEAR = 620          // distancia mínima a una formación intermedia en vuelo
 
+const smoothstep = (a, b, v) => { const k = Math.max(0, Math.min(1, (v - a) / (b - a))); return k * k * (3 - 2 * k) }
 const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2)
 const wrap01 = t => ((t % 1) + 1) % 1
 const shapeKey = spec => JSON.stringify(spec)
@@ -105,10 +107,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     scene.add(paper.group, paper.points)
     stage.own(paper)
     let planeReq = null, planeFlight = null
-    const planeStart = new Vector3(), planePos = new Vector3(), fwd = new Vector3()
-    const onPlane = e => {
-      const now = performance.now()
-      if (planeFlight || planeReq || now - flightAt < flightMs) return
+    const planeStart = new Vector3(), planePos = new Vector3(), fwd = new Vector3(), planeAim = new Vector3()
+    // Armar: la formación donde estás se reordena en el biplano.
+    const arm = now => {
       const st = stations[active]
       if (!st.pos) return
       // De frente y quieta, como en una foto: el biplano se lee de perfil.
@@ -118,7 +119,17 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       st.cloud.morphTo(paper.all, PLANE_PALETTE, now, { burst: 40 })
       planeReq = { at: now, from: active }
       sound.sparkle('form', TRANSFORM_MS)
-      if (e.detail) e.detail.delay = TRANSFORM_MS
+    }
+    // Si la cámara todavía está llegando (el panel aparece antes de que el
+    // vuelo termine, así que el botón ya se puede tocar), el armado espera a
+    // que llegue; el botón espera eso más el armado.
+    let armAt = 0
+    const onPlane = e => {
+      const now = performance.now()
+      if (planeFlight || planeReq || armAt) return
+      const left = Math.max(0, flightAt + flightMs - now)
+      armAt = now + left
+      if (e.detail) e.detail.delay = left + TRANSFORM_MS
     }
     window.addEventListener('world-plane', onPlane)
     // La formación de origen vuelve a ser lo que era.
@@ -135,7 +146,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     if (import.meta.env.DEV) {
       window.__plane = () => {
         const v = paper.group.position.clone().project(camera)
-        return { on: paper.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
+        const q = paper.group.quaternion; return { q: [q.x, q.y, q.z, q.w], on: paper.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
       }
     }
 
@@ -237,11 +248,19 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       if (Math.abs(end - cur) < 1e-3) return
       fromT = cur; toT = end
       travelDir = Math.sign(end - cur)
-      flightMs = 1500 + 520 * Math.max(0, Math.abs(end - cur) - 1)
+      // Cada estación de más alarga el viaje lo justo para verla pasar.
+      flightMs = 1500 + 900 * Math.max(0, Math.abs(end - cur) - 1)
       flightAt = now
+      // Navegar a otra parte con el avión en el aire: el viaje se cancela, el
+      // avión desaparece y la formación de origen vuelve a ser la de siempre.
+      if (planeFlight) {
+        paper.hide()
+        restore(planeFlight.from, now)
+        planeFlight = null
+      }
       if (planeReq && now - planeReq.at < 3000) {
-        // Con avión el viaje se alarga un poco: es para verlo.
-        flightMs *= 1.35
+        // Con avión el viaje dura el doble: es para verlo.
+        flightMs *= 2
         const src = stations[planeReq.from]
         paper.show(src.inner)
         planeStart.copy(paper.group.position)
@@ -341,7 +360,13 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     apiRef.current.sync(nav.current.state, 0)
     // Primera entrada: el título que ya estaba en pantalla se rehace con
     // partículas de la figura, como presentación del mundo.
-    pendingTitle = { at: performance.now() + 500, until: performance.now() + 3000, page: active, old: null }
+    // Con la bienvenida delante, la presentación espera a que se cierre.
+    const present = () => {
+      const now = performance.now()
+      pendingTitle = { at: now + 500, until: now + 3000, page: active, old: null }
+    }
+    if (document.documentElement.dataset.welcome === 'on') window.addEventListener('welcome-done', present, { once: true })
+    else present()
 
     // ── El cursor sobre la figura ───────────────────────────────────────────
     // El puntero (mouse, o la punta del dedo cuando apuntás) se proyecta sobre
@@ -422,12 +447,29 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
 
       curve.getPoint(wrap01(t / N), pos)
       stationLook(active, target)
-      look.lerpVectors(lookFrom, target, flying ? e : 1)
-      if (flying) {
-        // A mitad de vuelo se mira hacia donde se va: es lo que convierte una
-        // interpolación de cámara en la sensación de avanzar.
+      if (!flying) look.copy(target)
+      else {
+        // Hacia dónde mira la cámara en vuelo, por capas:
+        //   1. hacia adelante en el camino: es lo que convierte una
+        //      interpolación de cámara en la sensación de avanzar;
+        //   2. de reojo, a cada formación por la que pasa (en un viaje largo,
+        //      las estaciones intermedias se ven al costado, no se saltean);
+        //   3. en el último tramo, a la de destino: aparece chica a lo lejos y
+        //      crece a medida que llega;
+        //   4. al salir, todavía a la de origen.
         curve.getPoint(wrap01((t + travelDir * 0.25) / N), ahead)
-        look.lerp(ahead, Math.sin(Math.PI * e) * 0.7)
+        look.copy(ahead)
+        const lo = Math.min(fromT, toT), hi = Math.max(fromT, toT)
+        for (let j = Math.floor(lo) + 1; j < hi - 1e-3; j++) {
+          // Cuántas estaciones pasó de la j (negativo: todavía no llega). Se
+          // la mira desde un poco antes hasta un poco después de pasarla.
+          const u = (t - j) * travelDir
+          const g = Math.exp(-(((u - 0.12) / 0.32) ** 2)) * 0.7
+          if (g > 0.01) look.lerp(A[((j % N) + N) % N], g)
+        }
+        const left = Math.abs(toT - t), gone = Math.abs(t - fromT)
+        look.lerp(target, 1 - smoothstep(0, 1.15, left))
+        look.lerp(lookFrom, 1 - smoothstep(0, 0.35, gone))
       }
 
       // Paralaje: la cámara se asoma con la mano o la cabeza (como mirar por
@@ -442,8 +484,20 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         .addScaledVector(right, hx * amp)
         .addScaledVector(up, -hy * amp * 0.6)
       if (onCam) camera.position.addScaledVector(T[active], hz * 200)
-      // Con avión, la cámara lo persigue: la mirada se le va detrás.
-      if (planeFlight && flying) look.lerp(paper.group.position, 0.2 * Math.sin(Math.PI * e))
+      // Las formaciones intermedias se rodean, no se atraviesan: cerca de una,
+      // la cámara se aparta lo justo para pasarle al lado y verla entera.
+      if (flying) {
+        const lo = Math.min(fromT, toT), hi = Math.max(fromT, toT)
+        for (let j = Math.floor(lo) + 1; j < hi - 1e-3; j++) {
+          const aj = A[((j % N) + N) % N]
+          wv.subVectors(camera.position, aj)
+          const d = wv.length()
+          if (d < CLEAR) camera.position.addScaledVector(wv.normalize(), (CLEAR - d) * smoothstep(0, CLEAR, CLEAR - d) * 0.9 + 1e-3)
+        }
+      }
+      // La mirada NO persigue al avión: él cuelga de la cámara, y que la cámara
+      // lo mire cerraría un lazo (la mirada mueve al avión, el avión a la
+      // mirada) que lo hace oscilar.
       camera.lookAt(look)
 
       const w = stage.size.w, h = stage.size.h
@@ -578,21 +632,37 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       // formación de destino, no a lo largo del camino.) La estela queda en el
       // mundo, así que se estira detrás: es lo que dice que va rápido.
       // Despega del botón y termina dentro de la figura de destino.
+      if (armAt && now >= armAt) { armAt = 0; arm(now) }
       if (planeFlight) {
         camera.updateMatrixWorld()
         camera.getWorldDirection(fwd)
         right.crossVectors(fwd, up).normalize()
+        // El zigzag se apaga al acercarse: con la cámara frenando, sería lo
+        // único que mueve al avión y su rumbo se iría de lado.
+        const weave = 1 - (raw < 0.55 ? 0 : easeInOut(Math.min(1, (raw - 0.55) / 0.2)))
         planePos.copy(camera.position)
           .addScaledVector(fwd, 620)
-          .addScaledVector(right, Math.sin(now * 0.0017) * 90)
-          .addScaledVector(up, -60 + Math.sin(now * 0.0026) * 28)
+          .addScaledVector(right, Math.sin(now * 0.0017) * 90 * weave)
+          .addScaledVector(up, -60 + Math.sin(now * 0.0026) * 28 * weave)
         const k = raw < 0.3 ? easeInOut(raw / 0.3) : 1
         planePos.lerpVectors(planeStart, planePos, k)
         if (raw > 0.72) planePos.lerp(A[planeFlight.to], easeInOut((raw - 0.72) / 0.28))
         // La formación lo absorbe: en el último tramo se encoge hacia su
         // centro hasta desaparecer dentro.
         const swallow = raw > 0.8 ? easeInOut((raw - 0.8) / 0.2) : 0
-        paper.place(planePos, now, up, k, 0.6 * scale * (1 - swallow * 0.97))
+        // Rumbo: hacia donde mira la cámara (el avión va delante, en nuestra
+        // dirección), y al final, de a poco, hacia la formación donde entra.
+        // NO hacia su velocidad en el mundo: colgado de una cámara que gira,
+        // esa velocidad se da vuelta en algunos tramos y la nariz giraría en
+        // redondo de golpe. El ladeo sale del zigzag: se inclina hacia donde
+        // está virando.
+        const w = raw < 0.5 ? 0 : easeInOut(Math.min(1, (raw - 0.5) / 0.35))
+        planeAim.subVectors(A[planeFlight.to], planePos).normalize()
+        planeAim.lerpVectors(fwd, planeAim, w).normalize()
+          .addScaledVector(right, Math.cos(now * 0.0017) * 0.25 * weave)
+          .normalize().multiplyScalar(100).add(planePos)
+        const roll = -Math.cos(now * 0.0017) * 0.45 * weave
+        paper.place(planePos, now, up, k, 0.6 * scale * (1 - swallow * 0.97), planeAim, roll)
         if (!flying) {
           paper.hide()
           // Y lo que tragó se le nota: una onda roja sale del centro, recorre
@@ -627,6 +697,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       window.removeEventListener('pointercancel', onUp)
       window.removeEventListener('world-poke', onHandPoke)
       window.removeEventListener('world-plane', onPlane)
+      window.removeEventListener('welcome-done', present)
       host.style.cursor = ''
       stage.dispose()
     }
