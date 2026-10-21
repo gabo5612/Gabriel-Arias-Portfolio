@@ -113,7 +113,7 @@
   },
   {
     "id": "trailplugin",
-    "cover": "/covers/TrailKit.png",
+    "cover": "/covers/TrailKit.webp",
     "title": "TrailPlugin",
     "arch": "trailplugin",
     "archNote": "Why the licence state lives outside the plugin that ships to a customer.",
@@ -132,7 +132,7 @@
   },
   {
     "id": "quicktask",
-    "cover": "/covers/quicktask.png",
+    "cover": "/covers/quicktask.webp",
     "title": "QuickTask 2.0",
     "arch": "quicktask",
     "archNote": "Every step of a pattern runs; the last one stops and waits for a person.",
@@ -147,7 +147,7 @@
   },
   {
     "id": "squish",
-    "cover": "/covers/squish.png",
+    "cover": "/covers/squish.webp",
     "title": "Squish",
     "arch": "squish",
     "archNote": "The same guarantee built twice — browser worker pool, then native codecs.",
@@ -180,7 +180,7 @@
   },
   {
     "id": "daniel-arias",
-    "cover": "/covers/Daniel_arias.png",
+    "cover": "/covers/Daniel_arias.webp",
     "title": "Daniel Arias Portfolio",
     "arch": "daniel-arias",
     "archNote": "Three languages sharing one component tree instead of three sites.",
