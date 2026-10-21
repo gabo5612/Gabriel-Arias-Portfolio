@@ -439,33 +439,33 @@ p.projects__kind { margin: -12px 0 14px; }
 }
 .hand-cursor__tip {
   width: 8px; height: 8px;
-  background: var(--amber);
-  box-shadow: 0 0 12px rgba(245, 165, 36, .8);
+  background: var(--paper);
+  box-shadow: 0 0 6px rgba(236, 232, 222, .45);
 }
 .hand-cursor__ring {
   width: 40px; height: 40px;
-  border: 1.5px solid rgba(245, 165, 36, .75);
+  border: 1px solid rgba(236, 232, 222, .45);
   transform: translate(-50%, -50%) scale(calc(1 - var(--pinch) * .62));
   transition: border-color 150ms ease, background 150ms ease;
 }
 .hand-cursor[data-over="1"] .hand-cursor__ring {
-  border-color: var(--paper);
-  background: rgba(245, 165, 36, .12);
+  border-color: rgba(236, 232, 222, .7);
+  background: rgba(236, 232, 222, .05);
 }
-.hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(245, 165, 36, .35); }
+.hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(236, 232, 222, .16); }
 
-/* Mantener para abrir: un anillo exterior que se llena en sentido horario en
-   los 1.25 s. Es la única pista de que quedarse quieto hace algo, así que tiene
-   que verse aunque el contador recién empiece. */
+/* Mantener para abrir: un anillo exterior fino que se llena en sentido
+   horario en los 1.25 s. Es lo único de las ayudas que conserva el ámbar:
+   el progreso es información, el resto es sólo pista. */
 .hand-cursor__dwell {
   position: absolute;
   left: 0; top: 0;
   width: 56px; height: 56px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: conic-gradient(var(--amber) calc(var(--dwell, 0) * 360deg), rgba(236, 232, 222, .14) 0);
-  -webkit-mask: radial-gradient(circle, transparent 23px, #000 24px, #000 27px, transparent 28px);
-          mask: radial-gradient(circle, transparent 23px, #000 24px, #000 27px, transparent 28px);
+  background: conic-gradient(rgba(245, 165, 36, .7) calc(var(--dwell, 0) * 360deg), rgba(236, 232, 222, .08) 0);
+  -webkit-mask: radial-gradient(circle, transparent 24px, #000 25px, #000 26.5px, transparent 27.5px);
+          mask: radial-gradient(circle, transparent 24px, #000 25px, #000 26.5px, transparent 27.5px);
   opacity: 0;
   transition: opacity 150ms ease;
 }
@@ -473,9 +473,9 @@ p.projects__kind { margin: -12px 0 14px; }
 
 /* Lo que está bajo el dedo se ve como bajo el mouse, y el pellizco se ve
    como un clic. */
-.site .is-hand-hover { outline: 2px solid rgba(245, 165, 36, .7); outline-offset: 3px; }
+.site .is-hand-hover { outline: 1px solid rgba(236, 232, 222, .35); outline-offset: 3px; }
 .site .is-hand-press { transform: scale(.96); transition: transform 120ms ease; }
-.projects__row.is-hand-hover { outline: none; padding-left: 12px; background: linear-gradient(90deg, rgba(245, 165, 36, .1), transparent); }
+.projects__row.is-hand-hover { outline: none; padding-left: 12px; background: linear-gradient(90deg, rgba(236, 232, 222, .05), transparent); }
 
 /* ── Flechas de borde (modo puntero) ──────────────────────────────────────
    Franjas altas pegadas a los bordes: el cursor de la mano llega al borde de
@@ -502,13 +502,13 @@ p.projects__kind { margin: -12px 0 14px; }
 .edge-nav__btn--prev {
   left: 0;
   border-radius: 0 18px 18px 0;
-  background: linear-gradient(90deg, rgba(245, 165, 36, .16), transparent);
+  background: linear-gradient(90deg, rgba(236, 232, 222, .04), transparent);
   transform: translateX(-12px);
 }
 .edge-nav__btn--next {
   right: 0;
   border-radius: 18px 0 0 18px;
-  background: linear-gradient(270deg, rgba(245, 165, 36, .16), transparent);
+  background: linear-gradient(270deg, rgba(236, 232, 222, .04), transparent);
   transform: translateX(12px);
 }
 /* Arriba/abajo: bandas horizontales sobre el lado del mundo, no al centro —
@@ -524,25 +524,26 @@ p.projects__kind { margin: -12px 0 14px; }
 .edge-nav__btn--up {
   top: var(--nav-h);
   border-radius: 0 0 18px 18px;
-  background: linear-gradient(180deg, rgba(245, 165, 36, .16), transparent);
+  background: linear-gradient(180deg, rgba(236, 232, 222, .04), transparent);
   transform: translateY(-12px);
 }
 .edge-nav__btn--down {
   bottom: var(--route-h);
   border-radius: 18px 18px 0 0;
-  background: linear-gradient(0deg, rgba(245, 165, 36, .16), transparent);
+  background: linear-gradient(0deg, rgba(236, 232, 222, .04), transparent);
   transform: translateY(12px);
 }
 .edge-nav__btn--up .edge-nav__label, .edge-nav__btn--down .edge-nav__label { writing-mode: horizontal-tb; transform: none; }
-.edge-nav__btn--up.is-hand-hover { background: linear-gradient(180deg, rgba(245, 165, 36, .38), transparent); }
-.edge-nav__btn--down.is-hand-hover { background: linear-gradient(0deg, rgba(245, 165, 36, .38), transparent); }
+.edge-nav__btn--up.is-hand-hover { background: linear-gradient(180deg, rgba(236, 232, 222, .1), transparent); }
+.edge-nav__btn--down.is-hand-hover { background: linear-gradient(0deg, rgba(236, 232, 222, .1), transparent); }
 .edge-nav[data-on="1"] .edge-nav__btn { opacity: 1; pointer-events: auto; transform: none; }
-.edge-nav__arrow { font-size: 2.6rem; line-height: 1; color: var(--amber); }
+.edge-nav__arrow { font-size: 2.2rem; line-height: 1; color: rgba(236, 232, 222, .45); transition: color 200ms ease; }
+.edge-nav__btn.is-hand-hover .edge-nav__arrow { color: rgba(236, 232, 222, .85); }
 .edge-nav__label { font-size: .78rem; color: var(--fog); writing-mode: vertical-rl; }
 .edge-nav__btn--prev .edge-nav__label { transform: rotate(180deg); }
 .edge-nav__btn.is-hand-hover { outline: none; }
-.edge-nav__btn--prev.is-hand-hover { background: linear-gradient(90deg, rgba(245, 165, 36, .38), transparent); }
-.edge-nav__btn--next.is-hand-hover { background: linear-gradient(270deg, rgba(245, 165, 36, .38), transparent); }
+.edge-nav__btn--prev.is-hand-hover { background: linear-gradient(90deg, rgba(236, 232, 222, .1), transparent); }
+.edge-nav__btn--next.is-hand-hover { background: linear-gradient(270deg, rgba(236, 232, 222, .1), transparent); }
 .edge-nav__btn.is-hand-hover .edge-nav__label { color: var(--paper); }
 
 /* La guía del gesto cambia con el modo: apuntar no muestra el medidor del
@@ -551,8 +552,17 @@ p.projects__kind { margin: -12px 0 14px; }
 .gesture[data-state="point"] .gesture__arrow { opacity: .25; }
 .gesture[data-state="point"] { color: var(--paper); }
 .gesture[data-scroll] .gesture__hand { transition: transform 200ms ease; }
-.gesture[data-scroll="down"] .gesture__hand { transform: translateY(8px); color: var(--amber); }
-.gesture[data-scroll="up"] .gesture__hand { transform: translateY(-8px); color: var(--amber); }
+.gesture[data-scroll="down"] .gesture__hand { transform: translateY(8px); color: var(--paper); }
+.gesture[data-scroll="up"] .gesture__hand { transform: translateY(-8px); color: var(--paper); }
+
+/* La guía, en el sitio, es una pista y no un elemento de la página: neutra y
+   a media luz. El lab conserva la guía ámbar de engine.css. */
+.site .gesture { opacity: .7; color: var(--fog); }
+.site .gesture[data-state="open"] { color: rgba(236, 232, 222, .8); }
+.site .gesture__fill { background: rgba(236, 232, 222, .55); }
+.site .gesture__meter { background: rgba(236, 232, 222, .06); }
+.site .gesture[data-flash="next"] .gesture__arrow--r,
+.site .gesture[data-flash="prev"] .gesture__arrow--l { color: var(--paper); }
 
 /* ── Foco y accesibilidad ─────────────────────────────────────────────── */
 .site a:focus-visible, .site button:focus-visible {
