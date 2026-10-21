@@ -243,6 +243,8 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       }, st.page.scene.palette, now, 1300, () => {
         el.style.transition = 'opacity .5s ease'
         el.style.opacity = ''
+        // Avisa a App: la primera vez, el título deja de estar en espera.
+        window.dispatchEvent(new Event('world-title'))
       })
       sound.sparkle('form', 1300)
       return true
@@ -501,7 +503,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         const el = findTitle()
         const st = stations[pendingTitle.page]
         if (el && el.closest('.panel') !== pendingTitle.old && formTitle(el, st, now)) pendingTitle = null
-        else if (now > pendingTitle.until) pendingTitle = null
+        else if (now > pendingTitle.until) { pendingTitle = null; window.dispatchEvent(new Event('world-title')) }
       }
       formP.update(now)
       dissolveP.update(now)

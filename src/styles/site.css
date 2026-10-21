@@ -433,6 +433,8 @@ p.projects__kind { margin: -12px 0 14px; }
 }
 /* En los titulares la misma fuerza sería ilegible: empujan menos y se tuercen
    menos, pero el desdoble se nota más porque la letra es más grande. */
+/* Primera carga: el título espera a que lo formen las partículas (App.jsx). */
+.site--intro .panel__title, .site--intro .home__name { opacity: 0; transition: opacity .5s ease; }
 .panel__title .w, .home__name .w { --push: 12px; --twist: 5deg; --split: 5px; }
 .timeline__role .w, .projects__name .w { --push: 14px; --twist: 7deg; }
 

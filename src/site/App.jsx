@@ -53,6 +53,19 @@ export default function App() {
   const page = PAGES[state.page]
   const [world, setWorld] = useState(false)
   const [calibrating, setCalibrating] = useState(false)
+  // Primera carga: el título espera escondido a que el mundo lo forme con
+  // partículas. Si se pintara de entrada, se vería aparecer, desaparecer (el
+  // mundo lo oculta para formarlo) y volver a aparecer. Sin movimiento
+  // reducido y con un tope: si el mundo no llega, el título sale igual.
+  const [intro, setIntro] = useState(() =>
+    !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  useEffect(() => {
+    if (!intro) return
+    const done = () => setIntro(false)
+    const id = setTimeout(done, 6000)
+    window.addEventListener('world-title', done)
+    return () => { clearTimeout(id); window.removeEventListener('world-title', done) }
+  }, [intro])
   const routeRef = useRef(null)
   const mainRef = useRef(null)
   // La lupa de texto sigue al mouse siempre y al dedo cuando apuntás.
@@ -66,7 +79,7 @@ export default function App() {
     return () => (window.cancelIdleCallback || clearTimeout)(id)
   }, [depth.reduced])
 
-  const onWorldFail = useCallback(() => setWorld(false), [])
+  const onWorldFail = useCallback(() => { setWorld(false); setIntro(false) }, [])
   const onTravel = useCallback((t, flying) => routeRef.current?.travel(t, flying), [])
 
   const itemTitle = state.item && page.items ? state.item : null
@@ -84,7 +97,7 @@ export default function App() {
   const fly = shown.current.fly
 
   return (
-    <div className="site" data-page={page.id} data-world={world ? 'on' : 'off'}>
+    <div className={`site${intro ? ' site--intro' : ''}`} data-page={page.id} data-world={world ? 'on' : 'off'}>
       {world && (
         <div className="site__world">
           <Suspense fallback={null}>
