@@ -28,6 +28,7 @@ const VERT = /* glsl */`
   uniform float uMorph;      // 0 = forma de origen, 1 = forma destino
   uniform float uBurst;      // cuánto se infla a mitad de camino
   uniform float uFar;        // distancia a la que la niebla ya se la comió
+  uniform float uRepel;      // 0 = el campo empuja hacia afuera, 1 = lejos del campo
   attribute float aSeed;
   attribute vec3  aTo;
   varying vec3  vCol;
@@ -62,8 +63,13 @@ const VERT = /* glsl */`
 
     float f = 0.0;
     if (uRadius > 0.01) {
-      f = 1.0 - smoothstep(0.0, uRadius, length(world.xyz - uField));
-      world.xyz += wn * f * uLift;
+      vec3 away = world.xyz - uField;
+      f = 1.0 - smoothstep(0.0, uRadius, length(away));
+      // Mitad hacia afuera de la forma, mitad lejos del punto del campo: con
+      // el campo en la cara frontal es "abrirse"; con el campo bajo el cursor
+      // es un hueco que sigue al cursor, como empujar la nube con el dedo.
+      vec3 dir = normalize(mix(wn, normalize(away + vec3(1e-4)), uRepel));
+      world.xyz += dir * f * uLift;
     }
     // Respiración: en reposo no parece una foto.
     world.xyz += wn * sin(uTime * 0.0009 + aSeed * 6.2831) * 2.2;
@@ -132,6 +138,7 @@ export function createPointCloud({ positions, palette, size = 240, morphMs = 110
     uBurst:  { value: burst },
     uDim:    { value: 1 },
     uFar:    { value: far },
+    uRepel:  { value: 0.5 },
   }
   const mat = new ShaderMaterial({
     uniforms, vertexShader: VERT, fragmentShader: FRAG,

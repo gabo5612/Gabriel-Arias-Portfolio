@@ -116,12 +116,15 @@ export function useNavigation(pages, { onChange } = {}) {
   // ── Touch ─────────────────────────────────────────────────────────────────
   // Sólo el swipe horizontal navega: el vertical es del panel.
   useEffect(() => {
-    let x0 = 0, y0 = 0, t0 = 0
+    let x0 = 0, y0 = 0, t0 = 0, onWorld = false
     const onStart = e => {
       const p = e.touches[0]
       x0 = p.clientX; y0 = p.clientY; t0 = performance.now()
+      // Sobre la figura, arrastrar la gira: no es un swipe de navegación.
+      onWorld = !!e.target.closest?.('.world')
     }
     const onEnd = e => {
+      if (onWorld) return
       const p = e.changedTouches[0]
       const dx = p.clientX - x0, dy = p.clientY - y0
       if (performance.now() - t0 > 700) return

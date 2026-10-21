@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react'
-import { CatmullRomCurve3, Group, MathUtils, Vector3 } from 'three'
+import { CatmullRomCurve3, Group, MathUtils, Plane, Raycaster, Vector2, Vector3 } from 'three'
 import { createStage } from '../engine/stage'
 import { createPointCloud } from '../engine/pointCloud'
 import { createDust } from '../engine/dust'
 import { resolveShape } from '../engine/shapes/sources'
 import { SHAPES } from '../engine/shapes/procedural'
 import { handMode } from '../engine/gestures'
+import { pointer } from './pointer'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
@@ -98,7 +99,12 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       stage.own(cloud)
       // `item` es el ítem que esta estación está mostrando; undefined fuerza el
       // primer armado.
-      return { page: p, outer, inner, cloud, rotX: 0, rotY: 0, spin: i * 1.3, want: null, flat: false, item: undefined }
+      // ux/uy: giro que puso quien arrastró, con su velocidad vx/vy (inercia).
+      // pos: la forma actual, para poder estallarla y rearmarla con un clic.
+      return {
+        page: p, outer, inner, cloud, rotX: 0, rotY: 0, spin: i * 1.3, want: null, flat: false,
+        item: undefined, ux: 0, uy: 0, vx: 0, vy: 0, pos: null, over: false,
+      }
     })
 
     // Pide a una estación que adopte una forma. Si llegan dos pedidos antes de
@@ -114,7 +120,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       if (!flat && st.flat) st.spin = st.rotY
       st.flat = flat
       shapeOf(spec).then(pos => {
-        if (st.want === k && !disposed) st.cloud.morphTo(pos, null, performance.now(), opts)
+        if (st.want !== k || disposed) return
+        st.pos = pos
+        st.cloud.morphTo(pos, null, performance.now(), opts)
       }).catch(err => console.warn(`[world] ${st.page.id}:`, err.message))
     }
     const specFor = (p, item) => (item && p.scene.itemShape?.(item)) || p.scene.shape
@@ -179,6 +187,47 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     }
     // Si la navegación ya cambió mientras se montaba, ponerse al día.
     apiRef.current.sync(nav.current.state, 0)
+
+    // ── El cursor sobre la figura ───────────────────────────────────────────
+    // El puntero (mouse, o la punta del dedo cuando apuntás) se proyecta sobre
+    // un plano que pasa por el centro de la formación activa, de cara a la
+    // cámara. Si cae dentro de la figura, el campo se muda ahí: las partículas
+    // bajo el cursor se apartan y se encienden. Arrastrar la gira, con inercia;
+    // un clic sin arrastre la hace estallar y rearmarse.
+    const ray = new Raycaster(), ndc = new Vector2(), plane = new Plane()
+    const hit = new Vector3(), toCamN = new Vector3(), fieldT = new Vector3()
+    let drag = null
+
+    const poke = st => { if (st.pos) st.cloud.morphTo(st.pos, null, performance.now(), { burst: 80 }) }
+    const onDown = e => {
+      const st = stations[active]
+      if (e.button !== 0 || !st.over || !e.target.closest?.('.world')) return
+      drag = { x: e.clientX, y: e.clientY, moved: 0 }
+      st.vx = st.vy = 0
+      host.setPointerCapture?.(e.pointerId)
+      e.preventDefault()
+    }
+    const onMove = e => {
+      if (!drag) return
+      const st = stations[active]
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y
+      drag.x = e.clientX; drag.y = e.clientY
+      drag.moved += Math.abs(dx) + Math.abs(dy)
+      st.vy = dx * 0.009; st.vx = dy * 0.007
+      st.uy += st.vy; st.ux += st.vx
+    }
+    const onUp = () => {
+      if (!drag) return
+      if (drag.moved < 6) poke(stations[active])
+      drag = null
+    }
+    // El pellizco de la mano sobre algo que no es un link llega acá.
+    const onHandPoke = () => { if (stations[active].over) poke(stations[active]) }
+    window.addEventListener('pointerdown', onDown)
+    window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+    window.addEventListener('world-poke', onHandPoke)
 
     // ── Cuadro ──────────────────────────────────────────────────────────────
     const camVec = new Vector3()
@@ -248,7 +297,15 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         const k = mine && onCam ? 0.3 : 0.06
         st.rotY += (tx - st.rotY) * k
         st.rotX += (ty - st.rotX) * k
-        st.inner.rotation.set(st.rotX, st.rotY, 0)
+        // Inercia del arrastre. El texto vuelve solo al frente: girado no se lee.
+        if (!(drag && mine)) {
+          st.uy += st.vy; st.ux += st.vx
+          st.vy *= 0.94; st.vx *= 0.94
+          if (st.flat) { st.uy *= 0.92; st.ux *= 0.92 }
+          else st.ux *= 0.985
+        }
+        st.ux = Math.max(-1.3, Math.min(1.3, st.ux))
+        st.inner.rotation.set(st.rotX + st.ux, st.rotY + st.uy, 0)
         st.outer.scale.setScalar(scale)
         st.outer.updateMatrixWorld()
 
@@ -256,12 +313,42 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         center.setFromMatrixPosition(st.outer.matrixWorld)
         u.uCenter.value.copy(center)
         u.uSize.value = SIZE * scale
-        // El campo vive en la cara que mira a la cámara y sólo en la formación
-        // donde estás: los dedos abren la de acá, no la del fondo.
-        const n = mine ? Math.max(0, Math.min(5, onCam ? (s.fingers ?? 5) : 3)) / 5 : 0
-        u.uField.value.copy(camVec).sub(center).normalize().multiplyScalar(SIZE * scale).add(center)
-        u.uRadius.value = n * SIZE * scale * 0.95
-        u.uLift.value = n * 34
+        // Sin cursor encima, el campo vive en la cara que mira a la cámara y
+        // sólo en la formación donde estás: los dedos abren la de acá, no la
+        // del fondo. Con el cursor encima, se muda bajo el cursor.
+        toCamN.copy(camVec).sub(center).normalize()
+        st.over = false
+        if (mine && !flying && pointer.source !== 'none') {
+          ndc.set((pointer.x / w) * 2 - 1, -(pointer.y / h) * 2 + 1)
+          ray.setFromCamera(ndc, camera)
+          plane.setFromNormalAndCoplanarPoint(toCamN, center)
+          st.over = !!ray.ray.intersectPlane(plane, hit) && hit.distanceTo(center) < SIZE * scale * 1.1
+        }
+        let radiusT, liftT, repelT
+        if (st.over || (drag && mine)) {
+          // El cursor toca el plano medio de la figura, pero lo que se ve es
+          // su cara frontal: el campo se adelanta hasta donde estaría esa cara
+          // en una esfera del mismo radio (en el texto, plano, se queda en el
+          // plano). Si no, el hueco se abriría por dentro, donde no hay nada.
+          const R = SIZE * scale
+          const d = hit.distanceTo(center)
+          const depth = st.flat ? 0 : Math.sqrt(Math.max(0, R * R - d * d)) * 0.9
+          fieldT.copy(hit).addScaledVector(toCamN, depth)
+          radiusT = R * 0.6
+          liftT = 90
+          repelT = 1
+        } else {
+          const n = mine ? Math.max(0, Math.min(5, onCam ? (s.fingers ?? 5) : 3)) / 5 : 0
+          fieldT.copy(toCamN).multiplyScalar(SIZE * scale).add(center)
+          radiusT = n * SIZE * scale * 0.95
+          liftT = n * 34
+          repelT = 0
+        }
+        u.uField.value.lerp(fieldT, 0.3)
+        u.uRadius.value += (radiusT - u.uRadius.value) * 0.15
+        u.uLift.value += (liftT - u.uLift.value) * 0.15
+        u.uRepel.value += (repelT - u.uRepel.value) * 0.15
+        if (mine) host.style.cursor = drag ? 'grabbing' : st.over ? 'grab' : ''
         st.cloud.update(now)
       }
 
@@ -271,6 +358,12 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     return () => {
       disposed = true
       apiRef.current = null
+      window.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+      window.removeEventListener('world-poke', onHandPoke)
+      host.style.cursor = ''
       stage.dispose()
     }
   }, [signal, pages, onFail])

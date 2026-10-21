@@ -60,7 +60,9 @@ export default function HandControls({ signal, pages, state, go }) {
     }
     const clickAt = (x, y) => {
       const el = document.elementFromPoint(x, y)?.closest(CLICKABLE)
-      if (!el) return
+      // Nada clicable debajo: puede ser la figura. El mundo decide si el
+      // pellizco cayó sobre ella (la hace estallar) o en el vacío.
+      if (!el) { window.dispatchEvent(new CustomEvent('world-poke', { detail: { x, y } })); return }
       // Un .click() sintético dispara los mismos onClick de React que el mouse.
       el.click()
       el.classList.add('is-hand-press')

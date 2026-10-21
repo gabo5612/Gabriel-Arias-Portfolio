@@ -382,24 +382,37 @@ p.projects__kind { margin: -12px 0 14px; }
 /* La guía del gesto, sobre el mapa. */
 .site .gesture { position: absolute; z-index: 4; bottom: calc(var(--route-h) + 6px); }
 
-/* ── Lupa de texto ────────────────────────────────────────────────────────
-   useTextLens escribe --t (0..1) en las palabras cerca del cursor, sea el
-   mouse o la punta del dedo. Se levantan un poco, crecen y se calientan; lejos
-   del cursor --t no existe y la palabra es texto normal. inline-block porque
-   un transform no se aplica a un inline. */
+/* ── Distorsión del texto ─────────────────────────────────────────────────
+   useTextLens escribe en cada palabra cerca del cursor (mouse o dedo):
+     --t       0..1, cuánto le afecta (1 = justo debajo)
+     --dx/--dy dirección desde el cursor hacia la palabra
+   La palabra se aparta del cursor como limadura ante un imán, se tuerce hacia
+   ese lado y se desdobla en rojo/cian, con el ámbar encima. Lejos del cursor
+   no hay variables y es texto normal. inline-block porque un transform no se
+   aplica a un inline. */
 .w {
   display: inline-block;
-  --t: 0;
-  /* Crece poco y desde la base: con más, la palabra se come el espacio de
-     al lado y dos palabras encendidas se leen como una. */
-  transform-origin: 50% 85%;
-  transform: translateY(calc(var(--t) * -0.16em)) scale(calc(1 + var(--t) * var(--lens-scale, .04)));
+  --t: 0; --dx: 0; --dy: 0;
+  --push: 18px;          /* cuánto se aparta */
+  --twist: 9deg;         /* cuánto se tuerce */
+  --split: 3px;          /* cuánto se desdobla el color */
+  transform-origin: 50% 70%;
+  transform:
+    translate(calc(var(--dx) * var(--t) * var(--push)), calc(var(--dy) * var(--t) * var(--push) * .7))
+    rotate(calc(var(--dx) * var(--t) * var(--twist)))
+    skewX(calc(var(--dx) * var(--t) * var(--twist) * -1.4))
+    scale(calc(1 + var(--t) * .06));
   color: color-mix(in oklab, #ffd58a calc(var(--t) * 100%), currentColor);
-  text-shadow: 0 0 calc(var(--t) * 16px) rgba(245, 165, 36, calc(var(--t) * .55));
-  transition: transform 160ms ease-out, color 160ms ease-out, text-shadow 160ms ease-out;
+  text-shadow:
+    calc(var(--t) * var(--split) * -1) 0 rgba(255, 70, 120, calc(var(--t) * .75)),
+    calc(var(--t) * var(--split)) 0 rgba(70, 200, 255, calc(var(--t) * .75)),
+    0 0 calc(var(--t) * 18px) rgba(245, 165, 36, calc(var(--t) * .6));
+  transition: transform 140ms ease-out, color 140ms ease-out, text-shadow 140ms ease-out;
 }
-/* En titulares grandes cualquier escala es un salto: ahí casi sólo brillo. */
-.panel__title .w, .home__name .w, .timeline__role .w { --lens-scale: .015; }
+/* En los titulares la misma fuerza sería ilegible: empujan menos y se tuercen
+   menos, pero el desdoble se nota más porque la letra es más grande. */
+.panel__title .w, .home__name .w { --push: 12px; --twist: 5deg; --split: 5px; }
+.timeline__role .w, .projects__name .w { --push: 14px; --twist: 7deg; }
 
 /* ── Cursor de la mano ────────────────────────────────────────────────────
    La punta es el punto exacto del clic; el anillo se cierra con el pellizco,

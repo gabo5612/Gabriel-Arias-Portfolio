@@ -44,9 +44,16 @@ El cursor se congela donde empezaste a cerrar el pellizco, porque juntar el pulg
 la punta del índice. Con la palma abierta, la mano además agarra la formación y mueve la
 cámara (paralaje).
 
-**Lupa de texto.** Cada palabra del panel es un `<span class="w">` (lo genera `<Rich>`).
-Las palabras cerca del cursor, sea el mouse o el dedo, se encienden y se levantan. Lo hace
-`site/useTextLens.js`; el aspecto vive en `site.css`.
+### El cursor (mouse o dedo)
+
+- **Sobre la figura:** las partículas bajo el cursor se apartan y se encienden; el campo se
+  coloca sobre la cara visible, no en el plano medio. **Arrastrar** la gira con inercia
+  (el texto vuelve solo al frente). **Clic**, o pellizco con la mano, la hace estallar y
+  rearmarse. En touch, arrastrar sobre la figura la gira y no navega.
+- **Sobre el texto:** cada palabra del panel es un `<span class="w">` (lo genera `<Rich>`).
+  Las cercanas al cursor se apartan de él como limaduras ante un imán, se tuercen y se
+  desdoblan en rojo/cian. `site/useTextLens.js` escribe `--t`, `--dx` y `--dy` por palabra;
+  la fuerza (`--push`, `--twist`, `--split`) se ajusta en `site.css`.
 
 **Probar sin webcam (sólo en `npm run dev`):**
 
