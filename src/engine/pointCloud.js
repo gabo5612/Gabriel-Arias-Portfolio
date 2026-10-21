@@ -29,6 +29,9 @@ const VERT = /* glsl */`
   uniform float uBurst;      // cuánto se infla a mitad de camino
   uniform float uFar;        // distancia a la que la niebla ya se la comió
   uniform float uRepel;      // 0 = el campo empuja hacia afuera, 1 = lejos del campo
+  uniform float uWaveAt;     // cuándo salió la onda (ms; muy negativo = nunca)
+  uniform vec3  uWaveFrom;   // de dónde sale, en mundo
+  uniform vec3  uWaveCol;    // el color que deja a su paso
   attribute float aSeed;
   attribute vec3  aTo;
   varying vec3  vCol;
@@ -73,6 +76,15 @@ const VERT = /* glsl */`
     }
     // Respiración: en reposo no parece una foto.
     world.xyz += wn * sin(uTime * 0.0009 + aSeed * 6.2831) * 2.2;
+    // La onda: una esfera que crece desde uWaveFrom. Al pasar levanta los
+    // puntos (la cresta) y los tiñe; el tinte dura un momento y se va, de
+    // adentro hacia afuera, en el mismo orden en que llegó.
+    float since = uTime - uWaveAt - length(world.xyz - uWaveFrom) / 0.55;
+    float crest = since > 0.0 ? exp(-pow(since / 140.0, 2.0)) : 0.0;
+    float tint = since > 0.0 ? 1.0 - smoothstep(500.0, 1700.0, since) : 0.0;
+    world.xyz += wn * crest * 26.0;
+    vCol = mix(vCol, uWaveCol, tint * 0.9);
+    f = max(f, crest * 0.6);
     vGlow = f;
 
     // Por profundidad hacia la cámara y no por normal: en las formas planas
@@ -139,6 +151,9 @@ export function createPointCloud({ positions, palette, size = 240, morphMs = 110
     uDim:    { value: 1 },
     uFar:    { value: far },
     uRepel:  { value: 0.5 },
+    uWaveAt:   { value: -1e9 },
+    uWaveFrom: { value: new Vector3() },
+    uWaveCol:  { value: new Color(0xe8322a) },
   }
   const mat = new ShaderMaterial({
     uniforms, vertexShader: VERT, fragmentShader: FRAG,
@@ -170,6 +185,12 @@ export function createPointCloud({ positions, palette, size = 240, morphMs = 110
       if (nextPalette) uniforms.uColTo.value.forEach((c, i) => c.set(nextPalette[i]))
       uniforms.uBurst.value = b
       morphAt = now
+    },
+    // Una onda de color que sale de `from` (mundo) y recorre la forma.
+    wave(now, from, color) {
+      uniforms.uWaveAt.value = now
+      uniforms.uWaveFrom.value.copy(from)
+      if (color != null) uniforms.uWaveCol.value.set(color)
     },
     update(now) {
       uniforms.uMorph.value = progress(now)

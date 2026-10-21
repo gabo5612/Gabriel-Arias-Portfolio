@@ -589,10 +589,18 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         const k = raw < 0.3 ? easeInOut(raw / 0.3) : 1
         planePos.lerpVectors(planeStart, planePos, k)
         if (raw > 0.72) planePos.lerp(A[planeFlight.to], easeInOut((raw - 0.72) / 0.28))
-        paper.place(planePos, now, up, k, 0.6 * scale)
+        // La formación lo absorbe: en el último tramo se encoge hacia su
+        // centro hasta desaparecer dentro.
+        const swallow = raw > 0.8 ? easeInOut((raw - 0.8) / 0.2) : 0
+        paper.place(planePos, now, up, k, 0.6 * scale * (1 - swallow * 0.97))
         if (!flying) {
           paper.hide()
-          poke(stations[planeFlight.to])
+          // Y lo que tragó se le nota: una onda roja sale del centro, recorre
+          // la forma y se apaga, y la forma vuelve a sus colores.
+          const dest = stations[planeFlight.to]
+          center.setFromMatrixPosition(dest.outer.matrixWorld)
+          dest.cloud.wave(now, center, PLANE_PALETTE[0])
+          sound.absorb()
           restore(planeFlight.from, now)
           planeFlight = null
         }

@@ -370,6 +370,16 @@ export const sound = {
     oscs[0].onended = () => { g.disconnect(); p?.disconnect() }
   },
 
+  // La formación se traga al avión: un grave que cae (el trago) y, sobre la
+  // onda, el acorde de la estación subiendo como campanas.
+  absorb() {
+    if (!live()) return
+    const t = ctx.currentTime
+    tone(240, { at: t, dur: 0.55, gain: 0.14, glideTo: 50, wet: 0.4 })
+    tone(120, { at: t + 0.02, dur: 0.9, gain: 0.08, type: 'triangle', glideTo: 40, wet: 0.5 })
+    stationChord(station).forEach((s, k) => bell(padHz(s + 12), t + 0.18 + k * 0.12, 0.04, (k / 3 - 0.5) * 0.9))
+  },
+
   // Llegada: el acorde de la estación como campanas, de izquierda a derecha.
   arrive(i) {
     if (!live()) return

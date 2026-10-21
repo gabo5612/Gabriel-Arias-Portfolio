@@ -67,7 +67,10 @@ en un biplano rojo de perfil (`engine/shapes/biplane.js`: fuselaje, alas con mon
 tren de aterrizaje y hélice). Cuando terminó de armarse, despega: en el mismo cuadro la
 formación se apaga y aparece un biplano idéntico que sí puede volar (`engine/particlePlane.js`,
 hélice girando y dos estelas). Vuela delante de la cámara, que lo persigue, y se estrella
-contra la formación de Projects, que estalla. La esfera vuelve a armarse fuera de cuadro.
+hasta la formación de Projects, que lo absorbe: el avión se encoge hacia su centro y desaparece
+dentro, y desde ahí sale una onda que recorre la forma (la levanta y la tiñe de rojo al pasar)
+y se apaga en el mismo orden, devolviéndole sus colores (`cloud.wave()` en `pointCloud.js`).
+La esfera vuelve a armarse fuera de cuadro.
 El botón avisa con el evento `world-plane`; si el mundo contesta con `detail.delay`, espera
 ese tiempo (el armado) antes de navegar. Sin mundo, navega en el acto.
 
