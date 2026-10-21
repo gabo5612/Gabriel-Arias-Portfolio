@@ -47,11 +47,13 @@ export default function Home({ go, cam, tilt, reduced }) {
       </p>
       <p className="home__tagline"><Rich text={profile.tagline} /></p>
       <div className="home__actions">
-        <button type="button" className="btn btn-primary" onClick={e => {
-          // Literal: el mundo suelta un avión de papel desde este botón.
-          const r = e.currentTarget.getBoundingClientRect()
-          window.dispatchEvent(new CustomEvent('world-plane', { detail: { x: r.left + r.width / 2, y: r.top + r.height / 2 } }))
-          go({ type: 'goto', id: 'projects' })
+        <button type="button" className="btn btn-primary" onClick={() => {
+          // Literal: la esfera se convierte en un biplano y despega. Si el mundo
+          // está, contesta cuánto tarda en armarlo; sin mundo, se navega ya.
+          const detail = { delay: 0 }
+          window.dispatchEvent(new CustomEvent('world-plane', { detail }))
+          const fly = () => go({ type: 'goto', id: 'projects' })
+          if (detail.delay) setTimeout(fly, detail.delay); else fly()
         }}>
           Fly to my projects
         </button>

@@ -60,13 +60,16 @@ guarda en `localStorage` de este navegador y se aplica en vivo.
 apagar). Telemetría y la nota de la CSP, detrás de **More**. `?fakehud` (sólo en dev) lo
 muestra sin cámara, para diseñarlo.
 
-### El avión de papel
+### El biplano
 
-**Fly to my projects** lo hace literal: el botón suelta un avión de papel (`engine/paperPlane.js`)
-que despega desde el botón, vuela delante de la cámara zigzagueando y ladeándose, con dos
-estelas de partículas, y se estrella contra la formación de Projects, que estalla al
-recibirlo. Tiene su propio zumbido de hélice. El botón avisa con el evento `world-plane`
-antes de navegar; cualquier otro botón puede hacer lo mismo.
+**Fly to my projects** lo hace literal: la esfera de Home se reordena, con sus mismos puntos,
+en un biplano rojo de perfil (`engine/shapes/biplane.js`: fuselaje, alas con montantes, cola,
+tren de aterrizaje y hélice). Cuando terminó de armarse, despega: en el mismo cuadro la
+formación se apaga y aparece un biplano idéntico que sí puede volar (`engine/particlePlane.js`,
+hélice girando y dos estelas). Vuela delante de la cámara, que lo persigue, y se estrella
+contra la formación de Projects, que estalla. La esfera vuelve a armarse fuera de cuadro.
+El botón avisa con el evento `world-plane`; si el mundo contesta con `detail.delay`, espera
+ese tiempo (el armado) antes de navegar. Sin mundo, navega en el acto.
 
 ### Títulos de partículas
 

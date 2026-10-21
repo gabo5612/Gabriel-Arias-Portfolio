@@ -249,7 +249,7 @@ await check('tilting the phone drives the camera', async page => {
   assert(s.source === 'gyro' && s.x > 0.3, `source ${s.source}, x ${s.x?.toFixed(2)}`)
 })
 
-await check('"Fly to my projects" launches a paper plane that lands in the projects figure', async page => {
+await check('"Fly to my projects" turns the sphere into a dot biplane that flies to Projects', async page => {
   await open(page)
   const seen = page.evaluate(() => new Promise(r => {
     const pts = []
@@ -257,7 +257,7 @@ await check('"Fly to my projects" launches a paper plane that lands in the proje
     const f = () => {
       const p = window.__plane?.()
       if (p?.on && p.z < 1) pts.push(p)
-      if (performance.now() - t0 < 3500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
+      if (performance.now() - t0 < 5500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
     }
     requestAnimationFrame(f)
   }))

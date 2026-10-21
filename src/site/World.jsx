@@ -10,7 +10,7 @@ import { pointer } from './pointer'
 import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 import { sound } from '../engine/audio/worldSound'
-import { createPaperPlane } from '../engine/paperPlane'
+import { createParticlePlane, PLANE_PALETTE } from '../engine/particlePlane'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
@@ -89,19 +89,48 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     scene.add(dust.points)
     stage.own(dust)
 
-    // ── Avión de papel ──────────────────────────────────────────────────────
-    // "Fly to my projects" lo dice literal: el botón suelta un avión que
-    // despega desde donde está el botón, vuela por el circuito delante de la
-    // cámara (que lo sigue) y se estrella contra la formación de destino, que
-    // estalla al recibirlo. El botón avisa con el evento 'world-plane' justo
-    // antes de navegar; el vuelo siguiente lo lleva.
-    const paper = createPaperPlane({ trail: small ? 360 : 700 })
+    // ── El biplano ──────────────────────────────────────────────────────────
+    // "Fly to my projects" lo dice literal. La formación donde estás (la
+    // esfera de Home) se reordena en un biplano hecho de sus mismos puntos;
+    // cuando terminó de armarse, despega: en el mismo cuadro se apaga la
+    // formación y aparece un biplano idéntico (mismos puntos, misma posición,
+    // giro y escala) que sí puede volar. Vuela delante de la cámara, que lo
+    // persigue, y se estrella contra la formación de destino, que estalla al
+    // recibirlo. La formación de origen vuelve a ser esfera fuera de cuadro.
+    //
+    // El botón avisa con el evento 'world-plane' y, si el mundo contesta con
+    // detail.delay, espera eso antes de navegar: es el tiempo del armado.
+    const TRANSFORM_MS = 1100
+    const paper = createParticlePlane({ count, size: SIZE, far: FAR, trail: small ? 360 : 700 })
     scene.add(paper.group, paper.points)
     stage.own(paper)
     let planeReq = null, planeFlight = null
-    const planeStart = new Vector3(), planePos = new Vector3(), ndcV = new Vector3(), fwd = new Vector3()
-    const onPlane = e => { planeReq = { x: e.detail?.x, y: e.detail?.y, at: performance.now() } }
+    const planeStart = new Vector3(), planePos = new Vector3(), fwd = new Vector3()
+    const onPlane = e => {
+      const now = performance.now()
+      if (planeFlight || planeReq || now - flightAt < flightMs) return
+      const st = stations[active]
+      if (!st.pos) return
+      // De frente y quieta, como en una foto: el biplano se lee de perfil.
+      if (!st.flat) st.rotY = Math.atan2(Math.sin(st.rotY), Math.cos(st.rotY))
+      st.flat = true
+      st.want = 'plane'
+      st.cloud.morphTo(paper.all, PLANE_PALETTE, now, { burst: 40 })
+      planeReq = { at: now, from: active }
+      sound.sparkle('form', TRANSFORM_MS)
+      if (e.detail) e.detail.delay = TRANSFORM_MS
+    }
     window.addEventListener('world-plane', onPlane)
+    // La formación de origen vuelve a ser lo que era.
+    const restore = (i, now) => {
+      const st = stations[i]
+      st.cloud.points.visible = true
+      st.flat = false
+      st.spin = st.rotY
+      st.want = null
+      if (st.pos) st.cloud.morphTo(st.pos, st.page.scene.palette, now, { burst: 0 })
+    }
+
     // Sólo en desarrollo: para inspeccionar el vuelo del avión desde las pruebas.
     if (import.meta.env.DEV) {
       window.__plane = () => {
@@ -210,17 +239,14 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       travelDir = Math.sign(end - cur)
       flightMs = 1500 + 520 * Math.max(0, Math.abs(end - cur) - 1)
       flightAt = now
-      planeFlight = null
-      if (planeReq && now - planeReq.at < 1500) {
+      if (planeReq && now - planeReq.at < 3000) {
         // Con avión el viaje se alarga un poco: es para verlo.
         flightMs *= 1.35
-        // Despega del botón: su centro en pantalla, a 140 unidades de la cámara.
-        const { w, h } = stage.size
-        ndcV.set(((planeReq.x ?? w * 0.3) / w) * 2 - 1, -((planeReq.y ?? h * 0.7) / h) * 2 + 1, 0.5)
-          .unproject(camera).sub(camera.position).normalize()
-        planeStart.copy(camera.position).addScaledVector(ndcV, 140)
-        paper.show(planeStart)
-        planeFlight = { to: page }
+        const src = stations[planeReq.from]
+        paper.show(src.inner)
+        planeStart.copy(paper.group.position)
+        src.cloud.points.visible = false
+        planeFlight = { to: page, from: planeReq.from }
         sound.plane(flightMs)
       }
       planeReq = null
@@ -557,17 +583,23 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         camera.getWorldDirection(fwd)
         right.crossVectors(fwd, up).normalize()
         planePos.copy(camera.position)
-          .addScaledVector(fwd, 260)
-          .addScaledVector(right, Math.sin(now * 0.0017) * 70)
-          .addScaledVector(up, -45 + Math.sin(now * 0.0026) * 22)
-        if (raw < 0.25) planePos.lerpVectors(planeStart, planePos, easeInOut(raw / 0.25))
-        if (raw > 0.7) planePos.lerp(A[planeFlight.to], easeInOut((raw - 0.7) / 0.3))
-        paper.moveTo(planePos, now, up)
+          .addScaledVector(fwd, 620)
+          .addScaledVector(right, Math.sin(now * 0.0017) * 90)
+          .addScaledVector(up, -60 + Math.sin(now * 0.0026) * 28)
+        const k = raw < 0.3 ? easeInOut(raw / 0.3) : 1
+        planePos.lerpVectors(planeStart, planePos, k)
+        if (raw > 0.72) planePos.lerp(A[planeFlight.to], easeInOut((raw - 0.72) / 0.28))
+        paper.place(planePos, now, up, k, 0.6 * scale)
         if (!flying) {
           paper.hide()
           poke(stations[planeFlight.to])
+          restore(planeFlight.from, now)
           planeFlight = null
         }
+      } else if (planeReq && now - planeReq.at > 3000) {
+        // Se armó el avión pero nunca hubo viaje: vuelve a ser lo que era.
+        restore(planeReq.from, now)
+        planeReq = null
       }
       paper.update(now)
 
