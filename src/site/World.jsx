@@ -11,22 +11,27 @@ import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 import { sound } from '../engine/audio/worldSound'
 import { createParticlePlane, PLANE_PALETTE } from '../engine/particlePlane'
+import { flightMs as flightFor, PLANE_STRETCH } from './flight'
 
-// El mundo: un circuito cerrado en el espacio con una formación de partículas
-// por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
-// hasta la formación siguiente. Lo que ves de fondo —las otras formaciones,
+// El mundo: una avenida recta en el espacio con una formación de partículas
+// por página. Navegar no cambia de pantalla, mueve la cámara por la avenida
+// hasta la formación siguiente. Lo que ves al fondo —las otras formaciones,
 // apagadas por la niebla— son los otros lugares del sitio, donde realmente
-// están.
+// están: la de destino se ve chica a lo lejos y crece mientras llegás.
 //
-// Geometría: la cámara de la estación i está en C_i, sobre un círculo; su
-// formación está en A_i = C_i + T_i · VIEW_D, adelante en la tangente. Como el
-// circuito se curva, el vuelo de C_i a C_i+1 pasa rozando A_i: se atraviesa la
-// nube que acabás de dejar.
+// Geometría: la cámara de la estación i está en C_i, sobre una línea que
+// avanza hacia −z; su formación está en A_i = C_i + T·VIEW_D + derecha·SIDE,
+// adelante y a un costado. En línea y no en círculo para que cada vuelo
+// muestre lo que hay entre medio: las formaciones intermedias pasan al lado,
+// enteras, en vez de quedar detrás de una curva. La cámara siempre mira hacia
+// adelante (−z): yendo hacia atrás retrocede mirando al frente, y las
+// formaciones aparecen por el costado y se alejan delante.
 //
 // Todo lo que cambia por cuadro se lee de refs (señal, navegación) y se
 // escribe directo en three. React sólo monta y desmonta.
 
-const LOOP_R = 2200
+const STEP = 2000          // distancia entre estaciones
+const SIDE = 480           // cuánto a la derecha del camino está cada formación
 const VIEW_D = 900
 const SIZE = 240
 const FAR = 5200
@@ -34,7 +39,6 @@ const CLEAR = 620          // distancia mínima a una formación intermedia en v
 
 const smoothstep = (a, b, v) => { const k = Math.max(0, Math.min(1, (v - a) / (b - a))); return k * k * (3 - 2 * k) }
 const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2)
-const wrap01 = t => ((t % 1) + 1) % 1
 const shapeKey = spec => JSON.stringify(spec)
 
 export default function World({ signal, pages, state, dir, onFail, onTravel }) {
@@ -62,20 +66,26 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     const count = small ? 1600 : 4200
     const up = new Vector3(0, 1, 0)
 
-    // ── Circuito ────────────────────────────────────────────────────────────
+    // ── Avenida ─────────────────────────────────────────────────────────────
     const C = [], T = [], A = []
+    const fwdZ = new Vector3(0, 0, -1)
+    const side = new Vector3(1, 0, 0)       // derecha, mirando hacia −z
     for (let i = 0; i < N; i++) {
-      const a = (i / N) * Math.PI * 2
       // Una ondulación vertical suave: en un plano perfecto el vuelo se siente
-      // como un carrusel, con subidas y bajadas se siente como un recorrido.
-      C.push(new Vector3(Math.sin(a) * LOOP_R, Math.sin(a * 2) * 200, -Math.cos(a) * LOOP_R))
+      // como un riel; con subidas y bajadas, como un recorrido.
+      C.push(new Vector3(0, Math.sin(i * 1.3) * 110, -i * STEP))
+      T.push(fwdZ)
+      A.push(C[i].clone().addScaledVector(fwdZ, VIEW_D).addScaledVector(side, SIDE))
     }
-    const curve = new CatmullRomCurve3(C, true, 'catmullrom', 0.5)
-    for (let i = 0; i < N; i++) {
-      // El parámetro del nodo i en una curva cerrada de three es exactamente i/N.
-      T.push(curve.getTangent(i / N).normalize())
-      A.push(C[i].clone().addScaledVector(T[i], VIEW_D))
-    }
+    // La curva de la cámara pasa por las estaciones; la del polvo se estira
+    // más allá de las puntas, para que el principio y el final no se vean
+    // desnudos.
+    const curve = new CatmullRomCurve3(C, false, 'catmullrom', 0.5)
+    const camAt = (t, out) => curve.getPoint(Math.max(0, Math.min(1, t / (N - 1))), out)
+    const dustCurve = new CatmullRomCurve3([
+      C[0].clone().addScaledVector(fwdZ, -STEP * 1.5), ...C,
+      C[N - 1].clone().addScaledVector(fwdZ, STEP * 2),
+    ], false)
 
     // ── Títulos de partículas ───────────────────────────────────────────────
     // Dos nubes pegadas a la cámara: una forma el título que llega, otra
@@ -87,7 +97,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     camera.add(formP.points, dissolveP.points)
     stage.own(formP, dissolveP)
 
-    const dust = createDust(curve, { count: small ? 3000 : 9000, far: FAR * 0.8 })
+    const dust = createDust(dustCurve, { count: small ? 3000 : 9000, far: FAR * 0.8 })
     scene.add(dust.points)
     stage.own(dust)
 
@@ -236,20 +246,12 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     const go = (page, dir) => {
       const now = performance.now()
       const cur = t
-      // El destino es `page + k·N` para el k que respeta la dirección pedida:
-      // "siguiente" desde la última da la vuelta hacia adelante, no retrocede
-      // por todo el circuito. Sin dirección (un clic en el mapa), el camino corto.
-      let end
-      if (dir > 0) { end = page; while (end <= cur + 1e-3) end += N }
-      else if (dir < 0) { end = page; while (end >= cur - 1e-3) end -= N }
-      else {
-        end = page + Math.round((cur - page) / N) * N
-      }
+      // En línea no hay atajos ni vueltas: el destino es la estación misma.
+      const end = page
       if (Math.abs(end - cur) < 1e-3) return
       fromT = cur; toT = end
       travelDir = Math.sign(end - cur)
-      // Cada estación de más alarga el viaje lo justo para verla pasar.
-      flightMs = 1500 + 900 * Math.max(0, Math.abs(end - cur) - 1)
+      flightMs = flightFor(Math.round(Math.abs(end - cur)))
       flightAt = now
       // Navegar a otra parte con el avión en el aire: el viaje se cancela, el
       // avión desaparece y la formación de origen vuelve a ser la de siempre.
@@ -259,8 +261,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         planeFlight = null
       }
       if (planeReq && now - planeReq.at < 3000) {
-        // Con avión el viaje dura el doble: es para verlo.
-        flightMs *= 2
+        flightMs *= PLANE_STRETCH
         const src = stations[planeReq.from]
         paper.show(src.inner)
         planeStart.copy(paper.group.position)
@@ -445,30 +446,27 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       dust.uniforms.uSpeed.value += (speed - dust.uniforms.uSpeed.value) * 0.15
       dust.uniforms.uTime.value = now
 
-      curve.getPoint(wrap01(t / N), pos)
+      camAt(t, pos)
       stationLook(active, target)
       if (!flying) look.copy(target)
       else {
         // Hacia dónde mira la cámara en vuelo, por capas:
-        //   1. hacia adelante en el camino: es lo que convierte una
-        //      interpolación de cámara en la sensación de avanzar;
-        //   2. de reojo, a cada formación por la que pasa (en un viaje largo,
-        //      las estaciones intermedias se ven al costado, no se saltean);
-        //   3. en el último tramo, a la de destino: aparece chica a lo lejos y
-        //      crece a medida que llega;
+        //   1. al frente de la avenida (−z), sea cual sea el sentido: hacia
+        //      atrás se retrocede mirando al frente;
+        //   2. de reojo, a cada formación intermedia mientras está delante y
+        //      al pasarle al lado;
+        //   3. en el último tramo, a la de destino;
         //   4. al salir, todavía a la de origen.
-        curve.getPoint(wrap01((t + travelDir * 0.25) / N), ahead)
-        look.copy(ahead)
+        look.copy(pos).addScaledVector(fwdZ, 1600).addScaledVector(side, SIDE * 0.5)
         const lo = Math.min(fromT, toT), hi = Math.max(fromT, toT)
         for (let j = Math.floor(lo) + 1; j < hi - 1e-3; j++) {
-          // Cuántas estaciones pasó de la j (negativo: todavía no llega). Se
-          // la mira desde un poco antes hasta un poco después de pasarla.
-          const u = (t - j) * travelDir
-          const g = Math.exp(-(((u - 0.12) / 0.32) ** 2)) * 0.7
-          if (g > 0.01) look.lerp(A[((j % N) + N) % N], g)
+          // p < 0: la formación j todavía está delante; 0: al lado.
+          const p = t - (j + VIEW_D / STEP)
+          const g = Math.exp(-(((p + 0.15) / 0.28) ** 2)) * 0.5
+          if (g > 0.01) look.lerp(A[j], g)
         }
         const left = Math.abs(toT - t), gone = Math.abs(t - fromT)
-        look.lerp(target, 1 - smoothstep(0, 1.15, left))
+        look.lerp(target, 1 - smoothstep(0, 0.9, left))
         look.lerp(lookFrom, 1 - smoothstep(0, 0.35, gone))
       }
 
@@ -489,7 +487,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       if (flying) {
         const lo = Math.min(fromT, toT), hi = Math.max(fromT, toT)
         for (let j = Math.floor(lo) + 1; j < hi - 1e-3; j++) {
-          const aj = A[((j % N) + N) % N]
+          const aj = A[j]
           wv.subVectors(camera.position, aj)
           const d = wv.length()
           if (d < CLEAR) camera.position.addScaledVector(wv.normalize(), (CLEAR - d) * smoothstep(0, CLEAR, CLEAR - d) * 0.9 + 1e-3)
@@ -572,6 +570,11 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         st.outer.updateMatrixWorld()
 
         const u = st.cloud.uniforms
+        // En reposo, las otras formaciones apenas se insinúan: en línea quedan
+        // detrás del panel y le restarían lectura. En vuelo se encienden, que
+        // es cuando se las pasa.
+        const dimT = mine || flying ? 1 : 0.18
+        u.uDim.value += (dimT - u.uDim.value) * 0.06
         center.setFromMatrixPosition(st.outer.matrixWorld)
         u.uCenter.value.copy(center)
         u.uSize.value = SIZE * scale * st.zoom
@@ -685,7 +688,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       // tan rápido gira por el arrastre (o la inercia que dejó).
       sound.figure(a.over || drag ? 1 : 0, pointer.x / w, pointer.y / h, Math.hypot(a.vx, a.vy), a.zoom)
 
-      travelRef.current?.(wrap01(t / N), flying)
+      travelRef.current?.(t / (N - 1), flying)
     })
 
     return () => {

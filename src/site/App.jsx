@@ -12,6 +12,7 @@ import { calibrated } from '../engine/handProfile'
 import Nav from './ui/Nav'
 import RouteMap from './ui/RouteMap'
 import Welcome, { shouldWelcome } from './ui/Welcome'
+import { flightMs, PLANE_STRETCH } from './flight'
 import '../styles/engine.css'
 import '../styles/site.css'
 
@@ -36,10 +37,9 @@ const panel = {
     transition: { duration: 0.22, ease: 'easeIn' },
   }),
 }
-// `fly` es cuántas estaciones cruza el vuelo (0 = no vuela). El vuelo dura
-// 1.5 s más 0.9 s por estación de más (World.jsx); el panel entra cuando la
-// cámara ya está frenando, no a mitad de camino.
-const flyDelay = n => 0.75 + 0.9 * Math.max(0, n - 1)
+// `fly` es cuánto dura el vuelo en ms (0 = no vuela; ver flight.js). El
+// panel entra cuando la cámara ya está frenando, no a mitad de camino.
+const flyDelay = ms => Math.max(0.05, ms / 1000 - 0.75)
 const still = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
 
 const FAKE_HUD = import.meta.env.DEV && new URLSearchParams(window.location.search).has('fakehud')
@@ -108,14 +108,20 @@ export default function App() {
   // ¿Este panel llega volando? Se decide una vez por cambio de panel y se
   // congela: App se re-renderiza ~20 veces por segundo con la cámara encendida
   // (las estadísticas del HUD) y la animación de entrada no debe re-decidirse.
+  // Cuándo se pidió el biplano por última vez (el botón de Home avisa).
+  const planeAt = useRef(-Infinity)
+  useEffect(() => {
+    const on = () => { planeAt.current = performance.now() }
+    window.addEventListener('world-plane', on)
+    return () => window.removeEventListener('world-plane', on)
+  }, [])
   const shown = useRef({ key, page: state.page, fly: false })
   if (shown.current.key !== key) {
-    // Las mismas cuentas que el mundo: con dirección, el camino en ese
-    // sentido; sin ella (un clic en la barra), el corto.
-    const N = PAGES.length, from = shown.current.page, to = state.page
-    const fwd = (to - from + N) % N, back = (from - to + N) % N
-    const n = from === to ? 0 : dir > 0 ? fwd : dir < 0 ? back : Math.min(fwd, back)
-    shown.current = { key, page: state.page, fly: n }
+    // Las mismas cuentas que el mundo: en la avenida se cruzan |to − from|
+    // estaciones, y si acaba de despegar el biplano, el viaje se estira.
+    const n = Math.abs(state.page - shown.current.page)
+    const plane = performance.now() - planeAt.current < 4000
+    shown.current = { key, page: state.page, fly: flightMs(n) * (plane && n ? PLANE_STRETCH : 1) }
   }
   const fly = shown.current.fly
 

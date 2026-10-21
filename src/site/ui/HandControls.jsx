@@ -57,7 +57,7 @@ export default function HandControls({ signal, pages, state, go, paused = false 
     const pinch = createPinchClick()
     const dwell = createDwell({ ms: 1250 })
     let raf = 0, last = performance.now(), mode = 'none'
-    let flashTimer = 0, shown = '', hover = null, carry = 0
+    let flashTimer = 0, shown = '', hover = null, carry = 0, handAt = -Infinity
 
     const set = (st, caption, extra = '') => {
       const key = st + caption + extra
@@ -145,6 +145,12 @@ export default function HandControls({ signal, pages, state, go, paused = false 
       }
 
       // ── Swipe ─────────────────────────────────────────────────────────────
+      // Al aparecer, la mano no barre: la señal está suavizada y llega
+      // deslizándose desde donde estaba el mouse, y ese deslizamiento
+      // parecería un swipe. 400 ms de gracia desde que se la ve.
+      if (mode === 'none') { handAt = -Infinity; swipe.reset() }
+      else if (handAt === -Infinity) handAt = now
+      if (now - handAt < 400) swipe.reset()
       const sw = swipe.push(s, now)
       const p = mode === 'open' ? sw.progress : 0
       fillRRef.current.style.transform = `scaleX(${Math.max(0, p)})`

@@ -1,19 +1,16 @@
 import React, { useCallback, useImperativeHandle, useRef, forwardRef } from 'react'
 
-// El circuito visto desde arriba, con un punto por página y un marcador donde
-// está la cámara. No es decoración: es el mismo círculo sobre el que vuela el
-// mundo (World.jsx pone la estación i en el ángulo i/N), así que el marcador
-// recorre el mapa exactamente como la cámara recorre el mundo.
+// La avenida vista desde arriba, con un punto por página y un marcador donde
+// está la cámara. No es decoración: es la misma línea sobre la que vuela el
+// mundo (World.jsx pone la estación i a i/(N−1) del recorrido), así que el
+// marcador recorre el mapa exactamente como la cámara recorre el mundo.
 //
 // El marcador se mueve por ref desde el bucle del mundo, sin pasar por React.
 
-const W = 132, H = 64, RX = 56, RY = 22
+const W = 132, H = 64, PAD = 10
 
-const at = t => {
-  const a = t * Math.PI * 2
-  // Arriba en el mapa = adelante en el mundo (−z).
-  return [W / 2 + Math.sin(a) * RX, H / 2 - Math.cos(a) * RY]
-}
+// t ∈ [0, 1] a lo largo de la avenida → izquierda a derecha en el mapa.
+const at = t => [PAD + Math.max(0, Math.min(1, t)) * (W - PAD * 2), H / 2]
 
 const RouteMap = forwardRef(function RouteMap({ pages, state, go }, ref) {
   const markerRef = useRef(null)
@@ -42,18 +39,18 @@ const RouteMap = forwardRef(function RouteMap({ pages, state, go }, ref) {
 
       <div className="route__map">
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} aria-hidden="true">
-          <ellipse cx={W / 2} cy={H / 2} rx={RX} ry={RY} className="route__loop" />
+          <line x1={PAD} y1={H / 2} x2={W - PAD} y2={H / 2} className="route__loop" />
           {pages.map((p, i) => {
-            const [x, y] = at(i / N)
+            const [x, y] = at(i / (N - 1))
             return <circle key={p.id} cx={x} cy={y} r={i === state.page ? 4 : 2.6}
               className={`route__stop${i === state.page ? ' route__stop--on' : ''}`} />
           })}
-          <circle ref={markerRef} cx={at(state.page / N)[0]} cy={at(state.page / N)[1]} r="6" className="route__me" />
+          <circle ref={markerRef} cx={at(state.page / (N - 1))[0]} cy={at(state.page / (N - 1))[1]} r="6" className="route__me" />
         </svg>
         {/* Botones invisibles encima de cada parada: el SVG dibuja, el botón
             es lo que el teclado y el lector de pantalla encuentran. */}
         {pages.map((p, i) => {
-          const [x, y] = at(i / N)
+          const [x, y] = at(i / (N - 1))
           return (
             <button key={p.id} type="button" className="route__hit"
               style={{ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` }}

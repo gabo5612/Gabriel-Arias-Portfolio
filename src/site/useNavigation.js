@@ -12,7 +12,7 @@ import { parseHash, same, step, toHash } from './router'
 const SCROLLER = '[data-scroll]'
 const WHEEL_GAP = 260      // ms sin eventos = empieza otro gesto de rueda
 const WHEEL_DIST = 70      // recorrido acumulado que dispara
-const WHEEL_LOCK = 900     // tras cambiar de página, la rueda no vuelve a disparar antes
+const WHEEL_LOCK = 1200    // tras cambiar de página, la rueda no vuelve a disparar antes
 
 function isTyping(el) {
   return el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))

@@ -3,7 +3,9 @@
 Empezó como copia aislada del hero de `Gabriel-Arias-Portfolio` (tracking de manos/cabeza
 con MediaPipe, three.js, HUD de privacidad, voces Web Audio). Ahora es además un **sitio
 que se recorre como un mundo**: cada sección del portfolio es una formación de partículas
-en un circuito cerrado, y navegar es volar la cámara de una a otra.
+en línea, a lo largo de una avenida, y navegar es volar la cámara de una a otra: el destino
+se ve chico a lo lejos y crece, y las secciones intermedias pasan al costado. Hacia atrás, la
+cámara retrocede mirando al frente.
 
 ```bash
 npm install
@@ -167,7 +169,7 @@ src/
     titleParticles.js  títulos que se forman y se deshacen en partículas
     stage.js         renderer + cámara + resize + pausa fuera de pantalla
     pointCloud.js    nube morfable: forma y paleta viajan punto a punto
-    dust.js          polvo alrededor del circuito (la sensación de velocidad)
+    dust.js          polvo a lo largo de la avenida (la sensación de velocidad)
     shapes/          procedural.js (7 formas) y sources.js (procedural | text | model)
     audio/           worldSound (el sonido del sitio), heroVoices (lab), scale (la pentatónica)
     ui/              PrivacyHUD, TrackButton, TiltButton
@@ -178,11 +180,12 @@ src/
     pages/           una página = un archivo (componente + escena) + una línea en index.js
     router.js        navegación como datos (puro, testeado)
     useNavigation.js teclado, rueda, touch, historial
-    World.jsx        el circuito, las estaciones y el vuelo
+    World.jsx        la avenida, las estaciones y el vuelo
+    flight.js        cuánto dura un vuelo (lo comparten el mundo y el panel)
     pointer.js       un solo puntero (mouse o dedo) para la lupa
     useTextLens.js   la lupa de texto (y el arpa)
     useSiteSound.js  despertar/silenciar el audio, tic y clic de lo clicable
-    ui/              Nav, RouteMap (el circuito visto desde arriba), HandControls
+    ui/              Nav, RouteMap (la avenida vista desde arriba), HandControls
   lab/               los experimentos originales del hero, intactos
 ```
 
@@ -197,7 +200,7 @@ export const page = {
 export default function Talks({ state, go }) { /* … */ }
 ```
 
-y agregarla a `src/site/pages/index.js`. El orden de esa lista es el orden del circuito.
+y agregarla a `src/site/pages/index.js`. El orden de esa lista es el orden de la avenida.
 Con `items` + `scene.itemShape(id)` la página tiene sub-navegación (como Projects).
 
 ### Traer un diseño 3D (Blender → partículas)
