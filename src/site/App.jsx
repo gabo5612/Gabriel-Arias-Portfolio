@@ -110,7 +110,7 @@ export default function App() {
       )}
       {cam.camOn && (
         <Suspense fallback={null}>
-          <PrivacyHUD stats={cam.stats} video={cam.video} mode={cam.mode} onMode={cam.setMode}
+          <PrivacyHUD stats={cam.stats} video={cam.video} mode={cam.mode}
             muted={cam.muted} onMute={cam.toggleMute} onStop={cam.stop} />
         </Suspense>
       )}

@@ -125,6 +125,9 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
       <div className="hud__body">
       <canvas ref={canvasRef} className="hud__preview" aria-label="Webcam preview with detection overlay" />
       <div className="hud__side">
+      {/* Sin onMode no hay selector: el sitio sólo usa la mano; el lab
+          conserva la cabeza para la retícula de profundidad. */}
+      {onMode && (
       <div className="hud__modes" role="group" aria-label="Tracking source">
         <button
           type="button"
@@ -143,6 +146,7 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
           Head
         </button>
       </div>
+      )}
 
       {/* Resumen de una línea. En móvil sustituye a la tabla entera: de las ocho
           filas, sólo dos dicen algo que el visitante necesite — cuánto te ve, y
