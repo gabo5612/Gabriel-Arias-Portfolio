@@ -7,6 +7,7 @@ import { resolveShape } from '../engine/shapes/sources'
 import { SHAPES } from '../engine/shapes/procedural'
 import { handMode, twoHands } from '../engine/gestures'
 import { pointer } from './pointer'
+import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
@@ -70,6 +71,16 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       T.push(curve.getTangent(i / N).normalize())
       A.push(C[i].clone().addScaledVector(T[i], VIEW_D))
     }
+
+    // ── Títulos de partículas ───────────────────────────────────────────────
+    // Dos nubes pegadas a la cámara: una forma el título que llega, otra
+    // deshace el que se va. Separadas porque en un cambio rápido conviven.
+    scene.add(camera)
+    const tpCount = small ? 900 : 1700
+    const formP = createTitleParticles({ count: tpCount, pixelRatio: stage.renderer.getPixelRatio() })
+    const dissolveP = createTitleParticles({ count: tpCount, pixelRatio: stage.renderer.getPixelRatio() })
+    camera.add(formP.points, dissolveP.points)
+    stage.own(formP, dissolveP)
 
     const dust = createDust(curve, { count: small ? 3000 : 9000, far: FAR * 0.8 })
     scene.add(dust.points)
@@ -178,9 +189,72 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       active = page
     }
 
+    // El título del panel visible (la página en curso o el detalle abierto).
+    const findTitle = () =>
+      document.querySelector('.site__main .panel .panel__title, .site__main .panel .home__name')
+    const wv = new Vector3()
+    let pendingTitle = null, lastItem = nav.current.state.item
+
+    // El título que se va se deshace: el texto real se apaga en el acto y
+    // en su lugar quedan sus partículas, que se dispersan y desaparecen.
+    const dissolveTitle = (st, now) => {
+      const el = findTitle()
+      const pts = el && sampleElementText(el, tpCount)
+      if (!pts) return null
+      el.style.transition = 'none'
+      el.style.opacity = '0'
+      const { w, h } = stage.size
+      dissolveP.start('dissolve', (from, to) => {
+        for (let i = 0; i < tpCount; i++) {
+          dissolveP.screenToCamera(pts[i * 2], pts[i * 2 + 1], w, h, camera, from, i)
+          to[i * 3] = from[i * 3] + (Math.random() - 0.5) * 360
+          to[i * 3 + 1] = from[i * 3 + 1] + (Math.random() - 0.5) * 220
+          to[i * 3 + 2] = from[i * 3 + 2] - 80 - Math.random() * 260
+        }
+      }, st.page.scene.palette, now, 900)
+      return el.closest('.panel')
+    }
+
+    // El que llega se forma con partículas que salen de la figura: cada una
+    // parte de un punto real de la formación (en espacio de cámara) y llega a
+    // un punto de tinta del título. Al 80 % aparece el texto de verdad.
+    const formTitle = (el, st, now) => {
+      const pts = sampleElementText(el, tpCount)
+      if (!pts || !st.pos) return false
+      el.style.transition = 'none'
+      el.style.opacity = '0'
+      const { w, h } = stage.size
+      const n = st.pos.length / 3
+      st.inner.updateMatrixWorld()
+      formP.start('form', (from, to) => {
+        for (let i = 0; i < tpCount; i++) {
+          const k = ((Math.random() * n) | 0) * 3
+          wv.set(st.pos[k], st.pos[k + 1], st.pos[k + 2])
+            .applyMatrix4(st.inner.matrixWorld)
+            .applyMatrix4(camera.matrixWorldInverse)
+          from.set([wv.x, wv.y, wv.z], i * 3)
+          formP.screenToCamera(pts[i * 2], pts[i * 2 + 1], w, h, camera, to, i)
+        }
+      }, st.page.scene.palette, now, 1300, () => {
+        el.style.transition = 'opacity .5s ease'
+        el.style.opacity = ''
+      })
+      return true
+    }
+
     apiRef.current = {
       sync(state, dir) {
-        if (state.page !== active) go(state.page, dir)
+        const now = performance.now()
+        const pageChanged = state.page !== active
+        if (pageChanged || state.item !== lastItem) {
+          // El panel nuevo se monta cuando el viejo terminó de salir; con
+          // vuelo, además, entra casi al llegar. Se espera y se busca un panel
+          // que no sea el que se fue.
+          const old = dissolveTitle(stations[active], now)
+          pendingTitle = { at: now + (pageChanged ? 700 : 280), until: now + 2200, page: state.page, old }
+          lastItem = state.item
+        }
+        if (pageChanged) go(state.page, dir)
         // Cada estación muestra su ítem sólo mientras estás en ella. Salir de un
         // proyecto abierto cambiando de página devuelve esa formación a su
         // forma base, aunque ya no sea la estación activa.
@@ -195,6 +269,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     }
     // Si la navegación ya cambió mientras se montaba, ponerse al día.
     apiRef.current.sync(nav.current.state, 0)
+    // Primera entrada: el título que ya estaba en pantalla se rehace con
+    // partículas de la figura, como presentación del mundo.
+    pendingTitle = { at: performance.now() + 500, until: performance.now() + 3000, page: active, old: null }
 
     // ── El cursor sobre la figura ───────────────────────────────────────────
     // El puntero (mouse, o la punta del dedo cuando apuntás) se proyecta sobre
@@ -402,6 +479,18 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         if (mine) host.style.cursor = drag ? 'grabbing' : st.over ? 'grab' : ''
         st.cloud.update(now)
       }
+
+      // Título pendiente: en cuanto el panel nuevo existe y su figura ya tiene
+      // forma, se lanza. Si no aparece a tiempo, se abandona sin dejar texto
+      // oculto (nunca se ocultó).
+      if (pendingTitle && now >= pendingTitle.at) {
+        const el = findTitle()
+        const st = stations[pendingTitle.page]
+        if (el && el.closest('.panel') !== pendingTitle.old && formTitle(el, st, now)) pendingTitle = null
+        else if (now > pendingTitle.until) pendingTitle = null
+      }
+      formP.update(now)
+      dissolveP.update(now)
 
       travelRef.current?.(wrap01(t / N), flying)
     })
