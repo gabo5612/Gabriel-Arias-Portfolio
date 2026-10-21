@@ -266,7 +266,10 @@ export const sound = {
       if (on) return
       out.gain.cancelScheduledValues(ctx.currentTime)
       out.gain.setValueAtTime(0, ctx.currentTime)
-      setTimeout(() => { if (!on) ctx.suspend().catch(() => {}) }, 120)
+      // 250 ms de silencio antes de suspender: lo que se suspende queda
+      // congelado, y así hasta el analizador de desarrollo (≈190 ms de
+      // memoria) termina vacío.
+      setTimeout(() => { if (!on) ctx.suspend().catch(() => {}) }, 250)
     }, 400)
     else {
       ctx.resume().then(() => {
