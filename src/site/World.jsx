@@ -5,6 +5,7 @@ import { createPointCloud } from '../engine/pointCloud'
 import { createDust } from '../engine/dust'
 import { resolveShape } from '../engine/shapes/sources'
 import { SHAPES } from '../engine/shapes/procedural'
+import { handMode } from '../engine/gestures'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por el circuito
@@ -183,10 +184,16 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     const camVec = new Vector3()
     const center = new Vector3()
     let scale = 1
+    // Mientras apuntás con el índice, la mano es un cursor y no una cámara:
+    // el mundo se queda donde estaba al empezar a apuntar. Si no, mover el
+    // dedo para elegir un link haría girar la formación y temblar la vista.
+    let mode = 'none', hx = 0, hy = 0, hz = 0
 
     stage.start((now, dt) => {
       const s = signal.current
       const onCam = s.source === 'hand' || s.source === 'face'
+      mode = handMode(s, mode)
+      if (mode !== 'point') { hx = s.x; hy = s.y; hz = s.z }
 
       const raw = Math.min(1, (now - flightAt) / flightMs)
       const flying = raw < 1
@@ -209,11 +216,13 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       // Paralaje: la cámara se asoma con la mano o la cabeza (como mirar por
       // una ventana) y apenas con el puntero. Acercar la mano acerca la cámara.
       right.crossVectors(T[active], up).normalize()
-      const amp = onCam ? (s.source === 'face' ? 220 : 150) : 45
+      // Moderado con la mano: también es el joystick de scroll, y mantenerla
+      // baja no debería sacar la formación de cuadro.
+      const amp = onCam ? (s.source === 'face' ? 200 : 90) : 45
       camera.position.copy(pos)
-        .addScaledVector(right, s.x * amp)
-        .addScaledVector(up, -s.y * amp * 0.7)
-      if (onCam) camera.position.addScaledVector(T[active], s.z * 240)
+        .addScaledVector(right, hx * amp)
+        .addScaledVector(up, -hy * amp * 0.6)
+      if (onCam) camera.position.addScaledVector(T[active], hz * 200)
       camera.lookAt(look)
 
       const w = stage.size.w, h = stage.size.h
@@ -228,13 +237,13 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         // vuelta entera e y llega a los polos. Las demás giran solas, lento.
         let tx, ty
         if (st.flat) {
-          tx = mine ? s.x * (onCam ? 0.6 : 0.3) : 0
-          ty = mine ? s.y * (onCam ? 0.4 : 0.15) : 0
+          tx = mine ? hx * (onCam ? 0.6 : 0.3) : 0
+          ty = mine ? hy * (onCam ? 0.4 : 0.15) : 0
         } else if (mine && onCam && s.source === 'hand') {
-          tx = s.x * Math.PI; ty = s.y * Math.PI / 2
+          tx = hx * Math.PI; ty = hy * Math.PI / 2
         } else {
           st.spin += dt * 0.00007
-          tx = st.spin + (mine ? s.x * 0.45 : 0); ty = mine ? s.y * 0.25 : 0
+          tx = st.spin + (mine ? hx * 0.45 : 0); ty = mine ? hy * 0.25 : 0
         }
         const k = mine && onCam ? 0.3 : 0.06
         st.rotY += (tx - st.rotY) * k

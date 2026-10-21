@@ -1,3 +1,4 @@
+import Rich from '../ui/Rich'
 import React from 'react'
 import { skills } from '../../content'
 
@@ -14,13 +15,13 @@ export const page = {
 export default function Skills() {
   return (
     <div className="skills">
-      <h2 className="panel__title">What I work with</h2>
+      <h2 className="panel__title"><Rich text="What I work with" /></h2>
       <dl className="skills__list">
         {skills.map(g => (
           <div key={g.key} className="skills__group">
-            <dt>{g.label}</dt>
+            <dt><Rich text={g.label} /></dt>
             <dd>
-              <ul>{g.items.map(s => <li key={s}>{s}</li>)}</ul>
+              <ul>{g.items.map(s => <li key={s}><Rich text={s} /></li>)}</ul>
             </dd>
           </div>
         ))}

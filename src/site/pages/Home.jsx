@@ -1,3 +1,4 @@
+import Rich from '../ui/Rich'
 import React, { useEffect, useState } from 'react'
 import { profile } from '../../content'
 import TrackButton from '../../engine/ui/TrackButton'
@@ -38,12 +39,12 @@ export default function Home({ go, cam, reduced }) {
   const role = useTypewriter(profile.roles, reduced)
   return (
     <div className="home">
-      <p className="home__hi">Hi, I'm</p>
-      <h1 className="home__name">{profile.name}</h1>
+      <p className="home__hi"><Rich text="Hi, I'm" /></p>
+      <h1 className="home__name"><Rich text={profile.name} /></h1>
       <p className="home__role" aria-live="off">
         I build <span className="home__role-word">{role}</span><span className="home__caret" aria-hidden="true" />
       </p>
-      <p className="home__tagline">{profile.tagline}</p>
+      <p className="home__tagline"><Rich text={profile.tagline} /></p>
       <div className="home__actions">
         <button type="button" className="btn btn-primary" onClick={() => go({ type: 'goto', id: 'projects' })}>
           Fly to my projects

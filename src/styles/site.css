@@ -382,6 +382,76 @@ p.projects__kind { margin: -12px 0 14px; }
 /* La guía del gesto, sobre el mapa. */
 .site .gesture { position: absolute; z-index: 4; bottom: calc(var(--route-h) + 6px); }
 
+/* ── Lupa de texto ────────────────────────────────────────────────────────
+   useTextLens escribe --t (0..1) en las palabras cerca del cursor, sea el
+   mouse o la punta del dedo. Se levantan un poco, crecen y se calientan; lejos
+   del cursor --t no existe y la palabra es texto normal. inline-block porque
+   un transform no se aplica a un inline. */
+.w {
+  display: inline-block;
+  --t: 0;
+  /* Crece poco y desde la base: con más, la palabra se come el espacio de
+     al lado y dos palabras encendidas se leen como una. */
+  transform-origin: 50% 85%;
+  transform: translateY(calc(var(--t) * -0.16em)) scale(calc(1 + var(--t) * var(--lens-scale, .04)));
+  color: color-mix(in oklab, #ffd58a calc(var(--t) * 100%), currentColor);
+  text-shadow: 0 0 calc(var(--t) * 16px) rgba(245, 165, 36, calc(var(--t) * .55));
+  transition: transform 160ms ease-out, color 160ms ease-out, text-shadow 160ms ease-out;
+}
+/* En titulares grandes cualquier escala es un salto: ahí casi sólo brillo. */
+.panel__title .w, .home__name .w, .timeline__role .w { --lens-scale: .015; }
+
+/* ── Cursor de la mano ────────────────────────────────────────────────────
+   La punta es el punto exacto del clic; el anillo se cierra con el pellizco,
+   así se ve cuánto falta para que el clic cuente. */
+.hand-cursor {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  --pinch: 0;
+}
+.hand-cursor[data-on="1"] { opacity: 1; }
+.hand-cursor__tip, .hand-cursor__ring {
+  position: absolute;
+  left: 0; top: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.hand-cursor__tip {
+  width: 8px; height: 8px;
+  background: var(--amber);
+  box-shadow: 0 0 12px rgba(245, 165, 36, .8);
+}
+.hand-cursor__ring {
+  width: 40px; height: 40px;
+  border: 1.5px solid rgba(245, 165, 36, .75);
+  transform: translate(-50%, -50%) scale(calc(1 - var(--pinch) * .62));
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.hand-cursor[data-over="1"] .hand-cursor__ring {
+  border-color: var(--paper);
+  background: rgba(245, 165, 36, .12);
+}
+.hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(245, 165, 36, .35); }
+
+/* Lo que está bajo el dedo se ve como bajo el mouse, y el pellizco se ve
+   como un clic. */
+.site .is-hand-hover { outline: 2px solid rgba(245, 165, 36, .7); outline-offset: 3px; }
+.site .is-hand-press { transform: scale(.96); transition: transform 120ms ease; }
+.projects__row.is-hand-hover { outline: none; padding-left: 12px; background: linear-gradient(90deg, rgba(245, 165, 36, .1), transparent); }
+
+/* La guía del gesto cambia con el modo: apuntar no muestra el medidor del
+   swipe, y el scroll enciende la flecha del sentido. */
+.gesture[data-state="point"] .gesture__meter,
+.gesture[data-state="point"] .gesture__arrow { opacity: .25; }
+.gesture[data-state="point"] { color: var(--paper); }
+.gesture[data-scroll] .gesture__hand { transition: transform 200ms ease; }
+.gesture[data-scroll="down"] .gesture__hand { transform: translateY(8px); color: var(--amber); }
+.gesture[data-scroll="up"] .gesture__hand { transform: translateY(-8px); color: var(--amber); }
+
 /* ── Foco y accesibilidad ─────────────────────────────────────────────── */
 .site a:focus-visible, .site button:focus-visible {
   outline: 2px solid var(--amber);
@@ -429,5 +499,6 @@ p.projects__kind { margin: -12px 0 14px; }
 
 @media (prefers-reduced-motion: reduce) {
   .home__caret { animation: none; }
+  .w { transform: none; transition: none; }
   .projects__row { transition: none; }
 }

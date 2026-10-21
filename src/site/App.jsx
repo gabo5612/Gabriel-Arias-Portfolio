@@ -5,6 +5,7 @@ import { useCameraControl } from '../engine/signal/useCameraControl'
 import { profile } from '../content'
 import { PAGES } from './pages'
 import { useNavigation } from './useNavigation'
+import { useTextLens } from './useTextLens'
 import Nav from './ui/Nav'
 import RouteMap from './ui/RouteMap'
 import '../styles/engine.css'
@@ -14,7 +15,7 @@ import '../styles/site.css'
 // pinta y se puede leer y navegar antes de que exista el mundo.
 const World = React.lazy(() => import('./World'))
 const PrivacyHUD = React.lazy(() => import('../engine/ui/PrivacyHUD'))
-const GestureGuide = React.lazy(() => import('./ui/GestureGuide'))
+const HandControls = React.lazy(() => import('./ui/HandControls'))
 
 // El panel sale rápido y entra cuando la cámara ya está frenando: así el texto
 // aparece al llegar, no durante el vuelo. Cambiar de ítem dentro de una página
@@ -39,6 +40,9 @@ export default function App() {
   const page = PAGES[state.page]
   const [world, setWorld] = useState(false)
   const routeRef = useRef(null)
+  const mainRef = useRef(null)
+  // La lupa de texto sigue al mouse siempre y al dedo cuando apuntás.
+  useTextLens(mainRef, !depth.reduced)
 
   // El mundo se monta con el navegador ocioso, no en el primer pintado.
   useEffect(() => {
@@ -78,7 +82,7 @@ export default function App() {
 
       <Nav pages={PAGES} state={state} go={go} cam={cam} name={profile.name} />
 
-      <main className="site__main">
+      <main className="site__main" ref={mainRef}>
         <AnimatePresence mode="wait" custom={{ dir: dir || 1, fly }} initial={false}>
           <motion.section
             key={key}
@@ -99,9 +103,13 @@ export default function App() {
 
       <RouteMap ref={routeRef} pages={PAGES} state={state} go={go} />
 
+      {(cam.camOn || depth.source === 'hand') && (
+        <Suspense fallback={null}>
+          <HandControls signal={depth.signal} pages={PAGES} state={state} go={go} />
+        </Suspense>
+      )}
       {cam.camOn && (
         <Suspense fallback={null}>
-          <GestureGuide signal={depth.signal} pages={PAGES} state={state} go={go} />
           <PrivacyHUD stats={cam.stats} video={cam.video} mode={cam.mode} onMode={cam.setMode}
             muted={cam.muted} onMute={cam.toggleMute} onStop={cam.stop} />
         </Suspense>

@@ -1,3 +1,4 @@
+import Rich from '../ui/Rich'
 import React from 'react'
 import { projects, askChatGptUrl, architectureUrl } from '../../content'
 
@@ -18,8 +19,8 @@ export const page = {
 function List({ go }) {
   return (
     <div className="projects">
-      <h2 className="panel__title">Things I've built</h2>
-      <p className="panel__hint">Pick one, or use ↑ ↓ to walk through them.</p>
+      <h2 className="panel__title"><Rich text="Things I've built" /></h2>
+      <p className="panel__hint">Pick one, or use ↑ ↓ to walk through them. With your hand, point and pinch.</p>
       <ul className="projects__list">
         {projects.map(p => (
           <li key={p.id}>
@@ -29,10 +30,10 @@ function List({ go }) {
               onClick={e => { e.preventDefault(); go({ type: 'goto', id: 'projects', item: p.id }) }}
             >
               <span className="projects__name">
-                {p.title}
+                <span><Rich text={p.title} /></span>
                 {p.kind === 'service' && <span className="projects__kind">Paid service</span>}
               </span>
-              <span className="projects__note">{p.archNote}</span>
+              <span className="projects__note"><Rich text={p.archNote} /></span>
             </a>
           </li>
         ))}
@@ -50,9 +51,9 @@ function Detail({ p, go }) {
         All projects
       </button>
       {p.cover && <img className="project__cover" src={p.cover} alt="" loading="lazy" decoding="async" />}
-      <h2 className="panel__title">{p.title}</h2>
+      <h2 className="panel__title"><Rich text={p.title} /></h2>
       {p.kind === 'service' && <p className="projects__kind">Paid service</p>}
-      <p className="panel__text">{p.description}</p>
+      <p className="panel__text"><Rich text={p.description} /></p>
       <ul className="project__tags">{p.tags.map(t => <li key={t}>{t}</li>)}</ul>
       <div className="project__links">
         {p.demo && <a className="btn btn-primary" href={p.demo} target="_blank" rel="noopener noreferrer">{p.demoLabel || 'Live demo'}</a>}

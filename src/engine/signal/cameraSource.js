@@ -127,6 +127,25 @@ function countFingers(lm) {
   return n
 }
 
+// Apuntar "como con un lápiz": índice estirado, medio/anular/meñique
+// plegados. El pulgar no cuenta — se mueve para pellizcar y no debe sacarte
+// del modo puntero justo al hacer clic.
+function pointing(lm) {
+  const w = lm[WRIST]
+  const e = ([tip, pip]) => {
+    const d = dist(w, lm[pip])
+    return d > 1e-6 ? ext(dist(w, lm[tip]) / d) : 0
+  }
+  const [index, ...rest] = FINGERS.map(e)
+  const others = rest.reduce((a, b) => a + b, 0)
+  return index > 0.55 && others < 1.2 ? 1 : 0
+}
+
+// Pellizco pulgar–índice, 0 (separados) a 1 (juntos). Por razón contra el
+// tamaño de la palma, no en píxeles: así vale igual cerca o lejos de la cámara.
+const pinchOf = (lm, palm) =>
+  Math.min(1, Math.max(0, (0.75 - dist(lm[4], lm[8]) / palm) / (0.75 - 0.25)))
+
 const HAND = {
   label: 'hand',
   // La mano ocupa menos píxeles que una cara y sus landmarks son más finos, así
@@ -172,6 +191,11 @@ const HAND = {
         // Inclinación de la palma hacia adelante o atrás.
         pitch: (lm[MID_MCP].y - lm[WRIST].y) / s,
         fingers: countFingers(lm),
+        // Punta del índice en coordenadas del cuadro (0..1, sin espejar) y
+        // pellizco: lo que necesita el cursor de la mano.
+        tip: lm[8],
+        pinch: pinchOf(lm, s),
+        point: pointing(lm),
         lm,
       }
     }
@@ -187,6 +211,9 @@ const HAND = {
 }
 
 const MODES = { face: FACE, hand: HAND }
+
+// Región del cuadro que se mapea a la pantalla entera para el cursor.
+const BOX = { x0: 0.18, x1: 0.82, y0: 0.14, y1: 0.76 }
 
 export async function startCameraSource(mode, onPose, opts = {}) {
   const M = MODES[mode] || HAND
@@ -231,6 +258,13 @@ export async function startCameraSource(mode, onPose, opts = {}) {
     x2: createOneEuro({ minCutoff: 1.2, beta: 0.9 }),
     y2: createOneEuro({ minCutoff: 1.2, beta: 0.9 }),
     f2: createOneEuro({ minCutoff: 2.4, beta: 0.6 }),
+    // El cursor: quieto cuando apuntás quieto (minCutoff bajo, el temblor del
+    // dedo se nota en un puntero mucho más que en una cámara) y sin arrastre
+    // cuando lo movés rápido (beta alto: la unidad es la pantalla entera).
+    px: createOneEuro({ minCutoff: 0.8, beta: 4 }),
+    py: createOneEuro({ minCutoff: 0.8, beta: 4 }),
+    pinch: createOneEuro({ minCutoff: 3, beta: 0.5 }),
+    point: createOneEuro({ minCutoff: 2, beta: 0 }),
   }
 
   // Calibración: 3dtrack fija neutralFaceSize = 0.3 a ojo, y por eso si te
@@ -273,7 +307,7 @@ export async function startCameraSource(mode, onPose, opts = {}) {
       // onPose simplemente deja de llamarse. Se manda un cero explícito y el
       // filtro lo lleva a silencio con la misma suavidad que cualquier gesto.
       // No se tocan x/y/z: la escena se queda donde estaba en vez de saltar.
-      if (cal) onPose({ fingers: f.fingers(0, now / 1000), fingers2: 0, hands: 0 })
+      if (cal) onPose({ fingers: f.fingers(0, now / 1000), fingers2: 0, hands: 0, pinch: 0, point: 0 })
       onStats?.({ ...base, found: false, calibrating: !cal })
       return
     }
@@ -306,6 +340,16 @@ export async function startCameraSource(mode, onPose, opts = {}) {
       x2: raw.second ? f.x2(clamp(-(raw.second.cx - cal.cx) * 2 / M.span), t) : 0,
       y2: raw.second ? f.y2(clamp((raw.second.cy - cal.cy) * 2 / M.span), t) : 0,
       fingers2: raw.second ? f.f2(raw.second.fingers, t) : 0,
+      ...(raw.tip && {
+        // Absoluto y no relativo a la calibración: para apuntar, el centro
+        // del cuadro tiene que ser el centro de la pantalla. Se usa la parte
+        // central del cuadro, no entero: llegar al borde de la pantalla no
+        // debería pedir sacar el dedo de cuadro. x se espeja (vista selfie).
+        px: f.px(clamp((1 - raw.tip.x - BOX.x0) / (BOX.x1 - BOX.x0), 0, 1), t),
+        py: f.py(clamp((raw.tip.y - BOX.y0) / (BOX.y1 - BOX.y0), 0, 1), t),
+        pinch: f.pinch(raw.pinch, t),
+        point: f.point(raw.point, t),
+      }),
     })
     onStats?.({
       ...base, found: true, calibrating: false, box: raw.box,

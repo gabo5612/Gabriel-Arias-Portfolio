@@ -65,3 +65,52 @@ export function createSwipeDetector(opts = {}) {
 
   return { push, reset: () => { hist.length = 0; until = 0 } }
 }
+
+// ── Modo de la mano ─────────────────────────────────────────────────────────
+// Qué está haciendo la mano, con histéresis: sin ella, la frontera entre
+// "apuntar" y "mano cerrada" parpadea, y al pellizcar el índice se dobla
+// hacia el pulgar y te sacaría del modo puntero justo al hacer clic.
+//
+//   'none'   no hay mano
+//   'point'  índice estirado, el resto plegado: cursor
+//   'open'   palma abierta: swipe y scroll
+//   'closed' cualquier otra cosa
+export function handMode(s, prev = 'none', { fingers = SWIPE_DEFAULTS.fingers } = {}) {
+  if (s.source !== 'hand' || !(s.hands > 0)) return 'none'
+  const point = s.point ?? 0
+  if (prev === 'point' && (point > 0.25 || (s.pinch ?? 0) > 0.3)) return 'point'
+  if (point > 0.6) return 'point'
+  return (s.fingers ?? 0) >= fingers ? 'open' : 'closed'
+}
+
+// Joystick vertical: con la palma abierta, la altura de la mano respecto de
+// donde estaba al calibrar decide la velocidad de scroll. Zona muerta en el
+// centro para que una mano en reposo no desplace nada, y curva cuadrática
+// para que el control fino esté cerca del centro.
+export function scrollSpeed(y, { dead = 0.28, max = 1100 } = {}) {
+  const a = Math.abs(y)
+  if (a <= dead) return 0
+  const k = Math.min(1, (a - dead) / (1 - dead))
+  return Math.sign(y) * k * k * max          // px/s; y positivo = mano baja = bajar
+}
+
+// Clic por pellizco. Aprieta al pasar de `press`, suelta al bajar de
+// `release` (histéresis: un pellizco a medias no dispara ráfagas). Mientras
+// el pellizco se cierra, el cursor se congela donde estaba al empezar a
+// cerrarse: juntar el pulgar arrastra la punta del índice, y sin esto el clic
+// cae al lado de donde apuntabas.
+export function createPinchClick({ press = 0.7, release = 0.4, settle = 0.2 } = {}) {
+  let down = false, held = null
+  return {
+    push(pinch, x, y) {
+      if (pinch > settle && !held) held = { x, y }
+      if (pinch <= settle && !down) held = null
+      let click = false
+      if (!down && pinch > press) { down = true; click = true }
+      else if (down && pinch < release) { down = false; held = null }
+      const at = held || { x, y }
+      return { x: at.x, y: at.y, down, click }
+    },
+    reset() { down = false; held = null },
+  }
+}

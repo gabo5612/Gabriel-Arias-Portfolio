@@ -29,8 +29,32 @@ npm run make:model   # regenera public/models/knot.glb
 | Clic | nav de arriba, mapa de ruta de abajo | la lista y ↑/↓ del detalle |
 
 La URL es el estado (`#/projects/shopfloor`): atrás/adelante del navegador y los links
-directos funcionan. La mano además agarra la formación actual y mueve la cámara
-(paralaje); abrir los dedos abre el campo de la formación.
+directos funcionan.
+
+### La mano, en detalle
+
+| Pose | Qué hace |
+|---|---|
+| Palma abierta, barrido lateral | vuela a la estación anterior / siguiente |
+| Palma abierta, mantenida baja o alta | desplaza el texto (joystick: más lejos del centro, más rápido) |
+| Índice estirado, resto plegado ("lápiz") | cursor en la punta del dedo; la cámara y la formación se congelan |
+| Pellizco pulgar–índice mientras apuntás | clic en lo que está bajo el cursor |
+
+El cursor se congela donde empezaste a cerrar el pellizco, porque juntar el pulgar arrastra
+la punta del índice. Con la palma abierta, la mano además agarra la formación y mueve la
+cámara (paralaje).
+
+**Lupa de texto.** Cada palabra del panel es un `<span class="w">` (lo genera `<Rich>`).
+Las palabras cerca del cursor, sea el mouse o el dedo, se encienden y se levantan. Lo hace
+`site/useTextLens.js`; el aspecto vive en `site.css`.
+
+**Probar sin webcam (sólo en `npm run dev`):**
+
+```js
+window.__depth.pose({ hands: 1, fingers: 5, y: 0.7 })          // palma baja → scroll
+window.__depth.pose({ hands: 1, fingers: 1, point: 1, px: .2, py: .5 })  // cursor
+window.__depth.pose({ pinch: 1 })                                // clic
+```
 
 ## Estructura
 
@@ -39,7 +63,7 @@ src/
   engine/            reutilizable, no sabe nada del portfolio
     signal/          useDepthSignal (puntero/mano/cabeza/giroscopio → una señal),
                      cameraSource (MediaPipe local), oneEuro, useCameraControl
-    gestures.js      detector de swipe puro (lo usan el sitio, el lab y los tests)
+    gestures.js      swipe, modo de la mano, joystick de scroll, clic por pellizco (puros)
     stage.js         renderer + cámara + resize + pausa fuera de pantalla
     pointCloud.js    nube morfable: forma y paleta viajan punto a punto
     dust.js          polvo alrededor del circuito (la sensación de velocidad)
@@ -53,7 +77,9 @@ src/
     router.js        navegación como datos (puro, testeado)
     useNavigation.js teclado, rueda, touch, historial
     World.jsx        el circuito, las estaciones y el vuelo
-    ui/              Nav, RouteMap (el circuito visto desde arriba), GestureGuide
+    pointer.js       un solo puntero (mouse o dedo) para la lupa
+    useTextLens.js   la lupa de texto
+    ui/              Nav, RouteMap (el circuito visto desde arriba), HandControls
   lab/               los experimentos originales del hero, intactos
 ```
 

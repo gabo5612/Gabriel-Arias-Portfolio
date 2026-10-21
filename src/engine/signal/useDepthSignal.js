@@ -16,7 +16,10 @@ const clamp = (v, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 // fingers arranca en 5, no en 0: es el valor "neutro" de mano abierta. Las
 // fuentes que no tienen dedos —puntero, giroscopio, deriva ociosa— lo dejan ahí
 // y el atractor conserva su tamaño normal.
-const ZERO = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, fingers: 5, x2: 0, y2: 0, fingers2: 0, hands: 0 }
+const ZERO = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, fingers: 5, x2: 0, y2: 0, fingers2: 0, hands: 0,
+  // Cursor de la mano: punta del índice en pantalla (0..1), pellizco y pose
+  // de apuntar (0..1). Ya llegan filtrados con one-euro.
+  px: 0.5, py: 0.5, pinch: 0, point: 0 }
 
 export function useDepthSignal() {
   // Lo que leen los consumidores: ya suavizado.
@@ -93,6 +96,12 @@ export function useDepthSignal() {
       s.fingers2 += (target.current.fingers2 - s.fingers2) * k
       // hands es un conteo, no una magnitud: interpolarlo daría 1,5 manos.
       s.hands = target.current.hands
+      // El cursor va directo: un segundo suavizado encima del one-euro sería
+      // lag que se siente al apuntar.
+      s.px = target.current.px
+      s.py = target.current.py
+      s.pinch = target.current.pinch
+      s.point = target.current.point
       s.source = src
     }
     raf = requestAnimationFrame(tick)
@@ -156,6 +165,22 @@ export function useDepthSignal() {
     stopCam.current = () => window.removeEventListener('deviceorientation', onTilt)
     return true
   }, [reduced])
+
+  // ── Sólo desarrollo: poses de mano simuladas ──────────────────────────────
+  // Para probar cursor, pellizco y scroll sin webcam (o desde un test de
+  // navegador): window.__depth.pose({ hands: 1, point: 1, px: .3, py: .4 }).
+  // `import.meta.env.DEV` es de Vite; el build de producción lo elimina.
+  useEffect(() => {
+    if (!import.meta.env?.DEV) return
+    window.__depth = {
+      pose(p) {
+        Object.assign(target.current, p)
+        if (sourceRef.current !== 'hand') { sourceRef.current = 'hand'; setSource('hand') }
+      },
+      stop: () => deactivate(),
+    }
+    return () => { delete window.__depth }
+  }, [deactivate])
 
   // Soltar la cámara si el componente se va: un unmount no debe dejar el LED
   // del portátil encendido.

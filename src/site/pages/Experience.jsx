@@ -1,3 +1,4 @@
+import Rich from '../ui/Rich'
 import React from 'react'
 import { experience } from '../../content'
 
@@ -16,13 +17,13 @@ export default function Experience() {
   const roles = [...experience].reverse()
   return (
     <div className="experience">
-      <h2 className="panel__title">Where I've worked</h2>
+      <h2 className="panel__title"><Rich text="Where I've worked" /></h2>
       <ol className="timeline">
         {roles.map(r => (
           <li key={r.date} className="timeline__item">
             <p className="timeline__when">{r.date} <span>{r.location}</span></p>
-            <h3 className="timeline__role">{r.title}</h3>
-            {[].concat(r.description).map((d, i) => <p key={i} className="panel__text">{d}</p>)}
+            <h3 className="timeline__role"><Rich text={r.title} /></h3>
+            {[].concat(r.description).map((d, i) => <p key={i} className="panel__text"><Rich text={d} /></p>)}
           </li>
         ))}
       </ol>

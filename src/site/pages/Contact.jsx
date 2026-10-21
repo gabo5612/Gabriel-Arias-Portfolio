@@ -1,3 +1,4 @@
+import Rich from '../ui/Rich'
 import React from 'react'
 import { profile } from '../../content'
 
@@ -14,8 +15,8 @@ export default function Contact() {
   const c = profile.contact
   return (
     <div className="contact">
-      <h2 className="panel__title">{c.title.join(' ')}</h2>
-      <p className="panel__text">{c.subtitle}</p>
+      <h2 className="panel__title"><Rich text={c.title.join(' ')} /></h2>
+      <p className="panel__text"><Rich text={c.subtitle} /></p>
       <div className="contact__actions">
         <a className="btn btn-primary" href={`mailto:${c.email}`}>Email me</a>
         <a className="btn btn-ghost" href={c.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>

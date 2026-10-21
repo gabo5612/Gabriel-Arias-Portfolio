@@ -17,7 +17,7 @@ export default function About() {
   const { title, bio, stats } = profile.about
   return (
     <div className="about">
-      <h2 className="panel__title">{title[0]}<br />{title[1]}</h2>
+      <h2 className="panel__title"><Rich text={title[0]} /><br /><Rich text={title[1]} /></h2>
       {bio.map((p, i) => <p key={i} className="panel__text"><Rich text={p} /></p>)}
       <dl className="about__stats">
         {stats.map(s => (
