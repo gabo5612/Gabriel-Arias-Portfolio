@@ -161,6 +161,7 @@ export default function HandControls({ signal, pages, state, go }) {
       const prev = pages[(state.page - 1 + N) % N].label
       const next = pages[(state.page + 1) % N].label
       if (mode === 'none') set('idle', 'Show your hand to the camera')
+      else if (mode === 'two') set('two', 'Spread or close your hands to zoom, turn them to rotate')
       else if (mode === 'point') set('point', hover ? 'Hold still to open, or pinch to open now' : 'Point at a link. Pinch, or hold still for 1.25 seconds')
       else if (mode === 'closed') set('closed', 'Open your hand to move, or point your index to use it as a cursor')
       else if (scrolling) set('open', scrolling === 'down' ? 'Scrolling down' : 'Scrolling up', scrolling)

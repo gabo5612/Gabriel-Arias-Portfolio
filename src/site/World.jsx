@@ -5,7 +5,7 @@ import { createPointCloud } from '../engine/pointCloud'
 import { createDust } from '../engine/dust'
 import { resolveShape } from '../engine/shapes/sources'
 import { SHAPES } from '../engine/shapes/procedural'
-import { handMode } from '../engine/gestures'
+import { handMode, twoHands } from '../engine/gestures'
 import { pointer } from './pointer'
 
 // El mundo: un circuito cerrado en el espacio con una formación de partículas
@@ -91,8 +91,13 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       // Object3D.lookAt apunta +z al objetivo: las formas están diseñadas de
       // frente a +z, así que quedan de cara a quien llega.
       outer.lookAt(C[i])
+      // outer mira a la cámara (lookAt), roller es el volante de las dos
+      // manos sobre ese eje, inner es el giro de la figura (auto, agarre,
+      // arrastre). Separados para que ninguno pise la orientación del otro.
+      const roller = new Group()
+      outer.add(roller)
       const inner = new Group()
-      outer.add(inner)
+      roller.add(inner)
       const cloud = createPointCloud({ positions: seedShape, palette: p.scene.palette, size: SIZE, far: FAR })
       inner.add(cloud.points)
       scene.add(outer)
@@ -102,8 +107,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       // ux/uy: giro que puso quien arrastró, con su velocidad vx/vy (inercia).
       // pos: la forma actual, para poder estallarla y rearmarla con un clic.
       return {
-        page: p, outer, inner, cloud, rotX: 0, rotY: 0, spin: i * 1.3, want: null, flat: false,
+        page: p, outer, roller, inner, cloud, rotX: 0, rotY: 0, spin: i * 1.3, want: null, flat: false,
         item: undefined, ux: 0, uy: 0, vx: 0, vy: 0, pos: null, over: false,
+        zoom: 1, roll: 0,
       }
     })
 
@@ -115,7 +121,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       // El texto se lee sólo de frente: deja de girar y se balancea. El giro
       // acumulado se lleva a (-π, π] para que volver al frente sea el camino
       // corto y no desenrollar diez vueltas.
-      const flat = spec.type === 'text'
+      // Lo mismo para los modelos en relieve (`face: true`): son casi planos,
+      // y girando sobre el eje vertical quedarían de canto.
+      const flat = spec.type === 'text' || !!spec.face
       if (flat && !st.flat) st.rotY = Math.atan2(Math.sin(st.rotY), Math.cos(st.rotY))
       if (!flat && st.flat) st.spin = st.rotY
       st.flat = flat
@@ -237,12 +245,17 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     // el mundo se queda donde estaba al empezar a apuntar. Si no, mover el
     // dedo para elegir un link haría girar la formación y temblar la vista.
     let mode = 'none', hx = 0, hy = 0, hz = 0
+    // Dos manos abiertas: el par de manos al empezar el gesto, y el zoom/giro
+    // que tenía la figura en ese momento, para que el gesto sea relativo.
+    let pair = null
 
     stage.start((now, dt) => {
       const s = signal.current
       const onCam = s.source === 'hand' || s.source === 'face'
       mode = handMode(s, mode)
-      if (mode !== 'point') { hx = s.x; hy = s.y; hz = s.z }
+      // Apuntando o con las dos manos, la mano no es cámara: el mundo se queda
+      // donde estaba al empezar el gesto.
+      if (mode !== 'point' && mode !== 'two') { hx = s.x; hy = s.y; hz = s.z }
 
       const raw = Math.min(1, (now - flightAt) / flightMs)
       const flying = raw < 1
@@ -267,7 +280,9 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       right.crossVectors(T[active], up).normalize()
       // Moderado con la mano: también es el joystick de scroll, y mantenerla
       // baja no debería sacar la formación de cuadro.
-      const amp = onCam ? (s.source === 'face' ? 200 : 90) : 45
+      // El giroscopio está entre los dos: el teléfono se inclina menos de lo
+      // que viaja una mano, pero mucho más que un mouse.
+      const amp = onCam ? (s.source === 'face' ? 200 : 90) : s.source === 'gyro' ? 120 : 45
       camera.position.copy(pos)
         .addScaledVector(right, hx * amp)
         .addScaledVector(up, -hy * amp * 0.6)
@@ -278,6 +293,32 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       const targetScale = w / h > 1.05 && w > 860 ? 1 : 0.68
       scale += (targetScale - scale) * 0.08
       camVec.copy(camera.position)
+
+      // ── Dos manos ───────────────────────────────────────────────────────────
+      // Separarlas acerca la figura, juntarlas la aleja; girarlas como un
+      // volante la rota. Al soltar, la figura vuelve sola a su tamaño y giro.
+      const a = stations[active]
+      if (mode === 'two') {
+        // La segunda mano entra con su posición todavía convergiendo desde
+        // donde estaba (la señal está suavizada): medir la distancia inicial
+        // en ese cuadro daría un "inicio" casi cero y el zoom saltaría al
+        // máximo. Se re-mide durante 300 ms y recién entonces se fija.
+        if (!pair) pair = { at: now, zoom0: a.zoom, roll0: a.roll }
+        if (now - pair.at < 300) Object.assign(pair, twoHands(s))
+        else {
+          const g = twoHands(s, pair)
+          const zoomT = Math.max(0.6, Math.min(1.4, pair.zoom0 * g.zoom))
+          a.zoom += (zoomT - a.zoom) * 0.25
+          a.roll += (pair.roll0 + g.roll - a.roll) * 0.25
+        }
+      } else {
+        pair = null
+      }
+      for (const st of stations) {
+        if (st === a && mode === 'two') continue
+        st.zoom += (1 - st.zoom) * 0.06
+        st.roll += (0 - st.roll) * 0.06
+      }
 
       for (let i = 0; i < N; i++) {
         const st = stations[i]
@@ -312,13 +353,17 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         st.ux = Math.max(-1.3, Math.min(1.3, st.ux))
         const rz = !st.flat && st.page.scene.spin === 'z' ? st.spin : 0
         st.inner.rotation.set(st.rotX + st.ux, st.rotY + st.uy, rz)
-        st.outer.scale.setScalar(scale)
+        // El giro de las dos manos va en el grupo exterior, sobre el eje que
+        // mira a la cámara: así es un volante en pantalla sea cual sea la
+        // orientación de la figura.
+        st.roller.rotation.z = st.roll
+        st.outer.scale.setScalar(scale * st.zoom)
         st.outer.updateMatrixWorld()
 
         const u = st.cloud.uniforms
         center.setFromMatrixPosition(st.outer.matrixWorld)
         u.uCenter.value.copy(center)
-        u.uSize.value = SIZE * scale
+        u.uSize.value = SIZE * scale * st.zoom
         // Sin cursor encima, el campo vive en la cara que mira a la cámara y
         // sólo en la formación donde estás: los dedos abren la de acá, no la
         // del fondo. Con el cursor encima, se muda bajo el cursor.

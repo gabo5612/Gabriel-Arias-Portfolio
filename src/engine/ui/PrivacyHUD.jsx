@@ -29,6 +29,8 @@ function Row({ label, value, good }) {
 
 export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, onStop }) {
   const [net, setNet] = useState(0)
+  // Cerrado por defecto: el panel acompaña, no compite con la página.
+  const [more, setMore] = useState(false)
   const canvasRef = useRef(null)
   const statsRef = useRef(stats)
   statsRef.current = stats
@@ -99,101 +101,108 @@ export default function PrivacyHUD({ stats, video, mode, onMode, muted, onMute, 
 
   const calibrating = stats?.calibrating
   const found = stats?.found
-  const target = stats?.target || (mode === 'hand' ? 'right hand' : 'head')
+  const target = stats?.target || (mode === 'hand' ? 'hand' : 'head')
+  const status = !found ? `Show your ${target}` : calibrating ? 'Calibrating…' : 'Local'
 
   return (
-    <div className="hud" role="status" aria-live="polite">
-      <div className="hud__head">
-        <span className="hud__dot" aria-hidden="true" />
-        <strong className="hud__title">
-          {!found ? `Show your ${target}` : calibrating ? 'Calibrating…' : 'Tracking locally'}
-        </strong>
-        <button
-          type="button"
-          className={`hud__stop hud__sound${muted ? '' : ' hud__sound--on'}`}
-          onClick={onMute}
-          aria-pressed={!muted}
-          title={muted ? 'Turn sound on' : 'Turn sound off'}
-        >
-          {muted ? 'Sound off' : 'Sound on'}
-        </button>
-        <button type="button" className="hud__stop" onClick={onStop}>
-          Turn off
-        </button>
-      </div>
-
-      <div className="hud__body">
-      <canvas ref={canvasRef} className="hud__preview" aria-label="Webcam preview with detection overlay" />
-      <div className="hud__side">
-      {/* Sin onMode no hay selector: el sitio sólo usa la mano; el lab
-          conserva la cabeza para la retícula de profundidad. */}
-      {onMode && (
-      <div className="hud__modes" role="group" aria-label="Tracking source">
-        <button
-          type="button"
-          className={`hud__mode${mode === 'hand' ? ' hud__mode--on' : ''}`}
-          aria-pressed={mode === 'hand'}
-          onClick={() => onMode('hand')}
-        >
-          Hands
-        </button>
-        <button
-          type="button"
-          className={`hud__mode${mode === 'face' ? ' hud__mode--on' : ''}`}
-          aria-pressed={mode === 'face'}
-          onClick={() => onMode('face')}
-        >
-          Head
-        </button>
-      </div>
-      )}
-
-      {/* Resumen de una línea. En móvil sustituye a la tabla entera: de las ocho
-          filas, sólo dos dicen algo que el visitante necesite — cuánto te ve, y
-          que no sale nada del dispositivo. El resto es telemetría para mí. */}
-      <p className="hud__compact">
-        <span>
-          {mode === 'hand'
-            ? `${stats?.hands ?? 0}/2 hands · ${(stats?.fingers ?? 0).toFixed(1)}/5`
-            : found ? 'head tracked' : 'no head'}
+    <div className={`hud${more ? ' hud--more' : ''}`} role="status" aria-live="polite">
+      {/* Lo único siempre visible: la cámara, con el estado y los dos
+          controles encima. Lo que prueba que nada sale (el contador) va en la
+          etiqueta; el resto de la telemetría, detrás de "More". */}
+      <div className="hud__cam">
+        <canvas ref={canvasRef} className="hud__preview" aria-label="Webcam preview with detection overlay" />
+        <span className="hud__badge">
+          <span className="hud__dot" aria-hidden="true" />
+          {status}
+          {found && !calibrating && (
+            <span className={net === 0 ? 'hud__value--good' : 'hud__value--bad'}>
+              {net === 0 ? ' · 0 sent' : ` · ${net} sent`}
+            </span>
+          )}
         </span>
-        <span className="hud__value--good">
-          {net === 0 ? 'nothing left this device' : `${net} requests left`}
-        </span>
-      </p>
-      </div>
+        <div className="hud__tools">
+          <button
+            type="button"
+            className={`hud__icon${muted ? '' : ' hud__icon--on'}`}
+            onClick={onMute}
+            aria-pressed={!muted}
+            aria-label={muted ? 'Turn sound on' : 'Turn sound off'}
+            title={muted ? 'Turn sound on' : 'Turn sound off'}
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor" />
+              {muted
+                ? <path d="M11 6l4 4M15 6l-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                : <path d="M10.5 5.5a3.5 3.5 0 010 5M12.5 3.5a6.3 6.3 0 010 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />}
+            </svg>
+          </button>
+          <button type="button" className="hud__icon" onClick={onStop} aria-label="Turn the camera off" title="Turn the camera off">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 2v6M4.5 4.5a5 5 0 107 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div className="hud__rows">
-        {mode === 'hand' && (
-          <>
-            <Row label="Hands" value={`${stats?.hands ?? 0} / 2`} />
+      <button type="button" className="hud__more" aria-expanded={more} onClick={() => setMore(m => !m)}>
+        {more ? 'Less' : 'More'}
+      </button>
+
+      {more && (
+        <div className="hud__details">
+          {/* Sin onMode no hay selector: el sitio sólo usa la mano; el lab
+              conserva la cabeza para la retícula de profundidad. */}
+          {onMode && (
+            <div className="hud__modes" role="group" aria-label="Tracking source">
+              <button
+                type="button"
+                className={`hud__mode${mode === 'hand' ? ' hud__mode--on' : ''}`}
+                aria-pressed={mode === 'hand'}
+                onClick={() => onMode('hand')}
+              >
+                Hands
+              </button>
+              <button
+                type="button"
+                className={`hud__mode${mode === 'face' ? ' hud__mode--on' : ''}`}
+                aria-pressed={mode === 'face'}
+                onClick={() => onMode('face')}
+              >
+                Head
+              </button>
+            </div>
+          )}
+          <div className="hud__rows">
+            {mode === 'hand' && (
+              <>
+                <Row label="Hands" value={`${stats?.hands ?? 0} / 2`} />
+                <Row
+                  label="Fingers up"
+                  value={
+                    stats?.hands > 1
+                      ? `${(stats?.fingers ?? 0).toFixed(1)} + ${(stats?.fingers2 ?? 0).toFixed(1)}`
+                      : `${(stats?.fingers ?? 0).toFixed(1)} / 5`
+                  }
+                />
+              </>
+            )}
+            <Row label="Detection" value={`${stats?.fps ?? 0} fps`} />
             <Row
-              label="Fingers up"
-              value={
-                stats?.hands > 1
-                  ? `${(stats?.fingers ?? 0).toFixed(1)} + ${(stats?.fingers2 ?? 0).toFixed(1)}`
-                  : `${(stats?.fingers ?? 0).toFixed(1)} / 5`
-              }
+              label="Compute"
+              value={`${stats?.delegate ?? '—'} · ${stats?.vw ?? 0}×${stats?.vh ?? 0}`}
             />
-          </>
-        )}
-        <Row label="Detection" value={`${stats?.fps ?? 0} fps`} />
-        <Row
-          label="Compute"
-          value={`${stats?.delegate ?? '—'} · ${stats?.vw ?? 0}×${stats?.vh ?? 0}`}
-        />
-        <Row label="Latency" value={`${Math.round(stats?.latency ?? 0)} ms`} />
-        <Row label="Left this device" value={net === 0 ? '0 requests' : `${net} requests`} good={net === 0} />
-        <Row label="Uploaded" value="0 bytes" good />
-        <Row label="Model" value="WASM, in your browser" good />
-        <Row label="Audio" value={muted ? 'muted' : 'synthesised live'} />
-      </div>
-
-      <p className="hud__note">
-        Enforced, not promised: this page ships a <code>connect-src 'self'</code> policy,
-        so the browser itself refuses any outbound call.
-      </p>
+            <Row label="Latency" value={`${Math.round(stats?.latency ?? 0)} ms`} />
+            <Row label="Left this device" value={net === 0 ? '0 requests' : `${net} requests`} good={net === 0} />
+            <Row label="Uploaded" value="0 bytes" good />
+            <Row label="Model" value="WASM, in your browser" good />
+            <Row label="Audio" value={muted ? 'muted' : 'synthesised live'} />
+          </div>
+          <p className="hud__note">
+            Enforced, not promised: this page ships a <code>connect-src 'self'</code> policy,
+            so the browser itself refuses any outbound call.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

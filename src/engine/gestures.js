@@ -72,11 +72,15 @@ export function createSwipeDetector(opts = {}) {
 // hacia el pulgar y te sacaría del modo puntero justo al hacer clic.
 //
 //   'none'   no hay mano
+//   'two'    las dos palmas abiertas: zoom y giro de la figura
 //   'point'  índice estirado, el resto plegado: cursor
 //   'open'   palma abierta: swipe y scroll
 //   'closed' cualquier otra cosa
 export function handMode(s, prev = 'none', { fingers = SWIPE_DEFAULTS.fingers } = {}) {
   if (s.source !== 'hand' || !(s.hands > 0)) return 'none'
+  // Dos manos abiertas ganan a todo: separarlas mueve la mano principal y, si
+  // no, ese movimiento se leería como swipe y cambiaría de página.
+  if (s.hands > 1 && (s.fingers ?? 0) >= fingers && (s.fingers2 ?? 0) >= fingers) return 'two'
   const point = s.point ?? 0
   if (prev === 'point' && (point > 0.25 || (s.pinch ?? 0) > 0.3)) return 'point'
   if (point > 0.6) return 'point'
@@ -141,4 +145,20 @@ export function createDwell({ ms = 3000, slop = 28 } = {}) {
     spend(t) { spent = t; target = null },
     reset() { target = null; spent = null },
   }
+}
+
+// Dos manos: cuánto se separaron y cuánto giraron desde que empezó el gesto.
+// `start` es el par de manos al entrar en modo 'two'. Devuelve zoom (razón
+// de distancias) y roll (radianes, positivo = antihorario en pantalla).
+export function twoHands(s, start) {
+  const dx = s.x2 - s.x, dy = s.y2 - s.y
+  const d = Math.hypot(dx, dy)
+  const a = Math.atan2(dy, dx)
+  if (!start) return { d, a, zoom: 1, roll: 0 }
+  // y crece hacia abajo en la señal, así que el giro en pantalla es el
+  // opuesto al de atan2. El ángulo salta de π a −π al cruzar el eje: se toma
+  // el camino corto.
+  let roll = start.a - a
+  roll = Math.atan2(Math.sin(roll), Math.cos(roll))
+  return { d, a, zoom: start.d > 0.05 ? d / start.d : 1, roll }
 }

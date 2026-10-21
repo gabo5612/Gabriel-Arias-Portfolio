@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "test": "node --test \"test/*.test.mjs\"",
     "sync": "node scripts/sync-content.mjs",
-    "make:model": "node scripts/make-sample-model.mjs"
+    "make:model": "node scripts/make-sample-model.mjs",
+    "make:models": "/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup --python blender/build_models.py -- public/models/projects"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.0.1",

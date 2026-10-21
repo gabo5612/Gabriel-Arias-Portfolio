@@ -2,6 +2,7 @@ import Rich from '../ui/Rich'
 import React, { useEffect, useState } from 'react'
 import { profile } from '../../content'
 import TrackButton from '../../engine/ui/TrackButton'
+import TiltButton from '../../engine/ui/TiltButton'
 
 export const page = {
   id: 'home',
@@ -35,7 +36,7 @@ function useTypewriter(words, reduced) {
   return text
 }
 
-export default function Home({ go, cam, reduced }) {
+export default function Home({ go, cam, tilt, reduced }) {
   const role = useTypewriter(profile.roles, reduced)
   return (
     <div className="home">
@@ -49,7 +50,7 @@ export default function Home({ go, cam, reduced }) {
         <button type="button" className="btn btn-primary" onClick={() => go({ type: 'goto', id: 'projects' })}>
           Fly to my projects
         </button>
-        <TrackButton cam={cam} />
+        {tilt.available ? <TiltButton tilt={tilt} /> : <TrackButton cam={cam} />}
       </div>
       {cam.error && <p className="hero__track-error">{cam.error}</p>}
     </div>

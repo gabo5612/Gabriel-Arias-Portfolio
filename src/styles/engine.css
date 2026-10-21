@@ -102,58 +102,104 @@
 
 /* ==========================================
    HUD — la prueba de que nada sale de la máquina
+   Compacto: la cámara y una línea de estado. Acompaña a la página, no compite
+   con ella; la telemetría completa está detrás de "More".
    ========================================== */
 .hud {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  right: 20px;
+  bottom: 20px;
   z-index: 40;
-  width: 278px;
-  padding: 14px;
+  width: 200px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: rgba(9, 9, 11, .88);
+  gap: 6px;
+  font-family: var(--body, var(--font-body));
+  /* Arrastrar sobre el panel seleccionaba sus textos y los pintaba de ámbar. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hud--more {
+  width: 248px;
+  padding: 10px;
+  background: rgba(9, 9, 11, .82);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  font-family: var(--font-body);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.hud__head { display: flex; align-items: center; gap: 8px; }
+.hud__cam { position: relative; }
+.hud__preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #000;
+  opacity: .9;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+}
+
+.hud__badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: calc(100% - 12px);
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  color: rgba(255, 255, 255, .85);
+  font-size: .66rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
 .hud__dot {
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
   background: #22c55e; flex-shrink: 0;
   animation: status-pulse 2s ease-in-out infinite;
 }
-.hud__title {
-  font-size: .68rem; font-weight: 600; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--text-primary);
+
+.hud__tools {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
 }
-.hud__stop {
-  margin-left: auto;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  color: var(--text-secondary);
+.hud__icon {
+  width: 24px; height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  color: rgba(255, 255, 255, .6);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.hud__icon:hover { color: #fff; background: rgba(0, 0, 0, .75); }
+.hud__icon--on { color: rgba(255, 255, 255, .9); }
+
+.hud__more {
+  align-self: flex-end;
+  border: 0;
+  background: none;
+  padding: 2px 4px;
   font-size: .68rem;
-  padding: 3px 8px;
-  transition: var(--t-fast);
+  color: var(--text-muted);
+  transition: color var(--t-fast);
 }
-.hud__stop:hover { color: var(--text-primary); border-color: rgba(255,255,255,.25); }
+.hud__more:hover { color: var(--text-secondary); }
+.hud__more::after { content: ' ▾'; }
+.hud--more .hud__more::after { content: ' ▴'; }
 
-.hud__preview {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: var(--r-sm);
-  background: #000;
-  object-fit: cover;
-  display: block;
-}
-
-.hud__rows { display: flex; flex-direction: column; gap: 5px; }
-.hud__row { display: flex; align-items: baseline; gap: 10px; font-size: .72rem; }
+.hud__details { display: flex; flex-direction: column; gap: 10px; }
+.hud__rows { display: flex; flex-direction: column; gap: 4px; }
+.hud__row { display: flex; align-items: baseline; gap: 10px; font-size: .7rem; }
 .hud__label { color: var(--text-muted); }
 .hud__value {
   margin-left: auto;
@@ -161,50 +207,18 @@
   font-variant-numeric: tabular-nums;
 }
 .hud__value--good { color: #4ade80; }
-
+.hud__value--bad { color: #f87171; }
 .hud__note {
-  font-size: .68rem;
+  font-size: .66rem;
   line-height: 1.45;
   color: var(--text-muted);
   border-top: 1px solid var(--border);
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
-/* Escritorio: modos arriba, preview debajo — el orden de siempre. */
-.hud__body { display: flex; flex-direction: column-reverse; gap: 12px; }
-.hud__side { display: flex; flex-direction: column; gap: 12px; }
-.hud__compact { display: none; }
-
-/* ── Móvil ──────────────────────────────────────────────────────────────────
-   El panel ocupaba dos tercios de la pantalla y tapaba el propio efecto que
-   viene a explicar. Acá se queda en 30 vh: la tabla de ocho filas se cambia por
-   dos líneas, el preview se encoge y se pone al lado en vez de debajo. Las seis
-   filas que desaparecen son telemetría de desarrollo; las dos que quedan son lo
-   único que el visitante necesita — cuánto te ve, y que no sale nada de acá. */
 @media (max-width: 640px) {
-  .hud {
-    left: 10px; right: 10px; bottom: 10px; width: auto;
-    max-height: 30vh;
-    padding: 10px 12px;
-    gap: 9px;
-  }
-  .hud__rows, .hud__note { display: none; }
-  .hud__compact {
-    display: flex; flex-direction: column; gap: 2px;
-    font-size: .74rem; color: var(--text-muted); margin: 0;
-  }
-  .hud__body {
-    display: grid;
-    grid-template-columns: 76px 1fr;
-    gap: 10px;
-    align-items: center;
-    min-height: 0;
-  }
-  .hud__side { gap: 8px; }
-  .hud__preview { width: 76px; aspect-ratio: 1 / 1; object-fit: cover; }
-  .hud__title { font-size: .66rem; }
-  .hud__stop { font-size: .64rem; padding: 2px 7px; }
-  .hud__mode { font-size: .64rem; padding: 4px 5px; }
+  .hud { right: 10px; bottom: 10px; width: 132px; }
+  .hud--more { width: calc(100vw - 20px); }
 }
 
 
@@ -236,10 +250,6 @@
   font-weight: 600;
 }
 
-/* El interruptor de sonido vive junto al de apagado: quien quiera silencio no
-   debe tener que buscarlo. */
-.hud__head { flex-wrap: wrap; }
-.hud__sound--on { color: var(--accent); border-color: rgba(245, 165, 36, .4); }
 
 /* Sandbox — ayuda visual del swipe.
    idle   → la mano hace el gesto sola, en bucle: así se ve qué hay que hacer.

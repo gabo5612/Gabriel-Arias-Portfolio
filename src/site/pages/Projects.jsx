@@ -14,8 +14,10 @@ export const page = {
   scene: {
     shape: { type: 'cube' },
     palette: [0xf5a524, 0x2dd4bf, 0xf97316, 0x7dd3fc, 0xfbbf24, 0x4ade80],
-    // Al abrir un proyecto la formación escribe su nombre en partículas.
-    itemShape: id => byId[id] && { type: 'text', text: byId[id].title },
+    // Al abrir un proyecto, la formación se vuelve su modelo: uno por
+    // proyecto, generado con Blender (blender/build_models.py). Son relieves
+    // de frente, así que `face` los mantiene mirando a la cámara.
+    itemShape: id => byId[id] && { type: 'model', url: `/models/projects/${id}.glb`, face: true },
   },
 }
 

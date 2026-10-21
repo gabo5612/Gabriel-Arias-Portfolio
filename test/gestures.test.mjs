@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed } from '../src/engine/gestures.js'
+import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed, twoHands } from '../src/engine/gestures.js'
 
 const hand = (x, y = 0, fingers = 5) => ({ source: 'hand', hands: 1, x, y, fingers })
 
@@ -153,4 +153,25 @@ test('the site’s more sensitive swipe catches a moderate sweep the default mis
   assert.equal(sweep(createSwipeDetector(SITE), ...moderate, 300).swipes.length, 1)
   // Y sigue sin confundir una deriva lenta con un swipe.
   assert.equal(sweep(createSwipeDetector(SITE), { x: -0.9, y: 0 }, { x: 0.9, y: 0 }, 2000).swipes.length, 0)
+})
+
+test('two open palms are their own mode, so spreading them never swipes', () => {
+  const both = { source: 'hand', hands: 2, fingers: 5, fingers2: 5, point: 0 }
+  assert.equal(handMode(both), 'two')
+  assert.equal(handMode({ ...both, fingers2: 1 }), 'open')
+  assert.equal(handMode({ ...both, hands: 1 }), 'open')
+})
+
+test('two hands: spreading zooms in, turning rolls, the short way round', () => {
+  const start = twoHands({ x: -0.2, y: 0, x2: 0.2, y2: 0 })
+  const wider = twoHands({ x: -0.4, y: 0, x2: 0.4, y2: 0 }, start)
+  assert.ok(Math.abs(wider.zoom - 2) < 1e-9)
+  assert.equal(wider.roll, 0)
+  // La mano derecha sube (y negativo = arriba): giro antihorario en pantalla.
+  const turned = twoHands({ x: -0.2, y: 0.1, x2: 0.2, y2: -0.1 }, start)
+  assert.ok(turned.roll > 0.3 && turned.roll < 0.6)
+  // Cruzar ±π no da casi una vuelta entera.
+  const s2 = twoHands({ x: 0.2, y: 0.001, x2: -0.2, y2: 0 })
+  const r2 = twoHands({ x: 0.2, y: -0.001, x2: -0.2, y2: 0 }, s2)
+  assert.ok(Math.abs(r2.roll) < 0.05)
 })

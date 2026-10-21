@@ -2,6 +2,7 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react
 import { AnimatePresence, motion } from 'framer-motion'
 import { useDepthSignal } from '../engine/signal/useDepthSignal'
 import { useCameraControl } from '../engine/signal/useCameraControl'
+import { useTilt } from '../engine/signal/useTilt'
 import { profile } from '../content'
 import { PAGES } from './pages'
 import { useNavigation } from './useNavigation'
@@ -33,9 +34,14 @@ const panel = {
 }
 const still = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
 
+const FAKE_HUD = import.meta.env.DEV && new URLSearchParams(window.location.search).has('fakehud')
+  ? { found: true, calibrating: false, target: 'hand', hands: 1, fingers: 4.3, fps: 20, latency: 21, delegate: 'GPU', vw: 480, vh: 360 }
+  : null
+
 export default function App() {
   const depth = useDepthSignal()
   const cam = useCameraControl(depth)
+  const tilt = useTilt(depth)
   const { state, dir, go } = useNavigation(PAGES)
   const page = PAGES[state.page]
   const [world, setWorld] = useState(false)
@@ -80,7 +86,7 @@ export default function App() {
         </div>
       )}
 
-      <Nav pages={PAGES} state={state} go={go} cam={cam} name={profile.name} />
+      <Nav pages={PAGES} state={state} go={go} cam={cam} tilt={tilt} name={profile.name} />
 
       <main className="site__main" ref={mainRef}>
         <AnimatePresence mode="wait" custom={{ dir: dir || 1, fly }} initial={false}>
@@ -95,7 +101,7 @@ export default function App() {
             exit="exit"
           >
             <div className="panel__scroll" data-scroll>
-              <Component state={state} go={go} cam={cam} reduced={depth.reduced} />
+              <Component state={state} go={go} cam={cam} tilt={tilt} reduced={depth.reduced} />
             </div>
           </motion.section>
         </AnimatePresence>
@@ -106,6 +112,14 @@ export default function App() {
       {(cam.camOn || depth.source === 'hand') && (
         <Suspense fallback={null}>
           <HandControls signal={depth.signal} pages={PAGES} state={state} go={go} />
+        </Suspense>
+      )}
+      {/* Sólo en desarrollo: ?fakehud muestra el panel con datos de ejemplo,
+          para diseñarlo sin encender la cámara. */}
+      {import.meta.env.DEV && !cam.camOn && FAKE_HUD && (
+        <Suspense fallback={null}>
+          <PrivacyHUD stats={FAKE_HUD} video={null} mode="hand" muted={false}
+            onMute={() => {}} onStop={() => {}} />
         </Suspense>
       )}
       {cam.camOn && (

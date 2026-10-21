@@ -1,7 +1,8 @@
 import React from 'react'
 import TrackButton from '../../engine/ui/TrackButton'
+import TiltButton from '../../engine/ui/TiltButton'
 
-export default function Nav({ pages, state, go, cam, name }) {
+export default function Nav({ pages, state, go, cam, tilt, name }) {
   return (
     <header className="nav">
       <a
@@ -26,7 +27,10 @@ export default function Nav({ pages, state, go, cam, name }) {
           ))}
         </ul>
       </nav>
-      <TrackButton cam={cam} compact className="nav__track" />
+      {/* En el teléfono, inclinarlo; en el resto, la mano. */}
+      {tilt.available
+        ? <TiltButton tilt={tilt} compact className="nav__track" />
+        : <TrackButton cam={cam} compact className="nav__track" />}
     </header>
   )
 }
