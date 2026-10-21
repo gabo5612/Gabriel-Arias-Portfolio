@@ -1,233 +1,7 @@
 /* ==========================================
-   HERO — Full-screen with animated bg
+   ENGINE — piezas de UI que comparten el sitio y el lab: botón de tracking,
+   panel de privacidad y guía del gesto. Nada de layout de página acá.
    ========================================== */
-
-.hero {
-  position: relative;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 100px 24px 80px;
-  overflow: hidden;
-}
-
-/* ── Animated Background ── */
-.hero__bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.hero__blob {
-  position: absolute;
-  border-radius: 50%;
-  will-change: transform;
-}
-
-.hero__blob--1 {
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(245, 165, 36, 0.14) 0%, transparent 70%);
-  top: -250px;
-  right: -200px;
-  filter: blur(60px);
-  animation: float 14s ease-in-out infinite;
-}
-
-.hero__blob--2 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.09) 0%, transparent 70%);
-  bottom: -200px;
-  left: -200px;
-  filter: blur(80px);
-  animation: float-reverse 11s ease-in-out infinite;
-}
-
-.hero__blob--3 {
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.07) 0%, transparent 70%);
-  top: 45%;
-  left: 40%;
-  filter: blur(60px);
-  animation: float-slow 18s ease-in-out infinite;
-}
-
-/* Subtle dot-grid overlay */
-.hero__grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-}
-
-/* ── Content ── */
-.hero__content {
-  position: relative;
-  z-index: 1;
-  max-width: var(--container);
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* Greeting */
-.hero__greeting {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin-bottom: 6px;
-  font-family: var(--font-body);
-}
-
-/* Name */
-.hero__name {
-  font-family: var(--font-display);
-  font-size: clamp(3.2rem, 9vw, 6.5rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  background: linear-gradient(135deg, #f5a524 0%, #fb923c 45%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 20px;
-}
-
-/* Typewriter role */
-.hero__role-wrapper {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 28px;
-  min-height: 2rem;
-}
-
-.hero__role-prefix {
-  font-size: clamp(1rem, 2.2vw, 1.35rem);
-  font-weight: 500;
-  color: var(--text-muted);
-  font-family: var(--font-body);
-}
-
-.hero__role {
-  font-size: clamp(1rem, 2.2vw, 1.35rem);
-  font-weight: 600;
-  color: var(--text-primary);
-  font-family: var(--font-body);
-}
-
-.hero__role-cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1.3em;
-  background: var(--accent);
-  border-radius: 1px;
-  margin-left: 1px;
-  vertical-align: middle;
-  animation: typing-cursor 1.1s ease-in-out infinite;
-}
-
-/* Description */
-.hero__description {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  line-height: 1.75;
-  max-width: 540px;
-  margin-bottom: 40px;
-  font-family: var(--font-body);
-}
-
-/* CTA buttons */
-.hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 56px;
-}
-
-/* Scroll indicator */
-.hero__scroll {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-family: var(--font-body);
-}
-
-.hero__scroll-indicator {
-  width: 22px;
-  height: 36px;
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  border-radius: 11px;
-  display: flex;
-  justify-content: center;
-  padding: 5px 0;
-}
-
-.hero__scroll-dot {
-  width: 4px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 2px;
-  animation: scroll-bounce 2.2s ease-in-out infinite;
-}
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-@media (min-width: 768px) {
-  .hero {
-    padding: 100px 48px 80px;
-  }
-
-  .hero__description {
-    font-size: 1.1rem;
-  }
-}
-
-/* ==========================================
-   PROFUNDIDAD — capas, retícula 3D y tracking
-   ========================================== */
-
-/* La perspectiva vive en el contenedor: sin ella, rotateX/rotateY de las capas
-   son giros planos y no se lee volumen alguno. */
-.hero { perspective: 1200px; perspective-origin: 50% 45%; }
-
-/* Cada capa envuelve a su contenido en vez de ser el contenido: los blobs
-   conservan su `animation: float`, que un transform inline les pisaría. */
-.hero__layer {
-  position: absolute;
-  inset: 0;
-  will-change: transform;
-  transform-style: preserve-3d;
-}
-
-/* La retícula no lleva data-depth: mueve su propio frustum, no un transform. */
-.hero__lattice {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-.hero__lattice canvas { display: block; width: 100%; height: 100%; }
-
-.hero__parallax {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  will-change: transform;
-}
 
 /* ── Botón de tracking ──
    Es lo único de la página que no se puede adivinar leyendo: mueve el hero con
@@ -433,41 +207,6 @@
   .hud__mode { font-size: .64rem; padding: 4px 5px; }
 }
 
-/* ==========================================
-   REDUCED MOTION — hoy no existía en ningún lado
-   ========================================== */
-@media (prefers-reduced-motion: reduce) {
-  .hero__blob,
-  .hero__scroll-dot,
-  .hero__role-cursor,
-  .hud__dot,
-  .hero__track,
-  .hero__track::after,
-  .hero__track--on .hero__track-dot {
-    animation: none !important;
-  }
-  /* Sin la respiración el botón todavía tiene que verse: se queda con el borde
-     y el fondo ámbar, que no son movimiento. */
-  .hero__track::after { opacity: 0; }
-  .hero__layer,
-  .hero__parallax { transform: none !important; }
-}
-
-/* La retícula se apaga sobre la columna del copy. Sin esto los puntos compiten
-   con el texto justo donde hay que leer, y además la composición queda plana:
-   con la máscara el volumen pesa a la derecha, que es donde no hay nada. */
-.hero__lattice {
-  -webkit-mask-image: linear-gradient(100deg, rgba(0,0,0,.40) 0%, rgba(0,0,0,.52) 26%, #000 62%);
-          mask-image: linear-gradient(100deg, rgba(0,0,0,.40) 0%, rgba(0,0,0,.52) 26%, #000 62%);
-}
-@media (max-width: 900px) {
-  /* En una columna el texto ocupa todo el ancho, así que la máscara pasa a ser
-     vertical: despejado arriba donde está el nombre, denso abajo. */
-  .hero__lattice {
-    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.50) 55%, #000 100%);
-            mask-image: linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.50) 55%, #000 100%);
-  }
-}
 
 /* ── Conmutador de fuente: mano derecha o cabeza ── */
 .hud__modes {
@@ -497,67 +236,10 @@
   font-weight: 600;
 }
 
-/* Pista de gestos: aparece sólo mientras la cámara está activa. */
-.hero__hint {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  margin: -34px 0 34px;
-  font-size: .82rem;
-  color: var(--text-muted);
-}
-.hero__hint span { display: inline-flex; align-items: center; gap: 6px; }
-.hero__hint span::before {
-  content: '';
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--accent); opacity: .6; flex: none;
-}
-.hero__hint b { color: var(--text-secondary); font-weight: 600; }
-
 /* El interruptor de sonido vive junto al de apagado: quien quiera silencio no
    debe tener que buscarlo. */
 .hud__head { flex-wrap: wrap; }
 .hud__sound--on { color: var(--accent); border-color: rgba(245, 165, 36, .4); }
-
-/* Sandbox — etiqueta de la zona del globo que está al frente. Arriba: abajo a
-   la derecha la tapa el panel de privacidad. */
-.globe__zone {
-  position: absolute;
-  z-index: 1;
-  right: 32px;
-  top: 96px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  font-family: var(--font-display);
-}
-.globe__zone-label {
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.globe__zone-name {
-  font-size: 22px;
-  font-weight: 600;
-  transition: color var(--t-base);
-}
-.hero__lattice canvas { position: absolute; inset: 0; }
-
-/* Sandbox — solo el globo: sin máscara lateral y con el control abajo al centro. */
-.hero__lattice { -webkit-mask-image: none; mask-image: none; }
-.sandbox__controls {
-  position: absolute;
-  left: 50%;
-  bottom: 40px;
-  transform: translateX(-50%);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
 
 /* Sandbox — ayuda visual del swipe.
    idle   → la mano hace el gesto sola, en bucle: así se ve qué hay que hacer.
@@ -651,4 +333,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .gesture[data-state="idle"] .gesture__hand { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud__dot,
+  .hero__track,
+  .hero__track::after,
+  .hero__track--on .hero__track-dot {
+    animation: none !important;
+  }
+  /* Sin la respiración el botón todavía tiene que verse: se queda con el borde
+     y el fondo ámbar, que no son movimiento. */
+  .hero__track::after { opacity: 0; }
 }

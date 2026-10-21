@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+  <defs>
+    <pattern id="gs" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0v40" fill="none" stroke="#161b26" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="ws" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity=".20"/>
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="500" fill="#0B0D11"/>
+  <rect width="800" height="500" fill="url(#gs)"/>
+  <rect width="800" height="500" fill="url(#ws)"/>
+  <g fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- the manual: a page with a table, and a revision tab -->
+    <rect x="88" y="150" width="130" height="200" rx="10"/>
+    <path d="M188 150v22h30" opacity=".55"/>
+    <path d="M110 192h60M110 212h84" stroke-width="2"/>
+    <rect x="110" y="238" width="84" height="72" rx="4" opacity=".8"/>
+    <path d="M110 262h84M110 286h84M138 238v72M166 238v72" stroke-width="1.5" opacity=".55"/>
+    <path d="M232 250h46" opacity=".55"/>
+    <!-- retrieval: three chunks, one of them the one that answers -->
+    <rect x="292" y="196" width="96" height="30" rx="6" opacity=".45"/>
+    <rect x="292" y="236" width="96" height="30" rx="6"/>
+    <path d="M304 251h30" stroke-width="2"/>
+    <rect x="292" y="276" width="96" height="30" rx="6" opacity=".45"/>
+    <path d="M402 250h44" opacity=".55"/>
+    <!-- the answer: a figure, verified against the page, with its citation -->
+    <rect x="458" y="164" width="180" height="122" rx="12"/>
+    <path d="M482 200h80" stroke-width="3"/>
+    <path d="M482 226h132" stroke-width="2" opacity=".7"/>
+    <path d="M482 250h96" stroke-width="2" opacity=".7"/>
+    <path d="M548 286l-14 22h28z" fill="#0B0D11"/>
+    <rect x="458" y="318" width="180" height="34" rx="8" opacity=".8"/>
+    <path d="M478 335h34M524 335h26M562 335h20" stroke-width="2" opacity=".6"/>
+    <circle cx="692" cy="225" r="34" fill="#0B0D11"/>
+    <path d="M676 226l12 13 22-26" stroke-width="4"/>
+  </g>
+</svg>

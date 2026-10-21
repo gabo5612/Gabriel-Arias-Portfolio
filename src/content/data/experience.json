@@ -1,0 +1,30 @@
+[
+  {
+    "date": "2014-2019",
+    "title": "Cameraman & Web Developer",
+    "location": "Venezuela",
+    "description": "Ran everything web for Producciones Mi Tricolor: bought the domain, set up the CDN, built the site. I shot and wrote the content too, and did the performance work in the code itself rather than bolting a plugin on top of it."
+  },
+  {
+    "date": "2019-2022",
+    "title": "Web Developer & SEO Consultant",
+    "location": "Venezuela",
+    "description": "Built and ran the WordPress sites for Clarita’ShopVnzla. The point was local customers, so the work was content aimed at what people nearby were actually searching for, plus the photography and video that went with it."
+  },
+  {
+    "date": "2022-2023",
+    "title": "WordPress Developer & SEO Specialist",
+    "location": "Remote",
+    "description": "SEO at Efiempresa. I went through the site's content looking for what was holding rankings back, fixed it, and then watched whether organic traffic actually moved."
+  },
+  {
+    "date": "2023-Present",
+    "title": "Web Producer & AI Engineer",
+    "location": "Remote",
+    "description": [
+      "Work at a digital agency on a RAG platform that drafts client content. It ingests documents, embeds them into pgvector and runs a five-step pipeline on background jobs. Most of the work was never the AI part. It was deciding which models the server is allowed to call at all, who can do what, what each generation cost, and keeping a record of who changed what.",
+      "Also ran a WCAG 2.1 AA cleanup across five sites. The audit tool marked 854 items as 'needs manual check', which is useless at that volume, so I wrote a contrast checker that separates what a machine can measure from what a person has to judge by eye.",
+      "Technical audits run on a multi-agent setup I operate, up to eleven specialists at once, and I turn what several of them confirm independently into something a client can act on. Internal tools too, like an image and video compressor that runs with no backend."
+    ]
+  }
+]

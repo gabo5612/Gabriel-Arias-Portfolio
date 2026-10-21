@@ -3,7 +3,8 @@ import {
   AdditiveBlending, BufferAttribute, BufferGeometry, Color, Group, PerspectiveCamera,
   Points, Quaternion, Scene, ShaderMaterial, Vector3, WebGLRenderer,
 } from 'three'
-import { SHAPES } from '../../lib/shapes'
+import { SHAPES } from '../../engine/shapes/procedural'
+import { createSwipeDetector, SWIPE_DEFAULTS } from '../../engine/gestures'
 
 // Experimento: los puntos de la retícula, envueltos en un globo que se agarra
 // con la mano.
@@ -117,12 +118,8 @@ const FRAG = /* glsl */`
 
 const GLOBE_R = 240
 
-// Swipe: cuánto tiene que recorrer x (en unidades de señal, [-1, 1]) dentro de
-// la ventana, con cuántos dedos como mínimo, y cuánto esperar antes del próximo.
-const SWIPE_DX = 0.5
-const SWIPE_MS = 260
-const SWIPE_FINGERS = 3.5
-const SWIPE_COOLDOWN = 900
+// Umbrales del swipe: los de engine/gestures.js, compartidos con el sitio.
+const SWIPE_COOLDOWN = SWIPE_DEFAULTS.cooldown
 const MORPH_MS = 1100
 
 // Mano abierta, de frente. Se dibuja inline: un ícono descargado sería una
@@ -284,11 +281,7 @@ export default function GlobeScene({ signal, onFail }) {
     const inv = new Quaternion()
     let shown = -1
 
-    // Historial corto de x para medir velocidad. La señal ya viene suavizada,
-    // así que un swipe real se ve como un recorrido grande en poco tiempo y un
-    // temblor no.
-    const hist = []
-    let cooldown = 0
+    const swipes = createSwipeDetector()
     // Rotación con su propio seguimiento: durante un swipe la mano cruza medio
     // cuadro y, si el globo la siguiera, cada cambio de forma vendría con media
     // vuelta de regalo. Se congela en el ángulo de antes del swipe y vuelve
@@ -302,28 +295,21 @@ export default function GlobeScene({ signal, onFail }) {
       const onCam = s.source === 'hand' || s.source === 'face'
 
       // ── Swipe ─────────────────────────────────────────────────────────────
-      if (s.source === 'hand' && s.hands > 0) {
-        hist.push({ t: now, x: s.x, y: s.y })
-        while (hist.length && now - hist[0].t > SWIPE_MS) hist.shift()
-        const dx = s.x - hist[0].x
-        if (now > cooldown && s.fingers >= SWIPE_FINGERS && Math.abs(dx) > SWIPE_DX) {
-          goTo(dx > 0 ? 1 : -1, now)
-          cooldown = now + SWIPE_COOLDOWN
-          holdUntil = now + SWIPE_COOLDOWN
-          heldX = hist[0].x; heldY = hist[0].y
-          hist.length = 0
-        }
-        const open = s.fingers >= SWIPE_FINGERS
-        setGuide(open ? 'open' : 'closed',
-          open ? 'Swipe right for next · left for previous' : 'Open your hand to swipe')
-        setMeter(open && now > cooldown ? Math.max(-1, Math.min(1, dx / SWIPE_DX)) : 0)
-      } else {
-        hist.length = 0
+      const sw = swipes.push(s, now)
+      if (sw.swipe) {
+        goTo(sw.swipe.dir, now)
+        holdUntil = now + SWIPE_COOLDOWN
+        heldX = sw.swipe.from.x; heldY = sw.swipe.from.y
+      }
+      if (sw.state === 'idle') {
         setGuide('idle', s.source === 'hand'
           ? 'Show your hand to the camera'
           : 'Open hand, swipe sideways  ·  or ← →')
-        setMeter(0)
+      } else {
+        setGuide(sw.state, sw.state === 'open'
+          ? 'Swipe right for next · left for previous' : 'Open your hand to swipe')
       }
+      setMeter(sw.progress)
       uniforms.uMorph.value = Math.min(1, (now - morphAt) / MORPH_MS)
 
       // Euler XYZ = Rx·Ry: el giro horizontal es sobre el eje propio del globo

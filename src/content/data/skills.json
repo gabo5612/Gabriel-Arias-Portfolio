@@ -1,0 +1,110 @@
+[
+  {
+    "group": "IA",
+    "items": [
+      "Ollama",
+      "Local Inference",
+      "RAG",
+      "pgvector",
+      "Anthropic API",
+      "OpenAI API",
+      "Vercel AI SDK",
+      "MCP",
+      "Agents & Subagents",
+      "Evals"
+    ]
+  },
+  {
+    "group": "frontEnd",
+    "items": [
+      "JavaScript",
+      "TypeScript",
+      "PHP",
+      "React JS",
+      "React Native",
+      "Next.js",
+      "Vite.js",
+      "Gatsby JS"
+    ]
+  },
+  {
+    "group": "shopify",
+    "items": [
+      "Liquid",
+      "Shopify API"
+    ]
+  },
+  {
+    "group": "wordpress",
+    "items": [
+      "WordPress",
+      "Elementor",
+      "ACF",
+      "JQuery",
+      "Local WP"
+    ]
+  },
+  {
+    "group": "styling",
+    "items": [
+      "CSS",
+      "Tailwind",
+      "Bootstrap",
+      "SASS"
+    ]
+  },
+  {
+    "group": "backend",
+    "items": [
+      "MySQL",
+      "PostgreSQL",
+      "Supabase",
+      "Firebase",
+      "Google Cloud",
+      "Python",
+      "Node.js",
+      "Express.js"
+    ]
+  },
+  {
+    "group": "tools",
+    "items": [
+      "Docker",
+      "GitHub Actions",
+      "Inngest",
+      "Playwright",
+      "Electron",
+      "NPM",
+      "Webpack",
+      "Babel",
+      "Redux",
+      "JSON",
+      "Rest API",
+      "GitHub",
+      "ES6+"
+    ]
+  },
+  {
+    "group": "others",
+    "items": [
+      "Visual Studio Code",
+      "Figma",
+      "Photoshop",
+      "Illustrator",
+      "ClickUp",
+      "Slack",
+      "Zoom",
+      "HubSpot"
+    ]
+  },
+  {
+    "group": "seo",
+    "items": [
+      "Google Ads",
+      "Google Analytics",
+      "Google Search Console",
+      "Google PageSpeed Insights",
+      "SemRush"
+    ]
+  }
+]

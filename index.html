@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hero Sandbox</title>
+    <!-- La promesa del panel de privacidad —"nada sale de este dispositivo"—
+         no se afirma, se impone: connect-src 'self' hace que el navegador
+         rechace cualquier llamada saliente, incluida la telemetría de
+         MediaPipe. Misma política que el portfolio. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self'; base-uri 'self'; form-action 'self'" />
+    <meta name="description" content="Gabriel Arias — web developer and AI engineer building local-first systems. A portfolio you fly through." />
+    <meta name="theme-color" content="#05070d" />
+    <title>Gabriel Arias</title>
   </head>
   <body>
     <div id="root"></div>

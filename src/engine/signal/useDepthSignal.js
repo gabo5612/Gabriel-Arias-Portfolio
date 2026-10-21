@@ -118,7 +118,7 @@ export function useDepthSignal() {
     // Cambiar de modo con una fuente viva: se suelta la anterior primero, o
     // quedarían dos detectores escribiendo sobre el mismo target.
     if (stopCam.current) { stopCam.current(); stopCam.current = null }
-    const { startCameraSource } = await import('../lib/cameraSource')
+    const { startCameraSource } = await import('./cameraSource')
     stopCam.current = await startCameraSource(mode, pose => {
       Object.assign(target.current, pose)
       if (sourceRef.current !== mode) {
