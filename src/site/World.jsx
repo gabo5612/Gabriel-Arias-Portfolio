@@ -11,7 +11,7 @@ import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 import { sound } from '../engine/audio/worldSound'
 import { createParticlePlane, PLANE_PALETTE } from '../engine/particlePlane'
-import { flightMs as flightFor, PLANE_STRETCH } from './flight'
+import { flightMs as flightFor, PLANE_ARM_MS, PLANE_FLIGHT_MS } from './flight'
 
 // El mundo: una avenida recta en el espacio con una formación de partículas
 // por página. Navegar no cambia de pantalla, mueve la cámara por la avenida
@@ -114,7 +114,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     //
     // El botón avisa con el evento 'world-plane' y, si el mundo contesta con
     // detail.delay, espera eso antes de navegar: es el tiempo del armado.
-    const TRANSFORM_MS = 1100
+    const TRANSFORM_MS = PLANE_ARM_MS
     const paper = createParticlePlane({ count, size: SIZE, far: FAR, trail: small ? 360 : 700 })
     scene.add(paper.group, paper.points)
     stage.own(paper)
@@ -263,7 +263,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         planeFlight = null
       }
       if (planeReq && now - planeReq.at < 3000) {
-        flightMs *= PLANE_STRETCH
+        flightMs = PLANE_FLIGHT_MS
         const src = stations[planeReq.from]
         paper.show(src.inner)
         planeStart.copy(paper.group.position)

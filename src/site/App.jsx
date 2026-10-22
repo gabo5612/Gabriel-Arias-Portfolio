@@ -12,7 +12,7 @@ import { calibrated } from '../engine/handProfile'
 import Nav from './ui/Nav'
 import RouteMap from './ui/RouteMap'
 import Welcome, { shouldWelcome } from './ui/Welcome'
-import { flightMs, PLANE_STRETCH } from './flight'
+import { flightMs, PLANE_FLIGHT_MS } from './flight'
 import '../styles/engine.css'
 import '../styles/site.css'
 
@@ -121,7 +121,7 @@ export default function App() {
     // estaciones, y si acaba de despegar el biplano, el viaje se estira.
     const n = Math.abs(state.page - shown.current.page)
     const plane = performance.now() - planeAt.current < 4000
-    shown.current = { key, page: state.page, fly: flightMs(n) * (plane && n ? PLANE_STRETCH : 1) }
+    shown.current = { key, page: state.page, fly: plane && n ? PLANE_FLIGHT_MS : flightMs(n) }
   }
   const fly = shown.current.fly
 

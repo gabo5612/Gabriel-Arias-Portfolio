@@ -34,7 +34,8 @@ const FIG_HZ = 30          // actualización de las voces continuas
 // La identidad sonora de cada estación. No basta con cambiar de acorde: con
 // notas vecinas y el mismo timbre, seis acordes de la misma escala suenan
 // casi igual. Cada estación tiene además su registro (raíz distinta, del Mi
-// grave del recorrido por la experiencia al La agudo del contacto), su brillo
+// grave de la experiencia y el Sol grave de los proyectos al La agudo del
+// contacto), su brillo
 // (el corte del filtro) y su movimiento (pulso de amplitud, respiración del
 // filtro). Los semitonos son desde 220 Hz y todos caen en la pentatónica.
 // En el registro medio a propósito: por debajo de ~200 Hz los parlantes de un
@@ -44,7 +45,7 @@ export const STATIONS = [
   { chord: [3, 7, 10, 15], lp: 1300, breathe: 0.08, pulse: 0 },        // About: Do–Mi–Sol, cálido y luminoso
   { chord: [5, 10, 15, 22], lp: 2200, breathe: 0.18, pulse: 0 },       // Skills: cuartas, aireado y brillante
   { chord: [-5, 0, 7, 10], lp: 650, breathe: 0.04, pulse: 0 },         // Experience: Mi grave, oscuro, lento
-  { chord: [10, 15, 19, 22], lp: 1600, breathe: 0.1, pulse: 2.4 },     // Projects: Sol, con pulso: hay cosas en marcha
+  { chord: [-2, 3, 7, 10], lp: 1600, breathe: 0.1, pulse: 2.4 },      // Projects: Sol grave, con pulso: hay cosas en marcha
   { chord: [12, 19, 24, 27], lp: 2600, breathe: 0.12, pulse: 0.8 },    // Contact: La agudo, liviano, invita
 ]
 const stationOf = i => STATIONS[((i % STATIONS.length) + STATIONS.length) % STATIONS.length]

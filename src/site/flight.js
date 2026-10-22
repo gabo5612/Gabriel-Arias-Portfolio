@@ -6,5 +6,9 @@
 export const flightMs = n =>
   n <= 0 ? 0 : 1500 + 900 * Math.min(n - 1, 2) + 450 * Math.max(0, n - 3)
 
-// Con el biplano el viaje se estira: es para verlo.
-export const PLANE_STRETCH = 1.6
+// El biplano dura 5 s de punta a punta, desde el clic hasta que la formación
+// lo absorbe: PLANE_ARM_MS armándose y el resto volando, sea cual sea la
+// distancia.
+export const PLANE_TOTAL_MS = 5000
+export const PLANE_ARM_MS = 1000
+export const PLANE_FLIGHT_MS = PLANE_TOTAL_MS - PLANE_ARM_MS
