@@ -275,7 +275,7 @@ await check('"Fly to my projects" turns the sphere into a dot biplane that flies
     const f = () => {
       const p = window.__plane?.()
       if (p?.on && p.z < 1) pts.push(p)
-      if (performance.now() - t0 < 8500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
+      if (performance.now() - t0 < 12500) requestAnimationFrame(f); else r({ pts, end: window.__plane?.() })
     }
     requestAnimationFrame(f)
   }))
@@ -293,7 +293,7 @@ await check('the biplane flies again when pressed while the camera is still flyi
   await page.evaluate(() => { window.__seen = 0; const f = () => { if (window.__plane?.().on) window.__seen++; requestAnimationFrame(f) }; requestAnimationFrame(f) })
   await page.click('text=Fly to my projects')
   await waitHash(page, '#/projects')
-  await wait(7500)
+  await wait(11000)
   await page.click('.nav__links >> text=Home')
   // El panel aparece antes de que la cámara termine de llegar: se toca ahí.
   await page.waitForSelector('text=Fly to my projects')

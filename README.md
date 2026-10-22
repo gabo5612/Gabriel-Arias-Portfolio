@@ -72,7 +72,7 @@ presentación del título con partículas espera a que se cierre.
 
 ### El biplano
 
-Dura 5 s del clic a la absorción (1 s armándose, 4 s volando; `site/flight.js`).
+Dura 10 s del clic a la absorción (1 s armándose, 9 s volando; `site/flight.js`).
 
 **Fly to my projects** lo hace literal: la esfera de Home se reordena, con sus mismos puntos,
 en un biplano rojo de perfil (`engine/shapes/biplane.js`: fuselaje, alas con montantes, cola,
@@ -122,7 +122,7 @@ el botón del altavoz en la barra, o el del panel de la cámara; se recuerda en 
 
 | Qué pasa | Qué suena |
 |---|---|
-| Estar en una estación | Un fondo propio: cada sección tiene su nota base, su brillo y su movimiento (Home La, About Do, Skills Re brillante, Experience Mi grave y oscuro, Projects Sol grave con pulso, Contact La agudo) — tabla `STATIONS` en `worldSound.js` |
+| Estar en una estación | Un fondo propio: cada sección tiene su nota base, su brillo y su movimiento (Home La, About Do, Skills Re brillante, Experience Mi grave y oscuro, Projects Sol grave con pulso, Contact Re grave) — tabla `STATIONS` en `worldSound.js` |
 | Volar a otra | El acorde pasa por el de cada sección que se cruza (con una campana suave al pasarle al lado) hasta el de destino; aire que cruza de un oído al otro, un grave que empuja |
 | Llegar | Tres campanas con el acorde de la estación |
 | Título que se forma / se deshace | Chispas que suben / que bajan |
