@@ -229,3 +229,16 @@ Las otras fuentes: cualquier nombre de `procedural.js` (`sphere`, `cube`, `torus
   de que exista el mundo. Sin WebGL o con `prefers-reduced-motion`, el sitio funciona igual
   sin mundo.
 - Nada vuelve solo al portfolio: lo que funcione se porta a mano.
+
+## Terceros
+
+Se usan, no son de autoría propia:
+
+- **MediaPipe Tasks Vision** (Google, Apache License 2.0). `public/mediapipe/` redistribuye
+  sin cambios su WASM (`vision_wasm_internal.*`) y los modelos `hand_landmarker.task` y
+  `blaze_face_short_range.tflite`, copiados de `@mediapipe/tasks-vision@1.0.1`. Licencia:
+  https://www.apache.org/licenses/LICENSE-2.0
+- **three.js** (MIT), **React** (MIT), **framer-motion** (MIT), **Vite** (MIT), como
+  dependencias npm.
+- **Blender** (GPL) se usa como herramienta para generar los modelos de `public/models/`;
+  los `.glb` son salida de `blender/build_models.py`, no código de Blender.
