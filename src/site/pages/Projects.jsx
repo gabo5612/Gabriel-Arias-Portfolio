@@ -1,3 +1,4 @@
+import { asset } from '../../engine/asset'
 import Rich from '../ui/Rich'
 import React from 'react'
 import { projects, askChatGptUrl, architectureUrl } from '../../content'
@@ -55,7 +56,7 @@ function Detail({ p, go }) {
       <button type="button" className="project__back" onClick={() => go({ type: 'close' })}>
         All projects
       </button>
-      {p.cover && <img className="project__cover" src={p.cover} alt="" loading="lazy" decoding="async" />}
+      {p.cover && <img className="project__cover" src={asset(p.cover)} alt="" loading="lazy" decoding="async" />}
       <h2 className="panel__title"><Rich text={p.title} /></h2>
       {p.kind === 'service' && <p className="projects__kind">Paid service</p>}
       <p className="panel__text"><Rich text={p.description} /></p>

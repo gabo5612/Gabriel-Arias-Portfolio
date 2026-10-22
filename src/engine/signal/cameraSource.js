@@ -1,3 +1,4 @@
+import { asset } from '../asset.js'
 import { createOneEuro } from './oneEuro.mjs'
 import { profile } from '../handProfile.js'
 
@@ -15,7 +16,7 @@ import { profile } from '../handProfile.js'
 //
 // Este archivo sólo se alcanza por import() dinámico desde useDepthSignal.
 
-const MP_BASE = '/mediapipe'
+const MP_BASE = asset('mediapipe')
 const FACE_MODEL = `${MP_BASE}/blaze_face_short_range.tflite`
 const HAND_MODEL = `${MP_BASE}/hand_landmarker.task`
 

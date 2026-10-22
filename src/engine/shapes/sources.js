@@ -1,3 +1,4 @@
+import { asset } from '../asset.js'
 import { SHAPES } from './procedural.js'
 
 // De dónde puede salir una forma. Las tres fuentes devuelven lo mismo —un
@@ -93,7 +94,7 @@ export async function fromModel(url, count, R, { seed = 11 } = {}) {
     import('three/addons/utils/BufferGeometryUtils.js'),
     import('three'),
   ])
-  const gltf = await new GLTFLoader().loadAsync(url)
+  const gltf = await new GLTFLoader().loadAsync(asset(url))
   gltf.scene.updateMatrixWorld(true)
 
   // Todas las mallas de la escena en una sola geometría, ya en coordenadas de

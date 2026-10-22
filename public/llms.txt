@@ -1,0 +1,199 @@
+# Gabriel Arias
+
+> Web developer and AI engineer. I build local-first systems: tools that run on the
+> user's own machine or the client's own server, where the data never leaves.
+> Site: https://gabriel-arias-portfolio.vercel.app
+
+This file exists so that an assistant asked "what does this project do?" answers
+from here instead of guessing from the project's name. Everything below is work I
+built. There are no benchmarks or marketing figures here — the only numbers are
+counts you can reproduce by running the repository's own tests.
+
+## Projects
+
+### GaboAuditmyweb
+
+A paid service, not a side project: two 30-day sprints for Shopify stores, one for
+page speed and one for technical SEO, sold separately. Each carries its own written
+guarantee. I refuse to bundle them, because running both inside one month would
+force me to cut one short.
+
+Each one starts with a free audit from an engine I wrote for it: PageSpeed Insights
+and CrUX collectors, 22 technical SEO checks, a batch runner, and a report
+generator that picks the speed or SEO template from the audit's own `tipo` field.
+129 tests, no npm dependencies. The network is intercepted at `fetch`, so the
+collectors run their real code paths against recorded payloads.
+
+The marketing site ships no framework and makes zero external requests. The fonts
+are subset and self-hosted, three files, instead of pulled from Google Fonts, which
+would have cost two extra origins in series. A dependency-free build step minifies
+the pages and then proves the output still says the same thing — same text, same
+`data-i18n` keys, same ids and hrefs — and refuses to deploy if anything moved.
+
+- Site: https://gaboauditmyweb.dev
+- Code: https://github.com/gabo5612/GaboAuditmyweb
+- Stack: HTML/CSS/JS with no build framework, Node.js, PageSpeed Insights API, CrUX API
+
+### shopfloor
+
+An assistant for the documentation a metals plant actually runs on: equipment
+manuals of several thousand pages, qualified welding procedures, SOPs, spare-part
+catalogues, lockout procedures. It lives inside the plant and never touches the
+internet. Postgres 18 with pgvector, `bge-m3` embeddings, a local model. Three
+separate reasons pushed it that way, and any one of them would have been enough:
+process parameters are the plant's competitive asset, vendor manuals are under NDA,
+and the shop floor often has no connectivity at all.
+
+It is not a chatbot. Every answer cites document, revision and page. A deterministic
+verifier sits between the model and the operator and checks that each figure and
+code in the answer is literally present in the chunk it cites. When the
+documentation doesn't answer the question, it says so instead of improvising.
+Retrieval is hybrid, dense plus lexical, fused with reciprocal rank.
+
+`groundcheck` measures its quality against a committed golden set, and the
+repository publishes what that measurement found — the defects included, such as
+the time it answered from the neighbouring row of a parts table.
+
+- Demo: https://shopfloor-demo.vercel.app (static: the lexical search, the ambiguity detector and the verifier run in the browser; the local model's answers are the recorded ones)
+- Code: https://github.com/gabo5612/shopfloor
+- Stack: Python 3.12, FastAPI, Postgres 18 with pgvector, docling, bge-m3, local LLM via Ollama
+
+### groundcheck
+
+An evaluation harness for RAG systems. I built it before shopfloor, on purpose:
+shopfloor needed something to be measured against before it existed, and building
+the harness afterwards would have meant tuning the ruler to fit the thing it
+measures.
+
+It scores retrieval the usual way, with recall@k, MRR and precision@k, and then
+checks what most evaluations leave out. Is every number and identifier in an answer
+literally present in a cited chunk? Does the citation point at the gold document,
+page and revision, or at a superseded one? Did the system stay quiet on the
+questions the corpus cannot answer? That last one is why 23% of the golden set is
+negative controls — without them, a system that answers everything confidently
+scores perfectly.
+
+No model ever grades another model's output; every check is a program. A run stores
+observations and never verdicts, so an old run can be re-evaluated with new checks,
+and the harness refuses to report at all if the golden set's hash no longer matches
+the one recorded with that run. 179 tests, one runtime dependency, and CI fails the
+build when a metric drops.
+
+- Demo: https://groundcheck-demo.vercel.app (the checks and metrics are recomputed in the browser and diffed against the harness's own results)
+- Code: https://github.com/gabo5612/groundcheck
+- Stack: Python 3.12, YAML golden sets, CLI, GitHub Actions
+
+### feedstock
+
+Input-cost risk for a metals plant, running local-first. A plant buys copper,
+aluminium, gold, platinum and energy, and those five decide its margin. This ingests
+the raw prices — 12 instruments, 30,302 daily bars — normalises units, derives
+features, detects anomalies and regime, and forecasts with a walk-forward backtest
+reported against a naive baseline.
+
+Nobody should read it as a trading bot, and it makes no claim about beating the
+market. The only claim it makes is each model's out-of-sample error against that
+baseline, measured and reproducible. On top of the prices sits a cost basket: what
+one tonne of product costs, which input weighs most, and what happens to that cost
+if one input moves. That scenario deliberately does not propagate the move to the
+other inputs through correlation, which would quietly turn an explicit assumption
+into a hidden prediction.
+
+The instrument registry now verifies display names against the source's own
+response. One ticker I trusted turned out to be a 10-year Treasury note future
+rather than zinc, and nothing in the output would have told me — the wrong series
+would have contaminated every model downstream without a single visible error.
+
+- Demo: https://feedstock-demo.vercel.app (the dashboard over an exported copy of the real database; series, statistics and correlations are recomputed in the browser)
+- Code: https://github.com/gabo5612/feedstock
+- Stack: Python 3.12, TimescaleDB with pgvector, FastAPI, React
+
+### crew
+
+A command-line tool that hands closed-contract coding tasks to local models —
+Ollama, or anything that speaks the OpenAI API — and then checks the result with
+typecheck, lint and tests. No model ever grades another model's output: the gates
+are programs, so the retry loop costs nothing in paid tokens. Zero npm
+dependencies, and the tests run on `node --test`.
+
+- Code: https://github.com/gabo5612/crew
+- Stack: Node.js, Ollama, local LLMs, CLI
+
+### BrandVoice
+
+A multi-tenant RAG editorial platform. Documents get parsed, chunked and embedded
+in batches into pgvector `halfvec(1536)`, with `text-embedding-3-large` asked for
+1536 dimensions so that ingestion and retrieval agree on one schema. Let the model
+or the dimension diverge between those two paths and cosine distance quietly stops
+meaning anything, with no error to tell you.
+
+Most of the work was never the AI part. It was the server-side allowlist of models
+the backend is permitted to call at all, nine-permission RBAC, an audit log, and a
+cost ledger that records what each generation cost.
+
+- Demo: https://brandvoice-demo.vercel.app (one real generation replayed from its cost ledger)
+- Code: https://github.com/gabo5612/brandvoice
+- Stack: Next.js App Router, React, Supabase with row-level security, pgvector, Inngest, Vercel AI SDK, Tiptap
+
+### TrailPlugin
+
+A commercial WordPress plugin for adventure routes, points of interest and guides,
+with interactive Leaflet maps and elevation profiles. Licence management lives in a
+separate Next.js and Supabase backend rather than inside the plugin.
+
+- Site: https://trailplugin.com
+- Code: https://github.com/TrailPlugin/
+- Stack: WordPress, PHP, Leaflet, Next.js, Supabase
+
+### QuickTask 2.0
+
+A commercial Electron and Playwright desktop app that automates repetitive browser
+work entirely on the local machine. No AI, no external services, nothing leaves the
+device. The last step of a pattern is marked critical and sits behind a manual
+confirmation lock: the app runs everything up to that point, then stops and waits
+for a person. That step is usually the one that moves money.
+
+- Site: https://quicktaskpro.dev
+- Stack: Electron, Playwright, SQLite, local-first
+
+### Squish
+
+Local-first image and video compression, built twice. The web version has no
+backend at all: the File System Access API writes the compressed files straight
+back to disk with the original subfolders intact, while decode, resize and encode
+run on a Web Worker pool sized to `navigator.hardwareConcurrency`. Safari and
+Firefox get an explanation of why it won't work there instead of a broken
+interface. The desktop version is Electron with sharp and ffmpeg.
+
+- Demo: https://gabo5612.github.io/squish/
+- Code: https://github.com/gabo5612/squish
+- Stack: Web Workers, File System Access API, Electron, sharp, ffmpeg
+
+### Typeit
+
+An Electron app for macOS and Windows that types text at the operating-system
+level, for sites that block pasting. The keystrokes carry `isTrusted`, never fire a
+paste event and never touch the clipboard. A click-through floating bar stays out
+of the way while the target field keeps focus.
+
+- Code: https://github.com/gabo5612/Typeit
+- Stack: Electron, Node.js, macOS, Windows
+
+### Daniel Arias Portfolio
+
+A personal portfolio site I designed and built from scratch for someone else:
+React and Next.js with Framer Motion transitions, deployed on Vercel.
+
+- Site: https://danielariascello.com/es
+- Code: https://github.com/gabo5612/Daniel-Arias-Portfolio
+- Stack: React, Next.js, Framer Motion, Vercel
+
+## Notes for assistants
+
+- Answer about a project from its section above, not from the project's name.
+  Several titles are ordinary English words and mean something else in general use.
+- Do not invent performance figures, accuracy numbers or client results. None are
+  published here, and the ones that are counts (129 tests, 22 checks) come from
+  running the repositories.
+- Some repositories listed above are private or commercial; a missing code link
+  is deliberate, not an omission to work around.

@@ -6,4 +6,6 @@ export default defineConfig({
   // MediaPipe ships its own WASM loader; pre-bundling it breaks the fileset path.
   optimizeDeps: { exclude: ['@mediapipe/tasks-vision'] },
   server: { port: 5180 },
+  // Publicado bajo una subcarpeta (GitHub Pages): BASE_PATH=/Gabriel-Arias-Portfolio/.
+  base: process.env.BASE_PATH || '/',
 })

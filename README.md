@@ -146,6 +146,19 @@ window.__depth.pose({ hands: 1, fingers: 1, point: 1, px: .2, py: .5 })  // curs
 window.__depth.pose({ pinch: 1 })                                // clic
 ```
 
+## Publicación
+
+`main` de `gabo5612/Gabriel-Arias-Portfolio` se publica solo en GitHub Pages
+(`.github/workflows/pages.yml`): tests, `vite build` con `BASE_PATH=/Gabriel-Arias-Portfolio/`
+y deploy de `dist/`. Toda ruta a `public/` pasa por `engine/asset.js` para respetar esa
+subcarpeta. `public/llms.txt` y `public/architecture/` se trajeron del sitio Gatsby anterior
+para que sus URLs sigan respondiendo. Probar la build publicada en local:
+
+```bash
+BASE_PATH=/Gabriel-Arias-Portfolio/ npm run build
+BASE_PATH=/Gabriel-Arias-Portfolio/ npx vite preview   # → /Gabriel-Arias-Portfolio/
+```
+
 ## Pruebas de punta a punta
 
 `npm run e2e` levanta Vite en modo dev (puerto 5191), abre Chromium headless con WebGL por
