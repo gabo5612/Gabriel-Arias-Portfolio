@@ -105,7 +105,12 @@ await check('arrow key flies to the next page and its panel', async page => {
   await open(page)
   await page.keyboard.press('ArrowRight')
   await waitHash(page, '#/about')
-  await page.waitForFunction(() => document.querySelector('.panel__title')?.textContent.includes('AI systems'))
+  // El panel de About, con su título visible: sin depender del texto, que
+  // cambia cuando cambia el contenido.
+  await page.waitForFunction(() => {
+    const t = document.querySelector('.panel--about .panel__title')
+    return t && t.textContent.trim().length > 0 && getComputedStyle(t).opacity === '1'
+  }, null, { timeout: 8000 })
 })
 
 await check('one wheel gesture moves exactly one page', async page => {
