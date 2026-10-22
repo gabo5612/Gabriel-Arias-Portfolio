@@ -300,11 +300,20 @@ export const sound = {
 
   // Despegue hacia la estación `to`. El acorde se desliza durante el vuelo,
   // el filtro del fondo se abre en la mitad, y el aire cruza de un lado al otro.
-  fly(dir, ms, to) {
+  // stops: las estaciones que se cruzan en el camino, con el segundo en que
+  // se les pasa al lado. El fondo cambia a cada una a su turno (con una
+  // campana suave), y recién después al destino: el viaje se oye por tramos.
+  fly(dir, ms, to, stops = []) {
     station = to
     if (!live()) return
     const t = ctx.currentTime, d = ms / 1000
-    applyStation(to, t + d * 0.15, d * 0.22)
+    let last = 0
+    for (const s of stops) {
+      applyStation(s.i, t + Math.max(0, s.at - 0.25), 0.16)
+      bell(padHz(stationChord(s.i)[0] + 12), t + s.at, 0.022, 0.5)
+      last = s.at
+    }
+    applyStation(to, t + Math.max(d * 0.15, last + 0.3), stops.length ? 0.2 : d * 0.22)
     // El filtro se abre a mitad de vuelo y aterriza en el brillo del destino.
     const f = pad.lp.frequency
     f.cancelScheduledValues(t); f.setValueAtTime(f.value, t)
@@ -489,5 +498,7 @@ export const sound = {
     for (let i = 1; i < bins.length; i++) if (bins[i] > bins[k]) k = i
     return Math.round((k * ctx.sampleRate) / analyser.fftSize)
   },
+  // Sólo para pruebas: la nota grave del fondo ahora mismo, en Hz.
+  padRoot() { return pad ? Math.round(pad.oscs[0].o.frequency.value) : 0 },
   get state() { return ctx?.state ?? 'none' },
 }

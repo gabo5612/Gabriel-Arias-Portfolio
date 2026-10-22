@@ -35,8 +35,10 @@ const SIDE = 480           // cuánto a la derecha del camino está cada formaci
 const VIEW_D = 900
 const SIZE = 240
 const FAR = 5200
+const SLALOM = 400         // a cuánto del centro de una figura pasa el avión al rodearla
 const CLEAR = 620          // distancia mínima a una formación intermedia en vuelo
 
+const lerp = (a, b, k) => a + (b - a) * k
 const smoothstep = (a, b, v) => { const k = Math.max(0, Math.min(1, (v - a) / (b - a))); return k * k * (3 - 2 * k) }
 const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2)
 const shapeKey = spec => JSON.stringify(spec)
@@ -156,7 +158,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     if (import.meta.env.DEV) {
       window.__plane = () => {
         const v = paper.group.position.clone().project(camera)
-        const q = paper.group.quaternion; return { q: [q.x, q.y, q.z, q.w], on: paper.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
+        const q = paper.group.quaternion; const gp = paper.group.position; return { wx: gp.x, wz: gp.z, q: [q.x, q.y, q.z, q.w], on: paper.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
       }
     }
 
@@ -266,13 +268,34 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         paper.show(src.inner)
         planeStart.copy(paper.group.position)
         src.cloud.points.visible = false
-        planeFlight = { to: page, from: planeReq.from }
+        // Slalom: las formaciones que hay en el camino son postes. El avión
+        // pasa a la izquierda de la primera, a la derecha de la siguiente, y
+        // así. Cada poste es un punto por el que tiene que pasar, a SLALOM del
+        // centro de la figura (más que su radio: la rodea, no la atraviesa).
+        const gates = []
+        if (travelDir > 0) {
+          for (let j = Math.floor(cur) + 1; j < end; j++) {
+            gates.push({ s: -A[j].z, x: A[j].x + (gates.length % 2 ? 1 : -1) * SLALOM })
+          }
+        }
+        planeFlight = { to: page, from: planeReq.from, gates }
         sound.plane(flightMs)
       }
       planeReq = null
       lookFrom.copy(look)
       active = page
-      sound.fly(travelDir, flightMs, page)
+      // Cuándo se pasa al lado de cada formación intermedia: el vuelo es
+      // t = from + (to − from)·ease(raw), así que se invierte la curva.
+      const stops = []
+      const lo = Math.min(cur, end), hi = Math.max(cur, end)
+      for (let j = Math.floor(lo) + 1; j < hi - 1e-3; j++) {
+        const frac = Math.min(1, Math.max(0, (j + VIEW_D / STEP - cur) / (end - cur)))
+        let a = 0, b = 1
+        for (let it = 0; it < 24; it++) { const m = (a + b) / 2; if (easeInOut(m) < frac) a = m; else b = m }
+        stops.push({ i: j, at: ((a + b) / 2) * flightMs / 1000 })
+      }
+      stops.sort((p, q) => p.at - q.at)
+      sound.fly(travelDir, flightMs, page, stops)
     }
 
     // El título del panel visible (la página en curso o el detalle abierto).
@@ -647,6 +670,24 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           .addScaledVector(fwd, 620)
           .addScaledVector(right, Math.sin(now * 0.0017) * 90 * weave)
           .addScaledVector(up, -60 + Math.sin(now * 0.0026) * 28 * weave)
+        // El slalom manda sobre el x mientras haya postes cerca: entre dos, el
+        // avión cruza con una curva suave (smoothstep sobre la distancia).
+        let slope = 0
+        const gates = planeFlight.gates
+        if (gates.length) {
+          const slalomX = sp => {
+            const g0 = gates[0], gl = gates[gates.length - 1]
+            if (sp <= g0.s) return lerp(planePos.x, g0.x, smoothstep(g0.s - 1100, g0.s, sp))
+            if (sp >= gl.s) return lerp(gl.x, planePos.x, smoothstep(gl.s, gl.s + 1100, sp))
+            let i = 0
+            while (sp > gates[i + 1].s) i++
+            return lerp(gates[i].x, gates[i + 1].x, smoothstep(gates[i].s, gates[i + 1].s, sp))
+          }
+          const sp = -planePos.z
+          const x = slalomX(sp)
+          slope = (slalomX(sp + 80) - x) / 80
+          planePos.x = x
+        }
         const k = raw < 0.3 ? easeInOut(raw / 0.3) : 1
         planePos.lerpVectors(planeStart, planePos, k)
         if (raw > 0.72) planePos.lerp(A[planeFlight.to], easeInOut((raw - 0.72) / 0.28))
@@ -661,10 +702,15 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         // está virando.
         const w = raw < 0.5 ? 0 : easeInOut(Math.min(1, (raw - 0.5) / 0.35))
         planeAim.subVectors(A[planeFlight.to], planePos).normalize()
+        // Con slalom, la nariz sigue la curva (la pendiente del x) y el
+        // ladeo se inclina hacia adentro del giro; sin postes, el zigzag.
+        const lateral = gates.length ? slope : Math.cos(now * 0.0017) * 0.25 * weave
         planeAim.lerpVectors(fwd, planeAim, w).normalize()
-          .addScaledVector(right, Math.cos(now * 0.0017) * 0.25 * weave)
+          .addScaledVector(side, lateral * (1 - w))
           .normalize().multiplyScalar(100).add(planePos)
-        const roll = -Math.cos(now * 0.0017) * 0.45 * weave
+        const roll = gates.length
+          ? -Math.max(-0.8, Math.min(0.8, slope * 1.6)) * (1 - w)
+          : -Math.cos(now * 0.0017) * 0.45 * weave
         paper.place(planePos, now, up, k, 0.6 * scale * (1 - swallow * 0.97), planeAim, roll)
         if (!flying) {
           paper.hide()

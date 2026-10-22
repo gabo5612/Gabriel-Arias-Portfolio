@@ -76,7 +76,8 @@ presentación del título con partículas espera a que se cierre.
 en un biplano rojo de perfil (`engine/shapes/biplane.js`: fuselaje, alas con montantes, cola,
 tren de aterrizaje y hélice). Cuando terminó de armarse, despega: en el mismo cuadro la
 formación se apaga y aparece un biplano idéntico que sí puede volar (`engine/particlePlane.js`,
-hélice girando y dos estelas). Vuela delante de la cámara, que lo persigue, y se estrella
+hélice girando y dos estelas). Vuela delante de la cámara haciendo slalom entre las figuras
+que hay en el camino —a la izquierda de la primera, a la derecha de la siguiente—, y llega
 hasta la formación de Projects, que lo absorbe: el avión se encoge hacia su centro y desaparece
 dentro, y desde ahí sale una onda que recorre la forma (la levanta y la tiñe de rojo al pasar)
 y se apaga en el mismo orden, devolviéndole sus colores (`cloud.wave()` en `pointCloud.js`).
@@ -120,7 +121,7 @@ el botón del altavoz en la barra, o el del panel de la cámara; se recuerda en 
 | Qué pasa | Qué suena |
 |---|---|
 | Estar en una estación | Un fondo propio: cada sección tiene su nota base, su brillo y su movimiento (Home La, About Do, Skills Re brillante, Experience Mi grave y oscuro, Projects Sol con pulso, Contact La agudo) — tabla `STATIONS` en `worldSound.js` |
-| Volar a otra | El acorde se desliza al de destino, aire que cruza de un oído al otro, un grave que empuja |
+| Volar a otra | El acorde pasa por el de cada sección que se cruza (con una campana suave al pasarle al lado) hasta el de destino; aire que cruza de un oído al otro, un grave que empuja |
 | Llegar | Tres campanas con el acorde de la estación |
 | Título que se forma / se deshace | Chispas que suben / que bajan |
 | Cursor sobre la figura | Un soplo que canta según la posición; más fuerte si la girás rápido |
