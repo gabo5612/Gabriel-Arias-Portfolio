@@ -1,0 +1,34 @@
+import Rich from '../ui/Rich'
+import React from 'react'
+import { skills } from '../../content'
+
+export const page = {
+  id: 'skills',
+  label: 'Skills',
+  scene: {
+    // Muchos puntos sueltos que forman un sistema: una galaxia.
+    shape: { type: 'galaxy' },
+    // Plana: girando sobre el eje vertical queda de canto, una raya. Gira
+    // sobre su propio eje, como una galaxia.
+    spin: 'z',
+    palette: [0x2dd4bf, 0x7dd3fc, 0x38bdf8, 0x5eead4, 0xa5f3fc, 0x0ea5e9],
+  },
+}
+
+export default function Skills() {
+  return (
+    <div className="skills">
+      <h2 className="panel__title"><Rich text="What I work with" /></h2>
+      <dl className="skills__list">
+        {skills.map(g => (
+          <div key={g.key} className="skills__group">
+            <dt><Rich text={g.label} /></dt>
+            <dd>
+              <ul>{g.items.map(s => <li key={s}><Rich text={s} /></li>)}</ul>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}

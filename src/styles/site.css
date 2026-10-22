@@ -1,0 +1,804 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* ==========================================
+   SITIO — el mundo detrás, el texto encima.
+   No hay tarjetas: el contenido flota sobre un velo que oscurece sólo el lado
+   donde se lee, para que el mundo siga siendo el fondo y no una ventana dentro
+   de una caja.
+   ========================================== */
+
+.site {
+  --ink: #05070d;
+  --ink-2: #0a0f1c;
+  --paper: #ece8de;
+  --fog: #8b90a0;
+  --fog-2: #5d6272;
+  --amber: #f5a524;
+  --cyan: #7dd3fc;
+  --line: rgba(236, 232, 222, .12);
+
+  --display: 'Bricolage Grotesque', 'Space Grotesk', sans-serif;
+  --body: 'IBM Plex Sans', 'Inter', sans-serif;
+
+  --gutter: clamp(16px, 4vw, 56px);
+  --nav-h: 76px;
+  --route-h: 92px;
+
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  color: var(--paper);
+  font-family: var(--body);
+  /* Sin WebGL (o con reduced-motion) esto es todo el fondo: tiene que bastar. */
+  background:
+    radial-gradient(1200px 700px at 78% 40%, rgba(56, 78, 140, .22), transparent 70%),
+    radial-gradient(900px 600px at 10% 90%, rgba(245, 165, 36, .06), transparent 70%),
+    var(--ink);
+}
+
+.site ::selection { background: rgba(245, 165, 36, .3); color: #fff; }
+
+.site__world { position: absolute; inset: 0; z-index: 0; }
+.world, .world canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* Velo de lectura: oscurece el lado del panel, deja limpio el del mundo. */
+.site::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(5, 7, 13, .88) 0%, rgba(5, 7, 13, .62) 34%, rgba(5, 7, 13, 0) 58%);
+}
+.site[data-page="home"]::before {
+  background: linear-gradient(90deg, rgba(5, 7, 13, .7) 0%, rgba(5, 7, 13, .35) 36%, rgba(5, 7, 13, 0) 55%);
+}
+
+/* ── Navegación ───────────────────────────────────────────────────────── */
+.nav {
+  position: absolute;
+  z-index: 5;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  padding: 0 var(--gutter);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav__logo {
+  font-family: var(--display);
+  font-weight: 700;
+  font-stretch: 85%;
+  font-size: 1.05rem;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+.nav__links {
+  display: flex;
+  gap: 4px;
+}
+.nav__links a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: .9rem;
+  color: var(--fog);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.nav__links a:hover { color: var(--paper); }
+.nav__links a[aria-current="page"] {
+  color: var(--paper);
+  background: rgba(236, 232, 222, .08);
+}
+.nav__sound { margin-left: auto; }
+.nav__track { margin-left: -20px; }
+.sound-btn {
+  display: grid;
+  place-items: center;
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  color: var(--fog);
+  background: transparent;
+  border: 1px solid rgba(236, 232, 222, .12);
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.sound-btn:hover { color: var(--paper); border-color: rgba(236, 232, 222, .3); }
+.sound-btn[aria-pressed="true"] { color: var(--paper); }
+.sound-btn:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+/* Las ondas laten despacio mientras suena: dice que el sonido está vivo. */
+.sound-btn__waves { animation: sound-breathe 2.4s ease-in-out infinite; transform-origin: 9px 9px; }
+@keyframes sound-breathe { 50% { opacity: .45; } }
+.hero__track--compact { padding: 8px 14px; font-size: .82rem; }
+
+/* ── Panel ────────────────────────────────────────────────────────────── */
+.site__main {
+  position: absolute;
+  z-index: 2;
+  left: var(--gutter);
+  top: var(--nav-h);
+  bottom: var(--route-h);
+  width: min(36rem, 46vw);
+  display: flex;
+}
+.panel { flex: 1; min-height: 0; display: flex; }
+.panel__scroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Aire a los lados con margen negativo: la distorsión del texto empuja las
+     palabras hasta ~20 px fuera de su sitio, y un contenedor con scroll recorta
+     todo lo que sale de su caja. El texto queda alineado donde estaba. */
+  padding: 4vh 28px 6vh;
+  margin-inline: -28px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(236, 232, 222, .18) transparent;
+  /* El texto se funde en los bordes en vez de cortarse contra una línea. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 28px, #000 calc(100% - 40px), transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 28px, #000 calc(100% - 40px), transparent 100%);
+  display: flex;
+  flex-direction: column;
+}
+/* Centrado vertical cuando cabe, desplazable cuando no: margin auto en el
+   hijo, no justify-content, que recorta el principio al desbordar. */
+.panel__scroll > * { margin-block: auto; }
+
+.panel__title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-stretch: 88%;
+  font-size: clamp(2rem, 3.6vw, 3.1rem);
+  line-height: 1.02;
+  letter-spacing: -.025em;
+  color: var(--paper);
+  margin-bottom: 22px;
+  text-wrap: balance;
+}
+.panel__text {
+  font-size: 1.02rem;
+  line-height: 1.68;
+  color: #c9c6bd;
+  max-width: 62ch;
+  margin-bottom: 14px;
+}
+.panel__text strong { color: var(--paper); font-weight: 600; }
+.panel__hint { color: var(--fog); font-size: .9rem; margin: -8px 0 18px; }
+
+/* ── Home ─────────────────────────────────────────────────────────────── */
+.home__hi { color: var(--fog); font-size: 1.05rem; margin-bottom: 4px; }
+.home__name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-stretch: 75%;
+  font-size: clamp(3.6rem, 9vw, 8.4rem);
+  line-height: .86;
+  letter-spacing: -.035em;
+  margin-bottom: 26px;
+  color: var(--paper);
+}
+.home__role {
+  font-family: var(--display);
+  font-stretch: 92%;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  color: var(--fog);
+  min-height: 1.6em;
+  margin-bottom: 18px;
+}
+.home__role-word { color: var(--amber); }
+.home__caret {
+  display: inline-block;
+  width: 2px; height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--amber);
+  animation: typing-cursor 1.1s ease-in-out infinite;
+}
+.home__tagline {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: #c9c6bd;
+  max-width: 46ch;
+  margin-bottom: 34px;
+}
+.home__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* ── About ────────────────────────────────────────────────────────────── */
+.about__stats {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 8px 36px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.about__stats div { display: flex; flex-direction: column-reverse; }
+.about__stats dd {
+  font-family: var(--display);
+  font-weight: 700;
+  font-stretch: 85%;
+  font-size: 1.7rem;
+  line-height: 1.1;
+}
+.about__stats dt { font-size: .82rem; color: var(--fog); }
+
+/* ── Skills ───────────────────────────────────────────────────────────── */
+.skills__group {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.skills__group dt { color: var(--cyan); font-size: .9rem; font-weight: 500; padding-top: 1px; }
+.skills__group ul { display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.skills__group li { font-size: .95rem; color: #d6d2c8; }
+
+/* ── Experience ───────────────────────────────────────────────────────── */
+.timeline { position: relative; padding-left: 22px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(180deg, #a78bfa, rgba(167, 139, 250, .1));
+}
+.timeline__item { position: relative; padding-bottom: 26px; }
+.timeline__item::before {
+  content: '';
+  position: absolute;
+  left: -22px; top: 7px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, .16);
+}
+.timeline__when { font-size: .88rem; color: #c4b5fd; margin-bottom: 2px; }
+.timeline__when span { color: var(--fog-2); margin-left: 8px; }
+.timeline__role {
+  font-family: var(--display);
+  font-weight: 600;
+  font-stretch: 92%;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+.timeline .panel__text { font-size: .96rem; }
+
+/* ── Projects ─────────────────────────────────────────────────────────── */
+.projects__list { border-top: 1px solid var(--line); }
+.projects__row {
+  display: grid;
+  gap: 2px;
+  padding: 13px 10px 13px 0;
+  border-bottom: 1px solid var(--line);
+  transition: padding var(--t-base), background var(--t-base);
+}
+.projects__row:hover, .projects__row:focus-visible {
+  padding-left: 12px;
+  background: linear-gradient(90deg, rgba(245, 165, 36, .08), transparent);
+}
+.projects__name {
+  font-family: var(--display);
+  font-weight: 600;
+  font-stretch: 92%;
+  font-size: 1.22rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.projects__note { font-size: .9rem; color: var(--fog); line-height: 1.5; }
+.projects__kind {
+  font-family: var(--body);
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--amber);
+  border: 1px solid rgba(245, 165, 36, .4);
+  border-radius: 999px;
+  padding: 1px 8px;
+  display: inline-block;
+}
+p.projects__kind { margin: -12px 0 14px; }
+
+.project__back {
+  background: none;
+  border: 0;
+  color: var(--fog);
+  font-size: .9rem;
+  padding: 0;
+  margin-bottom: 18px;
+}
+.project__back::before { content: '‹ '; }
+.project__back:hover { color: var(--paper); }
+.project__cover {
+  width: 100%;
+  max-height: 210px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 22px;
+  border: 1px solid var(--line);
+  background: var(--ink-2);
+}
+.project__tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 22px; }
+.project__tags li {
+  font-size: .8rem;
+  color: #d6d2c8;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(236, 232, 222, .07);
+}
+.project__links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 26px; }
+.project__links .btn { padding: 10px 16px; font-size: .86rem; }
+.project__pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.project__pager button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--fog);
+  font-size: .9rem;
+}
+.project__pager button::before { content: '↑ '; }
+.project__pager .project__next::before { content: ''; }
+.project__pager .project__next::after { content: ' ↓'; }
+.project__pager button:hover { color: var(--paper); }
+
+/* ── Contact ──────────────────────────────────────────────────────────── */
+.contact .panel__title { font-size: clamp(2.4rem, 4.6vw, 4rem); }
+.contact__actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 14px; }
+.contact__email { color: var(--fog); font-size: .9rem; }
+
+/* ── Botones, en la voz del sitio ─────────────────────────────────────── */
+.site .btn { font-family: var(--body); border-radius: 999px; }
+.site .btn-primary { background: var(--amber); color: var(--ink); }
+.site .btn-ghost { border-color: rgba(236, 232, 222, .2); color: var(--paper); }
+
+/* ── Mapa de ruta ─────────────────────────────────────────────────────── */
+.route {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  width: min(520px, calc(100% - 32px));
+}
+.route__step {
+  background: none;
+  border: 0;
+  color: var(--fog);
+  font-size: .9rem;
+  padding: 10px 4px;
+  transition: color var(--t-fast);
+  white-space: nowrap;
+}
+.route__step:hover { color: var(--paper); }
+.route__step span { font-size: 1.2rem; vertical-align: -1px; }
+.route__step--prev { justify-self: end; }
+.route__step--next { justify-self: start; }
+.route__map { position: relative; width: 132px; height: 64px; }
+.route__map svg { display: block; overflow: visible; }
+.route__loop { fill: none; stroke: rgba(236, 232, 222, .18); stroke-width: 1; stroke-dasharray: 2 4; }
+.route__stop { fill: var(--fog-2); transition: r var(--t-base), fill var(--t-base); }
+.route__stop--on { fill: var(--paper); }
+.route__me { fill: none; stroke: var(--amber); stroke-width: 1.6; }
+.route__me[data-flying="1"] { stroke-width: 2.4; }
+.route__hit {
+  position: absolute;
+  width: 22px; height: 22px;
+  margin: -11px 0 0 -11px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  padding: 0;
+}
+.route__hit:hover { background: rgba(236, 232, 222, .08); }
+
+/* La guía del gesto, sobre el mapa. */
+.site .gesture { position: absolute; z-index: 4; bottom: calc(var(--route-h) + 6px); }
+
+/* ── Distorsión del texto ─────────────────────────────────────────────────
+   useTextLens escribe en cada palabra cerca del cursor (mouse o dedo):
+     --t       0..1, cuánto le afecta (1 = justo debajo)
+     --dx/--dy dirección desde el cursor hacia la palabra
+   La palabra se aparta del cursor como limadura ante un imán, se tuerce hacia
+   ese lado y se desdobla en rojo/cian, con el ámbar encima. Lejos del cursor
+   no hay variables y es texto normal. inline-block porque un transform no se
+   aplica a un inline. */
+.w {
+  display: inline-block;
+  --t: 0; --dx: 0; --dy: 0;
+  --push: 18px;          /* cuánto se aparta */
+  --twist: 9deg;         /* cuánto se tuerce */
+  --split: 3px;          /* cuánto se desdobla el color */
+  transform-origin: 50% 70%;
+  transform:
+    translate(calc(var(--dx) * var(--t) * var(--push)), calc(var(--dy) * var(--t) * var(--push) * .7))
+    rotate(calc(var(--dx) * var(--t) * var(--twist)))
+    skewX(calc(var(--dx) * var(--t) * var(--twist) * -1.4))
+    scale(calc(1 + var(--t) * .06));
+  color: color-mix(in oklab, #ffd58a calc(var(--t) * 100%), currentColor);
+  text-shadow:
+    calc(var(--t) * var(--split) * -1) 0 rgba(255, 70, 120, calc(var(--t) * .75)),
+    calc(var(--t) * var(--split)) 0 rgba(70, 200, 255, calc(var(--t) * .75)),
+    0 0 calc(var(--t) * 18px) rgba(245, 165, 36, calc(var(--t) * .6));
+  transition: transform 140ms ease-out, color 140ms ease-out, text-shadow 140ms ease-out;
+}
+/* En los titulares la misma fuerza sería ilegible: empujan menos y se tuercen
+   menos, pero el desdoble se nota más porque la letra es más grande. */
+/* Primera carga: el título espera a que lo formen las partículas (App.jsx). */
+.site--intro .panel__title, .site--intro .home__name { opacity: 0; transition: opacity .5s ease; }
+.panel__title .w, .home__name .w { --push: 12px; --twist: 5deg; --split: 5px; }
+.timeline__role .w, .projects__name .w { --push: 14px; --twist: 7deg; }
+
+/* ── Cursor de la mano ────────────────────────────────────────────────────
+   La punta es el punto exacto del clic; el anillo se cierra con el pellizco,
+   así se ve cuánto falta para que el clic cuente. */
+.hand-cursor {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  --pinch: 0;
+}
+.hand-cursor[data-on="1"] { opacity: 1; }
+.hand-cursor__tip, .hand-cursor__ring {
+  position: absolute;
+  left: 0; top: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.hand-cursor__tip {
+  width: 8px; height: 8px;
+  background: var(--paper);
+  box-shadow: 0 0 6px rgba(236, 232, 222, .45);
+}
+.hand-cursor__ring {
+  width: 40px; height: 40px;
+  border: 1px solid rgba(236, 232, 222, .45);
+  transform: translate(-50%, -50%) scale(calc(1 - var(--pinch) * .62));
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.hand-cursor[data-over="1"] .hand-cursor__ring {
+  border-color: rgba(236, 232, 222, .7);
+  background: rgba(236, 232, 222, .05);
+}
+.hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(236, 232, 222, .16); }
+
+/* Mantener para abrir: un anillo exterior fino que se llena en sentido
+   horario en los 1.25 s. Es lo único de las ayudas que conserva el ámbar:
+   el progreso es información, el resto es sólo pista. */
+.hand-cursor__dwell {
+  position: absolute;
+  left: 0; top: 0;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(rgba(245, 165, 36, .7) calc(var(--dwell, 0) * 360deg), rgba(236, 232, 222, .08) 0);
+  -webkit-mask: radial-gradient(circle, transparent 24px, #000 25px, #000 26.5px, transparent 27.5px);
+          mask: radial-gradient(circle, transparent 24px, #000 25px, #000 26.5px, transparent 27.5px);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.hand-cursor[data-over="1"] .hand-cursor__dwell { opacity: 1; }
+
+/* Lo que está bajo el dedo se ve como bajo el mouse, y el pellizco se ve
+   como un clic. */
+.site .is-hand-hover { outline: 1px solid rgba(236, 232, 222, .35); outline-offset: 3px; }
+.site .is-hand-press { transform: scale(.96); transition: transform 120ms ease; }
+.projects__row.is-hand-hover { outline: none; padding-left: 12px; background: linear-gradient(90deg, rgba(236, 232, 222, .05), transparent); }
+
+/* ── Flechas de borde (modo puntero) ──────────────────────────────────────
+   Cápsulas chicas y discretas: a los costados a media altura (el cursor de la
+   mano llega al borde con sólo llevar el dedo al borde del cuadro), y arriba/
+   abajo sobre el lado del mundo en el detalle de un proyecto. Dejar el dedo
+   encima llena el anillo y cambia. Son pista, no protagonistas. */
+.edge-nav { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.edge-nav__btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(236, 232, 222, .1);
+  border-radius: 999px;
+  background: rgba(236, 232, 222, .035);
+  color: var(--fog);
+  font-size: .75rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease, background 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.edge-nav[data-on="1"] .edge-nav__btn { opacity: 1; pointer-events: auto; transform: none; }
+.edge-nav__btn.is-hand-hover {
+  outline: none;
+  background: rgba(236, 232, 222, .09);
+  border-color: rgba(236, 232, 222, .25);
+  color: var(--paper);
+}
+.edge-nav__arrow { position: relative; font-size: 1.1rem; line-height: 1; color: inherit; }
+
+/* Costados: el botón es una zona invisible pegada al borde, más grande que lo
+   que se ve: el cursor de la mano llega justo hasta x = 0, y una cápsula
+   separada del borde quedaría fuera de su alcance. Lo visible es ::before. */
+.edge-nav__btn--prev, .edge-nav__btn--next {
+  top: 50%;
+  width: 60px;
+  height: 150px;
+  margin-top: -75px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.edge-nav__btn--prev { left: 0; transform: translateX(-8px); }
+.edge-nav__btn--next { right: 0; transform: translateX(8px); }
+.edge-nav__btn--prev::before, .edge-nav__btn--next::before {
+  content: '';
+  position: absolute;
+  top: 27px;
+  width: 34px;
+  height: 96px;
+  border: 1px solid rgba(236, 232, 222, .1);
+  border-radius: 999px;
+  background: rgba(236, 232, 222, .035);
+  transition: background 200ms ease, border-color 200ms ease;
+}
+.edge-nav__btn--prev::before { left: 10px; }
+.edge-nav__btn--next::before { right: 10px; }
+.edge-nav__btn--prev { padding-right: 6px; }
+.edge-nav__btn--next { padding-left: 6px; }
+.edge-nav__btn--prev.is-hand-hover, .edge-nav__btn--next.is-hand-hover { background: none; }
+.edge-nav__btn--prev.is-hand-hover::before, .edge-nav__btn--next.is-hand-hover::before {
+  background: rgba(236, 232, 222, .09);
+  border-color: rgba(236, 232, 222, .25);
+}
+.edge-nav__btn--prev .edge-nav__label,
+.edge-nav__btn--next .edge-nav__label {
+  position: absolute;
+  top: 50%;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  translate: 0 -50%;
+}
+.edge-nav__btn--prev .edge-nav__label { left: 52px; }
+.edge-nav__btn--next .edge-nav__label { right: 52px; }
+.edge-nav__btn.is-hand-hover .edge-nav__label { opacity: 1; }
+
+/* Arriba/abajo: píldora horizontal centrada sobre el mundo, no al centro de
+   la pantalla — abajo al centro vive la guía del gesto. `translate` va aparte
+   de `transform` para que la animación de entrada no pise el centrado. */
+.edge-nav__btn--up, .edge-nav__btn--down {
+  left: 76%;
+  translate: -50% 0;
+  height: 32px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.edge-nav__btn--up { top: calc(var(--nav-h) + 8px); transform: translateY(-8px); }
+.edge-nav__btn--down { bottom: calc(var(--route-h) + 8px); transform: translateY(8px); }
+
+/* La guía del gesto cambia con el modo: apuntar no muestra el medidor del
+   swipe, y el scroll enciende la flecha del sentido. */
+.gesture[data-state="point"] .gesture__meter,
+.gesture[data-state="point"] .gesture__arrow { opacity: .25; }
+.gesture[data-state="point"] { color: var(--paper); }
+.gesture[data-scroll] .gesture__hand { transition: transform 200ms ease; }
+.gesture[data-scroll="down"] .gesture__hand { transform: translateY(8px); color: var(--paper); }
+.gesture[data-scroll="up"] .gesture__hand { transform: translateY(-8px); color: var(--paper); }
+
+/* La guía, en el sitio, es una pista y no un elemento de la página: neutra y
+   a media luz. El lab conserva la guía ámbar de engine.css. */
+.site .gesture { opacity: .7; color: var(--fog); }
+.site .gesture[data-state="open"] { color: rgba(236, 232, 222, .8); }
+.site .gesture__fill { background: rgba(236, 232, 222, .55); }
+.site .gesture__meter { background: rgba(236, 232, 222, .06); }
+.site .gesture[data-flash="next"] .gesture__arrow--r,
+.site .gesture[data-flash="prev"] .gesture__arrow--l { color: var(--paper); }
+
+/* ── Calibración ─────────────────────────────────────────────────────────
+   Una tarjeta sobre el lado del mundo, no un modal a pantalla completa: la
+   persona tiene que poder ver la figura reaccionar mientras calibra. */
+.calib {
+  position: absolute;
+  z-index: 45;
+  right: max(var(--gutter), 240px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(320px, calc(100% - 32px));
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  background: rgba(5, 7, 13, .82);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.calib__title { font-family: var(--display); font-weight: 700; font-stretch: 90%; font-size: 1.35rem; }
+.calib__ring {
+  --p: 0;
+  width: 92px; height: 92px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(rgba(245, 165, 36, .8) calc(var(--p) * 360deg), rgba(236, 232, 222, .08) 0);
+  position: relative;
+}
+/* El hueco del anillo es un disco del color del fondo encima del degradado:
+   una máscara recortaría también el número. */
+.calib__ring::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.calib__count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.calib__count { z-index: 1; }
+.calib__count small { font-size: .8rem; color: var(--fog); font-weight: 400; }
+.calib__say { font-size: 1rem; line-height: 1.45; color: var(--paper); min-height: 2.9em; }
+.calib__hint { font-size: .78rem; color: var(--fog); margin-top: -6px; }
+.calib__actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.calib__actions .btn { padding: 8px 14px; font-size: .8rem; }
+.calib__summary { width: 100%; display: grid; gap: 4px; font-size: .82rem; }
+.calib__summary div { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 4px; }
+.calib__summary dt { color: var(--fog); }
+
+@media (max-width: 860px), (max-aspect-ratio: 21/20) {
+  .calib { right: 50%; transform: translate(50%, -50%); }
+}
+
+/* ── Foco y accesibilidad ─────────────────────────────────────────────── */
+.site a:focus-visible, .site button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Pantalla angosta: el mundo arriba, el texto abajo ────────────────── */
+@media (max-width: 860px), (max-aspect-ratio: 21/20) {
+  .site { --nav-h: 104px; --route-h: 78px; }
+  .nav { flex-wrap: wrap; align-content: center; gap: 6px 12px; padding-top: 6px; }
+  .nav nav { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .nav nav::-webkit-scrollbar { display: none; }
+  .nav__links a { padding: 6px 10px; font-size: .86rem; white-space: nowrap; }
+  .site__main {
+    left: var(--gutter);
+    right: var(--gutter);
+    width: auto;
+    top: 44vh;
+  }
+  .site::before, .site[data-page="home"]::before {
+    background: linear-gradient(180deg, rgba(5, 7, 13, 0) 30%, rgba(5, 7, 13, .78) 50%, rgba(5, 7, 13, .94) 100%);
+  }
+  .site[data-page="home"] .site__main { top: 38vh; }
+  .panel__scroll { padding: 2vh 16px 4vh; margin-inline: -16px; }
+  .panel__scroll > * { margin-block: 0 auto; }
+  .home__name { font-size: clamp(3.2rem, 15vw, 5rem); margin-bottom: 18px; }
+  .home__tagline { margin-bottom: 24px; }
+  .about__stats { grid-template-columns: repeat(2, auto); }
+  .skills__group { grid-template-columns: 1fr; gap: 6px; }
+  .route { grid-template-columns: 1fr auto 1fr; gap: 6px; bottom: 6px; }
+  .route__map { transform: scale(.8); }
+}
+
+@media (max-width: 480px) {
+  .nav__track { padding: 7px 11px; margin-left: 0; }
+  .sound-btn { width: 32px; height: 32px; }
+  .route__step { font-size: .82rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__caret { animation: none; }
+  .sound-btn__waves { animation: none; }
+  .w { transform: none; transition: none; }
+  .projects__row { transition: none; }
+}
+
+/* ── Bienvenida ───────────────────────────────────────────────────────── */
+/* El mundo sigue vivo detrás, desenfocado: la pantalla es una puerta, no una
+   pared. Una sola secuencia de entrada: título, cada línea, botones. */
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: rgba(5, 7, 13, .55);
+  backdrop-filter: blur(7px) saturate(1.2);
+  -webkit-backdrop-filter: blur(7px) saturate(1.2);
+  animation: welcome-in .6s ease both;
+}
+.welcome[data-leaving] { animation: welcome-out .45s ease both; }
+.welcome__card { width: min(34rem, 100%); }
+.welcome__title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-stretch: 75%;
+  font-size: clamp(2.1rem, 5.4vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  color: var(--paper);
+  margin: 0 0 28px;
+  animation: welcome-rise .8s .15s cubic-bezier(.2, .7, .2, 1) both;
+}
+.welcome__list { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 18px; }
+.welcome__item {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 16px;
+  align-items: center;
+  color: var(--fog);
+  line-height: 1.5;
+  animation: welcome-rise .7s cubic-bezier(.2, .7, .2, 1) both;
+}
+.welcome__item:nth-child(1) { animation-delay: .45s; }
+.welcome__item:nth-child(2) { animation-delay: .65s; }
+.welcome__item p { margin: 0; }
+.welcome__item strong { color: var(--paper); font-weight: 600; }
+.welcome__art { width: 52px; height: 52px; color: var(--amber); }
+/* Ondas del parlante: salen una tras otra, como si ya sonara. */
+.welcome__wave { animation: welcome-wave 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * .25s); }
+/* La mano saluda y deja un trazo: el dedo es el cursor. */
+.welcome__art--hand > g { transform-origin: 32px 56px; animation: welcome-wag 2.4s ease-in-out infinite; }
+.welcome__trail { stroke-dasharray: 60; animation: welcome-draw 2.4s ease-in-out infinite; opacity: .6; }
+.welcome__art--tilt rect { transform-origin: 32px 32px; animation: welcome-tilt 2.4s ease-in-out infinite; }
+.welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  animation: welcome-rise .7s .85s cubic-bezier(.2, .7, .2, 1) both;
+}
+.welcome__quiet {
+  background: none;
+  border: 0;
+  padding: 8px 4px;
+  color: var(--fog);
+  font: inherit;
+  font-size: .9rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.welcome__quiet:hover { color: var(--paper); }
+.welcome__quiet:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+@keyframes welcome-in { from { opacity: 0; } }
+@keyframes welcome-out { to { opacity: 0; } }
+@keyframes welcome-rise { from { opacity: 0; transform: translateY(14px); filter: blur(4px); } }
+@keyframes welcome-wave { 0%, 100% { opacity: .15; } 40% { opacity: 1; } }
+@keyframes welcome-wag { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes welcome-draw { 0% { stroke-dashoffset: 60; } 60%, 100% { stroke-dashoffset: 0; } }
+@keyframes welcome-tilt { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .welcome, .welcome__title, .welcome__item, .welcome__actions,
+  .welcome__wave, .welcome__art--hand > g, .welcome__trail, .welcome__art--tilt rect { animation: none; }
+}

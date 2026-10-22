@@ -1,39 +1,26 @@
 {
-  "name": "gabriel-arias-portfolio",
-  "version": "1.0.0",
+  "name": "hero-sandbox",
   "private": true,
-  "description": "gabriel-arias-portfolio",
-  "author": "Gabriel",
-  "keywords": [
-    "gatsby"
-  ],
+  "type": "module",
   "scripts": {
-    "dev": "gatsby develop",
-    "start": "gatsby develop",
-    "prebuild": "node scripts/verify-llms.mjs && node scripts/verify-architecture.mjs",
-    "build": "gatsby build",
-    "serve": "gatsby serve",
-    "dev-m": "gatsby develop -H 0.0.0.0 -p 8000",
-    "clean": "gatsby clean",
-    "verify:llms": "node scripts/verify-llms.mjs",
-    "verify:arch": "node scripts/verify-architecture.mjs",
-    "postbuild": "node scripts/verify-budget.mjs",
-    "verify:budget": "node scripts/verify-budget.mjs",
-    "test": "node --test \"test/*.test.mjs\""
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"test/*.test.mjs\"",
+    "sync": "node scripts/sync-content.mjs",
+    "make:model": "node scripts/make-sample-model.mjs",
+    "make:models": "/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup --python blender/build_models.py -- public/models/projects",
+    "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
-    "@mediapipe/tasks-vision": "^1.0.1",
-    "framer-motion": "^11.3.21",
-    "gatsby": "^5.13.5",
-    "gatsby-omni-font-loader": "^2.0.2",
-    "gatsby-plugin-image": "^3.13.1",
-    "gatsby-plugin-sharp": "^5.13.1",
-    "gatsby-source-filesystem": "^5.13.1",
-    "gatsby-transformer-sharp": "^5.13.1",
-    "lmdb": "^3.5.4",
+    "@mediapipe/tasks-vision": "1.0.1",
+    "framer-motion": "11.3.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-helmet": "^6.1.0",
-    "three": "^0.185.1"
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^5.4.0"
   }
 }

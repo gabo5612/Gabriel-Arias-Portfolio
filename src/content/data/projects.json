@@ -1,0 +1,199 @@
+[
+  {
+    "id": "gaboauditmyweb",
+    "cover": "/covers/gaboauditmyweb.svg",
+    "kind": "service",
+    "title": "GaboAuditmyweb",
+    "arch": "gaboauditmyweb",
+    "archNote": "A lightweight marketing frontend connected to an independent technical auditing engine, with automated quality checks and zero-dependency execution.",
+    "description": "An independent web performance and technical SEO auditing service designed to help Shopify businesses identify and resolve issues affecting search visibility, user experience, and conversions. I built a custom Node.js auditing engine that combines Google PageSpeed Insights, Chrome UX Report data, and 22 technical checks to generate actionable recommendations. The system includes 129 automated tests and runs without external npm dependencies. The marketing website is built without a frontend framework, uses self-hosted fonts, and makes no external requests. The service offers dedicated 30-day optimization programs for Core Web Vitals and technical SEO, allowing each area to receive focused attention and measurable improvements.",
+    "link": "https://gaboauditmyweb.dev",
+    "demo": "https://gaboauditmyweb.dev",
+    "github": "https://github.com/gabo5612/GaboAuditmyweb",
+    "tags": [
+      "Shopify",
+      "Core Web Vitals",
+      "Technical SEO",
+      "Node.js",
+      "PageSpeed API"
+    ]
+  },
+  {
+    "id": "shopfloor",
+    "cover": "/covers/shopfloor.svg",
+    "title": "shopfloor",
+    "arch": "shopfloor",
+    "archNote": "An air-gapped RAG architecture combining document ingestion, vector retrieval, local inference, source verification, and automated evaluation.",
+    "description": "An enterprise-oriented AI knowledge assistant designed for industrial environments where technical documentation is extensive, sensitive, and frequently updated. The system processes equipment manuals, welding procedures, operating instructions, and spare-parts catalogs, allowing operators to retrieve accurate information through natural-language questions. Built with Python, FastAPI, PostgreSQL, pgvector, local embeddings, and self-hosted language models, the entire platform operates without internet access. Its retrieval architecture verifies numerical information against original documents and attaches source references, including document revisions and page numbers. When sufficient evidence is unavailable, the system explicitly identifies the information gap rather than generating unsupported answers. Quality and retrieval accuracy are continuously evaluated through Groundcheck, using a dedicated 39-question benchmark.",
+    "link": "https://shopfloor-demo.vercel.app",
+    "demo": "https://shopfloor-demo.vercel.app",
+    "demoLabel": "Live Demo",
+    "github": "https://github.com/gabo5612/shopfloor",
+    "tags": [
+      "Python",
+      "FastAPI",
+      "pgvector",
+      "Local LLMs",
+      "RAG",
+      "Docling"
+    ]
+  },
+  {
+    "id": "groundcheck",
+    "cover": "/covers/groundcheck.svg",
+    "title": "groundcheck",
+    "arch": "groundcheck",
+    "archNote": "A deterministic RAG evaluation framework that separates retrieval metrics, factual verification, citation validation, and CI quality gates.",
+    "description": "A specialized evaluation framework built to measure the reliability, accuracy, and traceability of Retrieval-Augmented Generation systems. Groundcheck evaluates retrieval performance using metrics such as Recall@K, Mean Reciprocal Rank, and Precision@K, while independently verifying numerical accuracy, citation correctness, document revisions, and unsupported claims. Unlike evaluation systems that depend on another language model to judge responses, Groundcheck uses deterministic programmatic checks to produce reproducible results. Its benchmark includes negative-control questions to measure whether an AI system can recognize when the available documents do not contain an answer. Built in Python with 179 automated tests and a minimal dependency footprint, it integrates directly into CI pipelines and blocks deployments when evaluation metrics regress.",
+    "link": "https://groundcheck-demo.vercel.app",
+    "demo": "https://groundcheck-demo.vercel.app",
+    "demoLabel": "Live Demo",
+    "github": "https://github.com/gabo5612/groundcheck",
+    "tags": [
+      "Python",
+      "Evals",
+      "RAG",
+      "CI gate",
+      "CLI"
+    ]
+  },
+  {
+    "id": "feedstock",
+    "cover": "/covers/feedstock.svg",
+    "title": "feedstock",
+    "arch": "feedstock",
+    "archNote": "A local-first analytics pipeline connecting historical market data, unit normalization, feature engineering, forecasting models, and walk-forward backtesting.",
+    "description": "A data analytics and forecasting platform designed to help industrial businesses understand commodity price fluctuations and their impact on production costs. The system processes historical market data for materials such as copper, aluminum, gold, platinum, and energy, using 30,302 daily observations across 12 financial instruments. Built with Python, TimescaleDB, and React, it transforms raw market information into normalized datasets, historical trends, and predictive models. Forecasting performance is evaluated through walk-forward backtesting against baseline models, providing transparent and reproducible out-of-sample error measurements. The platform also validates instrument metadata against original data sources to prevent incorrect financial references from affecting analytical results. Its focus is decision support and cost-risk analysis rather than automated trading.",
+    "link": "https://feedstock-demo.vercel.app",
+    "demo": "https://feedstock-demo.vercel.app",
+    "demoLabel": "Live Demo",
+    "github": "https://github.com/gabo5612/feedstock",
+    "tags": [
+      "Python",
+      "TimescaleDB",
+      "Forecasting",
+      "Backtesting",
+      "React"
+    ]
+  },
+  {
+    "id": "crew",
+    "cover": "/covers/crew.svg",
+    "title": "crew",
+    "arch": "crew",
+    "archNote": "A lightweight AI orchestration CLI that delegates structured coding tasks to local models and validates results through deterministic development tools.",
+    "description": "A developer-focused AI orchestration tool designed to reduce reliance on expensive cloud inference while maintaining code quality and predictable execution. Crew delegates clearly defined programming tasks to locally hosted language models through Ollama or OpenAI-compatible endpoints. Instead of using additional AI models to evaluate generated code, it validates results through existing development tools, including TypeScript type checking, linting, and automated tests. This approach creates a repeatable execution and validation workflow while reducing paid token consumption. Built with Node.js and zero external npm dependencies, Crew provides a lightweight foundation for local AI-assisted development, task delegation, and automated coding workflows.",
+    "link": "https://github.com/gabo5612/crew",
+    "github": "https://github.com/gabo5612/crew",
+    "tags": [
+      "Node.js",
+      "Ollama",
+      "Local LLMs",
+      "CLI"
+    ]
+  },
+  {
+    "id": "brandvoice",
+    "cover": "/covers/brandvoice.svg",
+    "title": "BrandVoice",
+    "arch": "brandvoice",
+    "archNote": "A multi-tenant AI content architecture combining isolated vector retrieval, role-based access control, asynchronous workflows, model governance, and usage tracking.",
+    "description": "An AI-powered editorial platform designed to generate brand-consistent content using private business knowledge, writing guidelines, and structured generation workflows. Built with Next.js, React, Supabase, PostgreSQL, pgvector, and Inngest, BrandVoice uses Retrieval-Augmented Generation to incorporate relevant brand information into content creation. Its multi-tenant architecture separates customer data through row-level security and supports controlled access using a nine-permission role-based authorization system. The platform includes document ingestion, vector embeddings, asynchronous processing, approved-model restrictions, generation cost tracking, and audit logging. Particular attention was given to data isolation, retrieval consistency, operational transparency, and the reliability required to support multiple brands within a shared application.",
+    "link": "https://brandvoice-demo.vercel.app",
+    "demo": "https://brandvoice-demo.vercel.app",
+    "demoLabel": "Live Demo",
+    "github": "https://github.com/gabo5612/brandvoice",
+    "tags": [
+      "Next.js",
+      "pgvector",
+      "RAG",
+      "Supabase",
+      "Inngest"
+    ]
+  },
+  {
+    "id": "trailplugin",
+    "cover": "/covers/TrailKit.webp",
+    "title": "TrailPlugin",
+    "arch": "trailplugin",
+    "archNote": "A commercial WordPress plugin supported by an independent SaaS licensing platform, separating customer-facing functionality from subscription and license management.",
+    "description": "A commercial WordPress plugin and SaaS ecosystem developed for tourism businesses, outdoor destinations, and adventure-focused websites. TrailPlugin enables website owners to create interactive routes, points of interest, travel guides, and location-based experiences using Leaflet maps and elevation profiles. I designed and developed the product architecture, including custom WordPress functionality, reusable shortcodes, GPX imports, and interactive mapping components. A separate backend built with Next.js and Supabase manages software licenses, subscription plans, and product activation independently of the installed plugin. The project demonstrates end-to-end product engineering, combining WordPress plugin development, API architecture, licensing infrastructure, and the technical foundations required to distribute and maintain commercial software.",
+    "link": "https://trailplugin.com",
+    "demo": "https://trailplugin.com",
+    "demoLabel": "View Project",
+    "github": "https://github.com/TrailPlugin/",
+    "tags": [
+      "WordPress",
+      "PHP",
+      "Leaflet",
+      "Next.js",
+      "Supabase"
+    ]
+  },
+  {
+    "id": "quicktask",
+    "cover": "/covers/quicktask.webp",
+    "title": "QuickTask 2.0",
+    "arch": "quicktask",
+    "archNote": "A privacy-first desktop automation architecture combining local execution, encrypted storage, browser control, and human approval for critical actions.",
+    "description": "A commercial desktop automation application designed to simplify repetitive browser-based workflows without requiring cloud services or external AI providers. Built with Electron, Playwright, React, and SQLite, QuickTask allows users to automate sequences of actions while keeping sensitive information stored and processed locally. The application includes encrypted data storage, reusable automation patterns, and a layered security model. Critical operations require explicit human approval before execution, preventing automated workflows from completing sensitive actions without user confirmation. I developed the product end to end, from architecture and interface design to automation logic, security controls, and software distribution. The result is a practical local-first automation solution focused on privacy, reliability, and user control.",
+    "link": "https://quicktaskpro.dev",
+    "tags": [
+      "Electron",
+      "Playwright",
+      "SQLite",
+      "Local-first"
+    ]
+  },
+  {
+    "id": "squish",
+    "cover": "/covers/squish.webp",
+    "title": "Squish",
+    "arch": "squish",
+    "archNote": "Two local processing architectures: browser-based parallel compression using Web Workers and a desktop implementation powered by native media codecs.",
+    "description": "A high-performance image and video optimization tool designed to reduce media file sizes while preserving practical visual quality and protecting user privacy. Squish processes files locally, eliminating the need to upload images or videos to external servers. The browser implementation uses JavaScript, Web Workers, and the File System Access API to distribute processing across available CPU resources and write optimized files directly to local storage while preserving directory structures. A separate desktop implementation extends processing capabilities through Electron and native media libraries such as Sharp and FFmpeg. The project focuses on efficient resource utilization, responsive interfaces, batch processing, and practical performance improvements for websites and digital content workflows.",
+    "link": "https://gabo5612.github.io/squish/",
+    "demo": "https://gabo5612.github.io/squish/",
+    "github": "https://github.com/gabo5612/squish",
+    "tags": [
+      "Web Workers",
+      "File System API",
+      "Electron",
+      "Sharp"
+    ]
+  },
+  {
+    "id": "typeit",
+    "cover": "/covers/typeit.svg",
+    "title": "Typeit",
+    "arch": "typeit",
+    "archNote": "A cross-platform desktop architecture that translates text into native operating-system keystrokes while preserving focus and avoiding clipboard interactions.",
+    "description": "A cross-platform desktop utility developed to automate text entry in applications and websites that restrict traditional copy-and-paste interactions. Built with Electron and Node.js, Typeit simulates native operating-system keyboard input rather than injecting text directly into browser elements or relying on clipboard operations. The application supports macOS and Windows through platform-specific input mechanisms and provides a lightweight floating interface that remains accessible without interrupting the active application. Its architecture focuses on reliable input simulation, minimal dependencies, and consistent behavior across different desktop environments. The project demonstrates practical desktop engineering and integration with operating-system-level functionality.",
+    "link": "https://github.com/gabo5612/Typeit",
+    "github": "https://github.com/gabo5612/Typeit",
+    "tags": [
+      "Electron",
+      "Node.js",
+      "macOS",
+      "Windows"
+    ]
+  },
+  {
+    "id": "daniel-arias",
+    "cover": "/covers/Daniel_arias.webp",
+    "title": "Daniel Arias Portfolio",
+    "arch": "daniel-arias",
+    "archNote": "A multilingual Next.js architecture with shared components, localized content, responsive layouts, and integrated media experiences.",
+    "description": "A multilingual portfolio website designed and developed for professional cellist Daniel Arias, showcasing his international career, performances, and artistic background. Built with React, Next.js, and Framer Motion, the website combines modern frontend engineering with an elegant visual experience tailored to the classical music industry. Its architecture supports Spanish, English, and German through a shared component system, avoiding duplicated pages while maintaining consistent navigation and design across languages. The project includes responsive layouts, interactive animations, and integrated audio content that allows visitors to explore performances directly from the website. Deployed on Vercel, it demonstrates frontend architecture, internationalization, UI development, and performance-conscious design.",
+    "link": "https://danielariascello.com/es",
+    "demo": "https://danielariascello.com/es",
+    "demoLabel": "Visit site",
+    "github": "https://github.com/gabo5612/Daniel-Arias-Portfolio",
+    "tags": [
+      "React",
+      "Next.js",
+      "Framer Motion",
+      "Vercel"
+    ]
+  }
+]

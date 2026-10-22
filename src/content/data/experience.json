@@ -1,0 +1,30 @@
+[
+  {
+    "date": "2014–2019",
+    "title": "Cameraman & Web Developer",
+    "location": "Venezuela",
+    "description": "Started my career combining audiovisual production with web development at Producciones Mi Tricolor. Managed website development, domain configuration, hosting, CDN integration, and performance optimization while producing photography, video, and digital content. This experience gave me an early understanding of how technology, design, and content work together to create engaging digital experiences."
+  },
+  {
+    "date": "2019–2022",
+    "title": "Web Developer & SEO Consultant",
+    "location": "Venezuela",
+    "description": "Built and maintained websites and e-commerce platforms for Clarita'Shop Venezuela, specializing in WordPress, WooCommerce, and technical SEO. Managed the complete development lifecycle, including custom functionality, hosting, DNS, Linux servers, performance optimization, and ongoing maintenance. Developed local SEO strategies, optimized content for organic visibility, and integrated photography and video to improve user engagement and support business growth."
+  },
+  {
+    "date": "2023–2025",
+    "title": "WordPress Developer, Shopify & Technical SEO",
+    "location": "Remote",
+    "description": "Worked with Efiempresa developing and optimizing WordPress and Shopify websites, building custom themes, plugins, and API integrations. Led technical SEO audits, Core Web Vitals improvements, indexing optimization, and performance remediation. Collaborated with marketing and design teams to improve conversion paths and organic visibility. Introduced AI-assisted workflows for automated diagnostics, metadata generation, and content optimization."
+  },
+  {
+    "date": "2023–Present",
+    "title": "Web Producer & AI Engineer",
+    "location": "Remote",
+    "description": [
+      "At Magnetic Creative, I lead technical development across a diverse portfolio of international clients, delivering custom solutions using Shopify, Shopify Plus, WordPress, WooCommerce, React, Next.js, Node.js, and PHP. My responsibilities span software architecture, technical planning, API integrations, complex e-commerce functionality, performance optimization, and production deployments. I collaborate with developers, designers, SEO specialists, and business teams to translate requirements into scalable technical solutions.",
+      "My work has expanded into applied AI engineering, developing intelligent automation tools, semantic search systems, and AI-powered content workflows. I work with Python, FastAPI, PostgreSQL, pgvector, Ollama, OpenAI, Anthropic, and MCP to build reliable AI applications. This includes multi-agent orchestration, local LLM inference, structured outputs, evaluation pipelines, automated testing, and privacy-first architectures. I'm also working on enterprise-scale, self-hosted AI infrastructure.",
+      "Beyond AI, I develop advanced Shopify integrations, B2B commerce solutions, custom WordPress functionality, and internal productivity tools. I lead technical SEO and accessibility initiatives, including Core Web Vitals optimization, WCAG 2.1 AA remediation, analytics implementations, and automated auditing. I also build tools for media compression, workflow automation, and technical diagnostics, focusing on measurable improvements in performance, efficiency, and business outcomes."
+    ]
+  }
+]

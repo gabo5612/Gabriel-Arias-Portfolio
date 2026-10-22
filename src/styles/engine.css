@@ -1,0 +1,369 @@
+/* ==========================================
+   ENGINE — piezas de UI que comparten el sitio y el lab: botón de tracking,
+   panel de privacidad y guía del gesto. Nada de layout de página acá.
+   ========================================== */
+
+/* ── Botón de tracking ──
+   Es lo único de la página que no se puede adivinar leyendo: mueve el hero con
+   la mano o la cabeza, y nadie lo prueba si no parece pulsable. Antes era el
+   más callado de los tres — transparente sobre borde blanco al 8% — al lado de
+   un CTA ámbar sólido, así que se leía como texto deshabilitado.
+   Ahora se lee como acción disponible y respira despacio. La respiración es la
+   que pide el clic: se apaga en cuanto el tracking arranca (ya cumplió), al
+   pasar el puntero (ya te tiene) y con prefers-reduced-motion. */
+.hero__track {
+  position: relative;
+  overflow: hidden;                 /* recorta el barrido, no la sombra propia */
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(245, 165, 36, .42);
+  animation: track-breathe 3.2s ease-in-out infinite;
+}
+
+/* Barrido de luz. Va en ::after y no en un degradado del fondo para que no
+   pelee con el background que marca el estado. */
+.hero__track::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -50%;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(245, 165, 36, .18),
+    transparent);
+  animation: track-sweep 3.2s ease-in-out infinite;
+}
+
+.hero__track:hover {
+  color: #fbbf24;
+  background: rgba(245, 165, 36, .18);
+  border-color: rgba(245, 165, 36, .75);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(245, 165, 36, .22);
+  animation: none;                  /* ya no hace falta llamar la atención */
+}
+.hero__track:hover::after { animation: none; opacity: 0; }
+
+/* Foco de teclado: el mismo peso que el hover, porque quien navega con tab
+   necesita ver dónde está tanto como quien usa el ratón. */
+.hero__track:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  animation: none;
+}
+
+.hero__track--on {
+  color: var(--accent);
+  border-color: rgba(245, 165, 36, .5);
+  background: var(--accent-dim);
+  animation: none;
+  box-shadow: none;
+}
+.hero__track--on::after { animation: none; opacity: 0; }
+
+/* El icono de cámara sólo existe apagado: dice qué va a pasar al hacer clic,
+   que es exactamente lo que el texto no alcanza a decir. Encendido lo sustituye
+   el punto de estado, que sí tiene algo que informar. */
+.hero__track-cam {
+  flex-shrink: 0;
+  opacity: .9;
+}
+
+.hero__track-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .55;
+  flex-shrink: 0;
+}
+.hero__track--on .hero__track-dot {
+  opacity: 1;
+  animation: status-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes track-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 165, 36, .34), 0 0 16px rgba(245, 165, 36, .10); }
+  70%      { box-shadow: 0 0 0 7px rgba(245, 165, 36, 0), 0 0 24px rgba(245, 165, 36, .20); }
+}
+
+@keyframes track-sweep {
+  0%       { left: -50%; }
+  55%, 100% { left: 130%; }
+}
+.hero__track-error {
+  margin-top: 14px;
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================
+   HUD — la prueba de que nada sale de la máquina
+   Compacto: la cámara y una línea de estado. Acompaña a la página, no compite
+   con ella; la telemetría completa está detrás de "More".
+   ========================================== */
+.hud {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--body, var(--font-body));
+  /* Arrastrar sobre el panel seleccionaba sus textos y los pintaba de ámbar. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hud--more {
+  width: 248px;
+  padding: 10px;
+  background: rgba(9, 9, 11, .82);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hud__cam { position: relative; }
+.hud__preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #000;
+  opacity: .9;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+}
+
+.hud__badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: calc(100% - 12px);
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  color: rgba(255, 255, 255, .85);
+  font-size: .66rem;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.hud__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22c55e; flex-shrink: 0;
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+.hud__tools {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+}
+.hud__icon {
+  width: 24px; height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  color: rgba(255, 255, 255, .6);
+  transition: color var(--t-fast), background var(--t-fast);
+}
+.hud__icon:hover { color: #fff; background: rgba(0, 0, 0, .75); }
+.hud__icon--on { color: rgba(255, 255, 255, .9); }
+
+.hud__bar { display: flex; align-items: center; gap: 6px; }
+.hud__tune {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .35);
+  padding: 2px 9px;
+  font-size: .66rem;
+  color: var(--text-secondary);
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.hud__tune:hover { color: var(--text-primary); border-color: rgba(255, 255, 255, .25); }
+.hud__more {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  font-size: .68rem;
+  color: var(--text-muted);
+  transition: color var(--t-fast);
+}
+.hud__more:hover { color: var(--text-secondary); }
+.hud__more::after { content: ' ▾'; }
+.hud--more .hud__more::after { content: ' ▴'; }
+
+.hud__details { display: flex; flex-direction: column; gap: 10px; }
+.hud__rows { display: flex; flex-direction: column; gap: 4px; }
+.hud__row { display: flex; align-items: baseline; gap: 10px; font-size: .7rem; }
+.hud__label { color: var(--text-muted); }
+.hud__value {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.hud__value--good { color: #4ade80; }
+.hud__value--bad { color: #f87171; }
+.hud__note {
+  font-size: .66rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .hud { right: 10px; bottom: 10px; width: 132px; }
+  .hud--more { width: calc(100vw - 20px); }
+}
+
+
+/* ── Conmutador de fuente: mano derecha o cabeza ── */
+.hud__modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 3px;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.hud__mode {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-size: .68rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  transition: var(--t-fast);
+}
+.hud__mode:hover { color: var(--text-primary); }
+.hud__mode--on {
+  background: var(--accent);
+  color: #09090b;
+  font-weight: 600;
+}
+
+
+/* Sandbox — ayuda visual del swipe.
+   idle   → la mano hace el gesto sola, en bucle: así se ve qué hay que hacer.
+   closed → mano detectada pero cerrada: se apaga, falta abrirla.
+   open   → lista: la mano se queda quieta y el medidor muestra el recorrido. */
+.gesture {
+  position: absolute;
+  left: 50%;
+  bottom: 108px;
+  transform: translateX(-50%);
+  width: min(320px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  transition: color var(--t-base);
+}
+.gesture__stage {
+  position: relative;
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.gesture__arrow {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--text-muted);
+  transition: color var(--t-fast), transform var(--t-fast);
+}
+.gesture__hand {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  margin-left: -17px;
+  transition: opacity var(--t-base), color var(--t-base);
+}
+.gesture[data-state="idle"] .gesture__hand { animation: gesture-swipe 2.4s cubic-bezier(.5, 0, .3, 1) infinite; }
+.gesture[data-state="closed"] .gesture__hand { opacity: .35; }
+.gesture[data-state="open"] { color: var(--accent); }
+
+@keyframes gesture-swipe {
+  0%, 15%  { transform: translateX(-70px); opacity: 0; }
+  25%      { opacity: 1; }
+  55%      { transform: translateX(70px); opacity: 1; }
+  70%, 100% { transform: translateX(90px); opacity: 0; }
+}
+
+.gesture__meter {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, .08);
+  overflow: hidden;
+}
+.gesture__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: var(--accent);
+  transform: scaleX(0);
+}
+.gesture__fill--r { left: 50%; transform-origin: left center; }
+.gesture__fill--l { right: 50%; transform-origin: right center; }
+.gesture__notch {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-muted);
+}
+.gesture__caption {
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+/* Al cambiar de forma: la flecha del lado elegido se enciende y el medidor se
+   llena entero de ese lado, para que se vea que el gesto se contó. */
+.gesture[data-flash="next"] .gesture__arrow--r,
+.gesture[data-flash="prev"] .gesture__arrow--l { color: var(--accent); transform: scale(1.4); }
+.gesture[data-flash="next"] .gesture__fill--r,
+.gesture[data-flash="prev"] .gesture__fill--l { transform: scaleX(1) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gesture[data-state="idle"] .gesture__hand { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud__dot,
+  .hero__track,
+  .hero__track::after,
+  .hero__track--on .hero__track-dot {
+    animation: none !important;
+  }
+  /* Sin la respiración el botón todavía tiene que verse: se queda con el borde
+     y el fondo ámbar, que no son movimiento. */
+  .hero__track::after { opacity: 0; }
+}
