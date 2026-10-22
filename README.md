@@ -152,7 +152,10 @@ window.__depth.pose({ pinch: 1 })                                // clic
 (`.github/workflows/pages.yml`): tests, `vite build` con `BASE_PATH=/Gabriel-Arias-Portfolio/`
 y deploy de `dist/`. Toda ruta a `public/` pasa por `engine/asset.js` para respetar esa
 subcarpeta. `public/llms.txt` y `public/architecture/` se trajeron del sitio Gatsby anterior
-para que sus URLs sigan respondiendo. Probar la build publicada en local:
+para que sus URLs sigan respondiendo. Vercel (`gabriel-arias-portfolio.vercel.app`) también publica cada push a `main`, en la raíz
+(sin subcarpeta). `vercel.json` fija Vite y `dist/`: el proyecto venía configurado como
+Gatsby, que publica `public/`, y servía la salida vieja de Gatsby que tenía en caché.
+Probar la build publicada en local:
 
 ```bash
 BASE_PATH=/Gabriel-Arias-Portfolio/ npm run build
