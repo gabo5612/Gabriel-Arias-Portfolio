@@ -70,22 +70,23 @@ El mismo botón lo enciende: **Enter with sound and camera** (o *and tilt*), **S
 entrar sin nada. Se recuerda en `localStorage` (`welcomed`); `?nowelcome` la salta. La
 presentación del título con partículas espera a que se cierre.
 
-### El biplano
+### El cohete
 
 Dura 10 s del clic a la absorción (1 s armándose, 9 s volando; `site/flight.js`).
 
 **Fly to my projects** lo hace literal: la esfera de Home se reordena, con sus mismos puntos,
-en un biplano rojo de perfil (`engine/shapes/biplane.js`: fuselaje, alas con montantes, cola,
-tren de aterrizaje y hélice). Cuando terminó de armarse, despega: en el mismo cuadro la
-formación se apaga y aparece un biplano idéntico que sí puede volar (`engine/particlePlane.js`,
-hélice girando y dos estelas). Vuela delante de la cámara haciendo slalom entre las figuras
-que hay en el camino —a la izquierda de la primera, a la derecha de la siguiente—, y llega
-hasta la formación de Projects, que lo absorbe: el avión se encoge hacia su centro y desaparece
-dentro, y desde ahí sale una onda que recorre la forma (la levanta y la tiñe de rojo al pasar)
-y se apaga en el mismo orden, devolviéndole sus colores (`cloud.wave()` en `pointCloud.js`).
-La esfera vuelve a armarse fuera de cuadro.
-El botón avisa con el evento `world-plane`; si el mundo contesta con `detail.delay`, espera
-ese tiempo (el armado) antes de navegar. Sin mundo, navega en el acto.
+en un cohete de dibujo inclinado hacia arriba (`engine/shapes/rocket.js`: cuerpo de bala,
+punta roja, ventanilla, tres aletas, tobera y llama). Cuando terminó de armarse, despega: en
+el mismo cuadro la formación se apaga y aparece un cohete idéntico que sí puede volar
+(`engine/particleRocket.js`: se endereza, la ventanilla es azul, la llama titila y deja una
+estela de humo). Vuela delante de la cámara haciendo slalom entre las figuras que hay en el
+camino —a la izquierda de la primera, a la derecha de la siguiente—, y llega hasta la
+formación de Projects, que lo absorbe: se encoge hacia su centro y desaparece dentro, y
+desde ahí sale una onda que recorre la forma (la levanta y la tiñe de rojo al pasar) y se
+apaga en el mismo orden (`cloud.wave()` en `pointCloud.js`). Suena un rugido de motor que
+cruza de izquierda a derecha. La esfera vuelve a armarse fuera de cuadro. El botón avisa con
+el evento `world-plane`; si el mundo contesta con `detail.delay`, espera ese tiempo (el
+armado) antes de navegar. Sin mundo, navega en el acto.
 
 ### Títulos de partículas
 

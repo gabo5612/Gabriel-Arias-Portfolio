@@ -267,7 +267,7 @@ await check('tilting the phone drives the camera', async page => {
   assert(s.source === 'gyro' && s.x > 0.3, `source ${s.source}, x ${s.x?.toFixed(2)}`)
 })
 
-await check('"Fly to my projects" turns the sphere into a dot biplane that flies to Projects', async page => {
+await check('"Fly to my projects" turns the sphere into a dot rocket that flies to Projects', async page => {
   await open(page)
   const seen = page.evaluate(() => new Promise(r => {
     const pts = []
@@ -288,7 +288,7 @@ await check('"Fly to my projects" turns the sphere into a dot biplane that flies
   assert(!end.on, 'plane still flying after the trip')
 })
 
-await check('the biplane flies again when pressed while the camera is still flying home', async page => {
+await check('the rocket flies again when pressed while the camera is still flying home', async page => {
   await open(page)
   await page.evaluate(() => { window.__seen = 0; const f = () => { if (window.__plane?.().on) window.__seen++; requestAnimationFrame(f) }; requestAnimationFrame(f) })
   await page.click('text=Fly to my projects')

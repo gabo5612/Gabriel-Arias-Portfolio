@@ -42,15 +42,16 @@ test('normalize centres the cloud and puts the farthest point at R', () => {
   assert.ok(Math.abs(max - 100) < 1e-3)
 })
 
-test('the biplane has exactly count points, and body + propeller add up', async () => {
-  const { biplane } = await import('../src/engine/shapes/biplane.js')
+test('the rocket has exactly count points, split into body, window and flame', async () => {
+  const { rocket } = await import('../src/engine/shapes/rocket.js')
   for (const count of [1600, 4200]) {
-    const b = biplane(count, 240)
-    assert.equal(b.all.length, count * 3)
-    assert.equal(b.body.length + b.prop.length, count * 3)
-    assert.ok(b.all.every(Number.isFinite))
-    // De perfil y con la nariz en +x: más largo en x que alto en y.
-    const xs = b.body.filter((_, i) => i % 3 === 0), ys = b.body.filter((_, i) => i % 3 === 1)
-    assert.ok(Math.max(...xs) - Math.min(...xs) > Math.max(...ys) - Math.min(...ys))
+    const r = rocket(count, 240)
+    assert.equal(r.all.length, count * 3)
+    assert.equal(r.body.length + r.window.length + r.flame.length, count * 3)
+    assert.ok(r.all.every(Number.isFinite))
+    // Inclinado hacia arriba a la derecha: la punta (x máx) está más alta que la tobera.
+    let tip = 0
+    for (let i = 0; i < r.body.length; i += 3) if (r.body[i] > r.body[tip]) tip = i
+    assert.ok(r.body[tip + 1] > r.nozzle[1], 'nose should be above the nozzle')
   }
 })

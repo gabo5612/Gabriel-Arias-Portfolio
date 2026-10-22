@@ -342,45 +342,50 @@ export const sound = {
     tone(55, { at: t, dur: d * 0.6, gain: 0.07, attack: d * 0.25, glideTo: 82.5, wet: 0.2 })
   },
 
-  // El avión de papel: un zumbido de hélice (dos sierras desafinadas que
-  // baten) que se acerca, sube un poco de tono y al final cae, como al pasar
-  // de largo. Cruza de izquierda a derecha.
-  plane(ms) {
+  // El cohete: un rugido de motor. Ruido grave filtrado (el empuje) con un
+  // chisporroteo encima (la llama) y un seno muy grave que da el cuerpo. Crece
+  // al encenderse, se sostiene, y se apaga al final; cruza de izquierda a
+  // derecha.
+  rocket(ms) {
     if (!live()) return
     const t = ctx.currentTime, d = ms / 1000
-    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2
-    lp.frequency.setValueAtTime(300, t)
-    lp.frequency.linearRampToValueAtTime(1400, t + d * 0.5)
-    lp.frequency.linearRampToValueAtTime(500, t + d)
     const g = ctx.createGain()
     g.gain.setValueAtTime(0.0001, t)
-    g.gain.exponentialRampToValueAtTime(0.05, t + d * 0.2)
-    g.gain.setValueAtTime(0.05, t + d * 0.75)
+    g.gain.exponentialRampToValueAtTime(0.09, t + Math.min(0.8, d * 0.15))
+    g.gain.setValueAtTime(0.09, t + d * 0.8)
     g.gain.exponentialRampToValueAtTime(0.0001, t + d)
-    const flutter = ctx.createOscillator(); flutter.frequency.value = 22
-    const fg = ctx.createGain(); fg.gain.value = 0.35
-    const amp = ctx.createGain(); amp.gain.value = 0.65
-    flutter.connect(fg); fg.connect(amp.gain)
-    const oscs = [0, 7].map(cents => {
-      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.detune.value = cents
-      o.frequency.setValueAtTime(130, t)
-      o.frequency.linearRampToValueAtTime(175, t + d * 0.6)
-      o.frequency.linearRampToValueAtTime(120, t + d)
-      o.connect(lp); o.start(t); o.stop(t + d + 0.05)
-      return o
-    })
-    lp.connect(amp); amp.connect(g)
-    const out = bus(0, 0.35)
     const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null
     if (p) {
-      p.pan.setValueAtTime(-0.6, t); p.pan.linearRampToValueAtTime(0.5, t + d)
-      g.connect(p); p.connect(out)
-    } else g.connect(out)
-    flutter.start(t); flutter.stop(t + d + 0.05)
-    oscs[0].onended = () => { g.disconnect(); p?.disconnect() }
+      p.pan.setValueAtTime(-0.5, t); p.pan.linearRampToValueAtTime(0.5, t + d)
+      g.connect(p); p.connect(bus(0, 0.3))
+    } else g.connect(bus(0, 0.3))
+
+    const rumble = noise()
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.9
+    lp.frequency.setValueAtTime(220, t)
+    lp.frequency.linearRampToValueAtTime(520, t + d * 0.3)
+    lp.frequency.linearRampToValueAtTime(380, t + d)
+    rumble.connect(lp); lp.connect(g)
+
+    const crackle = noise()
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = 0.8
+    const cg = ctx.createGain(); cg.gain.value = 0.18
+    // El chisporroteo late irregular: un LFO de amplitud a ~13 Hz.
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 13
+    const lfoG = ctx.createGain(); lfoG.gain.value = 0.12
+    lfo.connect(lfoG); lfoG.connect(cg.gain)
+    crackle.connect(bp); bp.connect(cg); cg.connect(g)
+
+    const sub = ctx.createOscillator(); sub.type = 'sine'
+    sub.frequency.setValueAtTime(48, t); sub.frequency.linearRampToValueAtTime(62, t + d * 0.4)
+    const sg = ctx.createGain(); sg.gain.value = 0.5
+    sub.connect(sg); sg.connect(g)
+
+    for (const n of [rumble, crackle, sub, lfo]) { n.start(t); n.stop(t + d + 0.05) }
+    sub.onended = () => { g.disconnect(); p?.disconnect() }
   },
 
-  // La formación se traga al avión: un grave que cae (el trago) y, sobre la
+  // La formación se traga al cohete: un grave que cae (el trago) y, sobre la
   // onda, el acorde de la estación subiendo como campanas.
   absorb() {
     if (!live()) return

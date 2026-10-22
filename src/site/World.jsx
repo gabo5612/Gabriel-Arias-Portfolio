@@ -10,7 +10,7 @@ import { pointer } from './pointer'
 import { profile } from '../engine/handProfile'
 import { createTitleParticles, sampleElementText } from '../engine/titleParticles'
 import { sound } from '../engine/audio/worldSound'
-import { createParticlePlane, PLANE_PALETTE } from '../engine/particlePlane'
+import { createParticleRocket, PLANE_PALETTE } from '../engine/particleRocket'
 import { flightMs as flightFor, PLANE_ARM_MS, PLANE_FLIGHT_MS } from './flight'
 
 // El mundo: una avenida recta en el espacio con una formación de partículas
@@ -35,7 +35,7 @@ const SIDE = 480           // cuánto a la derecha del camino está cada formaci
 const VIEW_D = 900
 const SIZE = 240
 const FAR = 5200
-const SLALOM = 400         // a cuánto del centro de una figura pasa el avión al rodearla
+const SLALOM = 400         // a cuánto del centro de una figura pasa el cohete al rodearla
 const CLEAR = 620          // distancia mínima a una formación intermedia en vuelo
 
 const lerp = (a, b, k) => a + (b - a) * k
@@ -103,32 +103,33 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
     scene.add(dust.points)
     stage.own(dust)
 
-    // ── El biplano ──────────────────────────────────────────────────────────
+    // ── El cohete ───────────────────────────────────────────────────────────
     // "Fly to my projects" lo dice literal. La formación donde estás (la
-    // esfera de Home) se reordena en un biplano hecho de sus mismos puntos;
+    // esfera de Home) se reordena en un cohete hecho de sus mismos puntos;
     // cuando terminó de armarse, despega: en el mismo cuadro se apaga la
-    // formación y aparece un biplano idéntico (mismos puntos, misma posición,
+    // formación y aparece un cohete idéntico (mismos puntos, misma posición,
     // giro y escala) que sí puede volar. Vuela delante de la cámara, que lo
-    // persigue, y se estrella contra la formación de destino, que estalla al
+    // persigue, y llega a la formación de destino, que lo absorbe con una onda al
     // recibirlo. La formación de origen vuelve a ser esfera fuera de cuadro.
     //
     // El botón avisa con el evento 'world-plane' y, si el mundo contesta con
     // detail.delay, espera eso antes de navegar: es el tiempo del armado.
     const TRANSFORM_MS = PLANE_ARM_MS
-    const paper = createParticlePlane({ count, size: SIZE, far: FAR, trail: small ? 360 : 700 })
-    scene.add(paper.group, paper.points)
-    stage.own(paper)
+    const rocket = createParticleRocket({ count, size: SIZE, far: FAR, trail: small ? 360 : 700 })
+    scene.add(rocket.group, rocket.points)
+    stage.own(rocket)
     let planeReq = null, planeFlight = null
     const planeStart = new Vector3(), planePos = new Vector3(), fwd = new Vector3(), planeAim = new Vector3()
-    // Armar: la formación donde estás se reordena en el biplano.
+    // Armar: la formación donde estás se reordena en el cohete.
     const arm = now => {
       const st = stations[active]
       if (!st.pos) return
-      // De frente y quieta, como en una foto: el biplano se lee de perfil.
+      // De frente y quieta, como en una foto: el cohete se lee de perfil,
+      // inclinado como en un dibujo.
       if (!st.flat) st.rotY = Math.atan2(Math.sin(st.rotY), Math.cos(st.rotY))
       st.flat = true
       st.want = 'plane'
-      st.cloud.morphTo(paper.all, PLANE_PALETTE, now, { burst: 40 })
+      st.cloud.morphTo(rocket.all, PLANE_PALETTE, now, { burst: 40 })
       planeReq = { at: now, from: active }
       sound.sparkle('form', TRANSFORM_MS)
     }
@@ -154,11 +155,11 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       if (st.pos) st.cloud.morphTo(st.pos, st.page.scene.palette, now, { burst: 0 })
     }
 
-    // Sólo en desarrollo: para inspeccionar el vuelo del avión desde las pruebas.
+    // Sólo en desarrollo: para inspeccionar el vuelo del cohete desde las pruebas.
     if (import.meta.env.DEV) {
       window.__plane = () => {
-        const v = paper.group.position.clone().project(camera)
-        const q = paper.group.quaternion; const gp = paper.group.position; return { wx: gp.x, wz: gp.z, q: [q.x, q.y, q.z, q.w], on: paper.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
+        const v = rocket.group.position.clone().project(camera)
+        const q = rocket.group.quaternion; const gp = rocket.group.position; return { wx: gp.x, wz: gp.z, q: [q.x, q.y, q.z, q.w], on: rocket.visible, flight: !!planeFlight, sx: (v.x + 1) / 2 * stage.size.w, sy: (1 - v.y) / 2 * stage.size.h, z: v.z }
       }
     }
 
@@ -255,20 +256,20 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       travelDir = Math.sign(end - cur)
       flightMs = flightFor(Math.round(Math.abs(end - cur)))
       flightAt = now
-      // Navegar a otra parte con el avión en el aire: el viaje se cancela, el
-      // avión desaparece y la formación de origen vuelve a ser la de siempre.
+      // Navegar a otra parte con el cohete en el aire: el viaje se cancela, el
+      // cohete desaparece y la formación de origen vuelve a ser la de siempre.
       if (planeFlight) {
-        paper.hide()
+        rocket.hide()
         restore(planeFlight.from, now)
         planeFlight = null
       }
       if (planeReq && now - planeReq.at < 3000) {
         flightMs = PLANE_FLIGHT_MS
         const src = stations[planeReq.from]
-        paper.show(src.inner)
-        planeStart.copy(paper.group.position)
+        rocket.show(src.inner)
+        planeStart.copy(rocket.group.position)
         src.cloud.points.visible = false
-        // Slalom: las formaciones que hay en el camino son postes. El avión
+        // Slalom: las formaciones que hay en el camino son postes. El cohete
         // pasa a la izquierda de la primera, a la derecha de la siguiente, y
         // así. Cada poste es un punto por el que tiene que pasar, a SLALOM del
         // centro de la figura (más que su radio: la rodea, no la atraviesa).
@@ -279,7 +280,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           }
         }
         planeFlight = { to: page, from: planeReq.from, gates }
-        sound.plane(flightMs)
+        sound.rocket(flightMs)
       }
       planeReq = null
       lookFrom.copy(look)
@@ -516,8 +517,8 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           if (d < CLEAR) camera.position.addScaledVector(wv.normalize(), (CLEAR - d) * smoothstep(0, CLEAR, CLEAR - d) * 0.9 + 1e-3)
         }
       }
-      // La mirada NO persigue al avión: él cuelga de la cámara, y que la cámara
-      // lo mire cerraría un lazo (la mirada mueve al avión, el avión a la
+      // La mirada NO persigue al cohete: él cuelga de la cámara, y que la cámara
+      // lo mire cerraría un lazo (la mirada mueve al cohete, el cohete a la
       // mirada) que lo hace oscilar.
       camera.lookAt(look)
 
@@ -652,7 +653,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
       formP.update(now)
       dissolveP.update(now)
 
-      // El avión vuela en el cuadro de la cámara: siempre delante y un poco
+      // El cohete vuela en el cuadro de la cámara: siempre delante y un poco
       // abajo, zigzagueando, como un avión que se persigue. (Sobre el circuito
       // quedaría fuera de cuadro: durante el vuelo la cámara mira hacia la
       // formación de destino, no a lo largo del camino.) La estela queda en el
@@ -664,14 +665,14 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         camera.getWorldDirection(fwd)
         right.crossVectors(fwd, up).normalize()
         // El zigzag se apaga al acercarse: con la cámara frenando, sería lo
-        // único que mueve al avión y su rumbo se iría de lado.
+        // único que mueve al cohete y su rumbo se iría de lado.
         const weave = 1 - (raw < 0.55 ? 0 : easeInOut(Math.min(1, (raw - 0.55) / 0.2)))
         planePos.copy(camera.position)
           .addScaledVector(fwd, 620)
           .addScaledVector(right, Math.sin(now * 0.0017) * 90 * weave)
           .addScaledVector(up, -60 + Math.sin(now * 0.0026) * 28 * weave)
         // El slalom manda sobre el x mientras haya postes cerca: entre dos, el
-        // avión cruza con una curva suave (smoothstep sobre la distancia).
+        // cohete cruza con una curva suave (smoothstep sobre la distancia).
         let slope = 0
         const gates = planeFlight.gates
         if (gates.length) {
@@ -694,7 +695,7 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         // La formación lo absorbe: en el último tramo se encoge hacia su
         // centro hasta desaparecer dentro.
         const swallow = raw > 0.8 ? easeInOut((raw - 0.8) / 0.2) : 0
-        // Rumbo: hacia donde mira la cámara (el avión va delante, en nuestra
+        // Rumbo: hacia donde mira la cámara (el cohete va delante, en nuestra
         // dirección), y al final, de a poco, hacia la formación donde entra.
         // NO hacia su velocidad en el mundo: colgado de una cámara que gira,
         // esa velocidad se da vuelta en algunos tramos y la nariz giraría en
@@ -705,15 +706,20 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
         // Con slalom, la nariz sigue la curva (la pendiente del x) y el
         // ladeo se inclina hacia adentro del giro; sin postes, el zigzag.
         const lateral = gates.length ? slope : Math.cos(now * 0.0017) * 0.25 * weave
+        // Y de tres cuartos: con la nariz derecho hacia adelante sólo se le
+        // vería la tobera. Se lo gira ~40° a la derecha y un poco hacia
+        // arriba, como el cohete de una ilustración; al llegar, apunta a la
+        // formación.
         planeAim.lerpVectors(fwd, planeAim, w).normalize()
-          .addScaledVector(side, lateral * (1 - w))
+          .addScaledVector(side, lateral * (1 - w) + 0.85 * (1 - w))
+          .addScaledVector(up, 0.3 * (1 - w))
           .normalize().multiplyScalar(100).add(planePos)
         const roll = gates.length
           ? -Math.max(-0.8, Math.min(0.8, slope * 1.6)) * (1 - w)
           : -Math.cos(now * 0.0017) * 0.45 * weave
-        paper.place(planePos, now, up, k, 0.6 * scale * (1 - swallow * 0.97), planeAim, roll)
+        rocket.place(planePos, now, up, k, 0.6 * scale * (1 - swallow * 0.97), planeAim, roll)
         if (!flying) {
-          paper.hide()
+          rocket.hide()
           // Y lo que tragó se le nota: una onda roja sale del centro, recorre
           // la forma y se apaga, y la forma vuelve a sus colores.
           const dest = stations[planeFlight.to]
@@ -724,11 +730,11 @@ export default function World({ signal, pages, state, dir, onFail, onTravel }) {
           planeFlight = null
         }
       } else if (planeReq && now - planeReq.at > 3000) {
-        // Se armó el avión pero nunca hubo viaje: vuelve a ser lo que era.
+        // Se armó el cohete pero nunca hubo viaje: vuelve a ser lo que era.
         restore(planeReq.from, now)
         planeReq = null
       }
-      paper.update(now)
+      rocket.update(now)
 
       // El sonido de la figura: cuánto está el cursor encima, dónde, y qué
       // tan rápido gira por el arrastre (o la inercia que dejó).
