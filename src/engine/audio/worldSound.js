@@ -467,6 +467,21 @@ export const sound = {
     tone(NOTES[12], { dur: 0.06, gain: 0.02, wet: 0.25 })
   },
 
+  // La mano se perdió a mitad de gesto: dos notas suaves que bajan (una
+  // pregunta, no un error). Si vuelve a tiempo, las mismas subiendo.
+  handLost() {
+    if (!live()) return
+    const t = ctx.currentTime
+    tone(NOTES[11], { at: t, dur: 0.18, gain: 0.025, wet: 0.5 })
+    tone(NOTES[9], { at: t + 0.12, dur: 0.3, gain: 0.02, wet: 0.6 })
+  },
+  handFound() {
+    if (!live()) return
+    const t = ctx.currentTime
+    tone(NOTES[9], { at: t, dur: 0.14, gain: 0.022, wet: 0.4 })
+    tone(NOTES[11], { at: t + 0.08, dur: 0.22, gain: 0.025, wet: 0.5 })
+  },
+
   // Clic de verdad: dos notas que suben.
   click() {
     if (!live()) return

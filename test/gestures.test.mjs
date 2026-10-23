@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed, twoHands } from '../src/engine/gestures.js'
+import { createDwell, createPinchClick, createPresence, createSwipeDetector, handMode, scrollSpeed, twoHands } from '../src/engine/gestures.js'
 
 const hand = (x, y = 0, fingers = 5) => ({ source: 'hand', hands: 1, x, y, fingers })
 
@@ -174,4 +174,32 @@ test('two hands: spreading zooms in, turning rolls, the short way round', () => 
   const s2 = twoHands({ x: 0.2, y: 0.001, x2: -0.2, y2: 0 })
   const r2 = twoHands({ x: 0.2, y: -0.001, x2: -0.2, y2: 0 }, s2)
   assert.ok(Math.abs(r2.roll) < 0.05)
+})
+
+// ── Perder la mano a mitad de gesto ─────────────────────────────────────────
+
+test('presence: a short loss is a pause, a long one lets go', () => {
+  const p = createPresence({ grace: 1000 })
+  assert.equal(p.push(true, 0).state, 'present')
+  const lost = p.push(false, 100)
+  assert.ok(lost.lost && lost.state === 'lost')
+  assert.equal(p.push(false, 600).t, 0.5)
+  const back = p.push(true, 700)
+  assert.ok(back.back && back.state === 'present')
+  p.push(false, 800)
+  const gone = p.push(false, 1900)
+  assert.ok(gone.gone && gone.state === 'gone')
+  assert.ok(!p.push(true, 2000).back, 'coming back after the grace is a fresh start')
+})
+
+test('dwell: time without the hand does not count, and it resumes near the same spot', () => {
+  const d = createDwell({ ms: 1000, slop: 28 })
+  const link = {}
+  d.push(link, 100, 100, 0)
+  assert.equal(d.push(link, 100, 100, 600).progress, 0.6)
+  d.pause(600)
+  d.resume(1400)                                   // 800 ms sin mano
+  // Vuelve 20 px más allá: sigue, no reinicia.
+  assert.ok(Math.abs(d.push(link, 120, 100, 1450).progress - 0.65) < 1e-9)
+  assert.ok(d.push(link, 120, 100, 1800).fire)
 })

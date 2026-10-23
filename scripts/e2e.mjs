@@ -201,6 +201,48 @@ await check('point and pinch opens a project', async page => {
   await waitHash(page, '#/projects/crew', 2500)
 })
 
+// Perder la mano a mitad de gesto: un segundo de gracia en pausa (cursor
+// fantasma, el anillo conserva lo que llevaba), y si vuelve sigue desde ahí.
+const LOST = { hands: 0, fingers: 0, point: 0, pinch: 0 }
+await check('a hand lost for a moment pauses the hold and picks it up again', async page => {
+  await open(page, '#/projects')
+  const r = await rectOf(page, '.projects__row', 'crew')
+  const at = { ...POINT, px: (r.x - 120) / r.w, py: r.y / r.h }
+  await pose(page, at)
+  await wait(750)                                   // ~media espera de 1.25 s
+  await pose(page, LOST)
+  await wait(500)
+  assert((await page.getAttribute('.hand-cursor', 'data-lost')) === '1', 'no ghost cursor while lost')
+  assert((await hash(page)) === '#/projects', 'opened while the hand was gone')
+  const back = Date.now()
+  await pose(page, at)
+  await waitHash(page, '#/projects/crew', 2500)
+  // Sin pausa, volver reiniciaría los 1.25 s enteros.
+  assert(Date.now() - back < 1150, `took ${Date.now() - back} ms after the hand came back`)
+})
+
+await check('after the grace period a lost hand lets go', async page => {
+  await open(page, '#/projects')
+  await pose(page, { ...POINT, px: 0.3, py: 0.5 })
+  await wait(400)
+  await pose(page, LOST)
+  await wait(1400)
+  assert((await page.getAttribute('.hand-cursor', 'data-on')) === '', 'cursor still shown')
+  assert((await page.textContent('.gesture__caption')).includes('Show your hand'), 'no "show your hand" guide')
+})
+
+await check('moving the mouse takes the cursor from the hand', async page => {
+  await open(page, '#/projects')
+  await pose(page, { ...POINT, px: 0.3, py: 0.5 })
+  await wait(400)
+  assert((await page.getAttribute('.hand-cursor', 'data-on')) === '1', 'hand cursor not shown')
+  await page.mouse.move(600, 400); await page.mouse.move(700, 450)
+  await wait(150)
+  assert((await page.getAttribute('.hand-cursor', 'data-on')) === '', 'hand kept the cursor while the mouse moved')
+  await wait(1500)                                  // mouse quieto: la mano vuelve
+  assert((await page.getAttribute('.hand-cursor', 'data-on')) === '1', 'hand did not take the cursor back')
+})
+
 await check('holding the finger on the edge arrow turns the page', async page => {
   await open(page, '#/about')
   await pose(page, { ...POINT, px: 1, py: 0.5 })

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
-import { createDwell, createPinchClick, createSwipeDetector, handMode, scrollSpeed } from '../../engine/gestures'
-import { fromHand, releaseHand } from '../pointer'
+import { createDwell, createPinchClick, createPresence, createSwipeDetector, handMode, scrollSpeed } from '../../engine/gestures'
+import { fromHand, pointer, releaseHand } from '../pointer'
 import { EVENT, profile } from '../../engine/handProfile'
 import { sound } from '../../engine/audio/worldSound'
 
@@ -19,6 +19,8 @@ import { sound } from '../../engine/audio/worldSound'
 // no se entera.
 
 const CLICKABLE = 'a[href], button:not([disabled]), [role="button"]'
+const GRACE = 1000        // ms que se espera a una mano perdida antes de soltar todo
+const MOUSE_HOLD = 1200   // ms que la mano cede después de que el mouse se movió
 
 // Más sensible que el detector por defecto (0.5 en 260 ms): en el sitio el
 // swipe es LA forma de moverse, y un barrido moderado tiene que alcanzar. La
@@ -56,7 +58,11 @@ export default function HandControls({ signal, pages, state, go, paused = false 
     window.addEventListener(EVENT, onProfile)
     const pinch = createPinchClick()
     const dwell = createDwell({ ms: 1250 })
-    let raf = 0, last = performance.now(), mode = 'none'
+    // Perder la mano (salió del cuadro, la luz, un cuadro malo) no tira lo
+    // que estabas haciendo: durante GRACE ms queda en pausa, con el cursor
+    // como un fantasma donde desapareció, y si vuelve sigue desde ahí.
+    const presence = createPresence({ grace: GRACE })
+    let raf = 0, last = performance.now(), mode = 'none', handMode0 = 'none'
     let flashTimer = 0, shown = '', hover = null, carry = 0, handAt = -Infinity
 
     const set = (st, caption, extra = '') => {
@@ -112,7 +118,17 @@ export default function HandControls({ signal, pages, state, go, paused = false 
 
       // ── Cursor ────────────────────────────────────────────────────────────
       const cur = cursorRef.current
-      if (mode === 'point') {
+      const pres = presence.push(mode !== 'none', now)
+      // El modo con el que se perdió: sólo un dedo que apuntaba deja fantasma.
+      if (mode !== 'none') handMode0 = mode
+      const ghost = pres.state === 'lost' && handMode0 === 'point'
+      // Si el mouse se movió de verdad, manda el mouse: la mano cede un rato
+      // y no se pelean por el cursor ni por la lupa.
+      const mouseOwns = now - pointer.mouseAt < MOUSE_HOLD
+      if (pres.lost && handMode0 === 'point' && !mouseOwns) sound.handLost()
+      if (pres.back) { dwell.resume(now); if (handMode0 === 'point') sound.handFound() }
+      cur.dataset.lost = ''
+      if (mode === 'point' && !mouseOwns) {
         // Hasta el último píxel visible, no hasta innerWidth: ése ya está
         // fuera de la pantalla y elementFromPoint no encontraría la flecha
         // del borde, que es justo adonde lleva el dedo al extremo del cuadro.
@@ -134,6 +150,17 @@ export default function HandControls({ signal, pages, state, go, paused = false 
         sound.dwell(dw.fire ? 0 : dw.progress)
         if (r.click) { clickAt(r.x, r.y); dwell.spend(hover) }
         else if (dw.fire) clickAt(r.x, r.y)
+      } else if (ghost && !mouseOwns) {
+        // En pausa: el cursor queda donde estaba, tenue y apagándose a lo
+        // largo del margen; el anillo de espera conserva lo que llevaba y el
+        // objetivo sigue marcado. Nada hace clic.
+        dwell.pause(now)
+        sound.dwell(0)
+        cur.dataset.on = '1'
+        cur.dataset.lost = '1'
+        cur.dataset.down = ''
+        cur.style.setProperty('--lost', pres.t.toFixed(3))
+        pinch.reset()
       } else {
         cur.dataset.on = ''
         cur.style.setProperty('--dwell', '0')
@@ -185,7 +212,9 @@ export default function HandControls({ signal, pages, state, go, paused = false 
 
       const prev = pages[(state.page - 1 + N) % N].label
       const next = pages[(state.page + 1) % N].label
-      if (mode === 'none') set('idle', 'Show your hand to the camera')
+      if (ghost && !mouseOwns) set('lost', 'Lost your hand. Bring it back to pick up where you left off')
+      else if (mouseOwns && mode === 'point') set('point', 'The mouse has it. Keep the mouse still to point again')
+      else if (mode === 'none') set('idle', 'Show your hand to the camera')
       else if (mode === 'two') set('two', 'Spread or close your hands to zoom, turn them to rotate')
       else if (mode === 'point') set('point', hover ? 'Hold still to open, or pinch to open now' : 'Point at a link. Pinch, or hold still for 1.25 seconds')
       else if (mode === 'closed') set('closed', 'Open your hand to move, or point your index to use it as a cursor')

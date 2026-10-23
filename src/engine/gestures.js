@@ -128,11 +128,15 @@ export function createPinchClick({ press = 0.7, release = 0.4, settle = 0.2 } = 
 // vuelve a disparar hasta que el cursor lo deje: quedarse encima de un link
 // recién abierto no debe abrirlo cada tres segundos.
 export function createDwell({ ms = 3000, slop = 28 } = {}) {
-  let target = null, since = 0, ax = 0, ay = 0, spent = null
+  let target = null, since = 0, ax = 0, ay = 0, spent = null, pausedAt = null
   return {
     push(t, x, y, now) {
       if (t !== spent) spent = null
       if (!t || t === spent) { target = null; return { progress: 0, fire: false } }
+      // Volviendo de una pausa sobre el mismo objetivo: la mano reaparece
+      // cerca pero no en el mismo píxel; se adopta la posición nueva como
+      // ancla en vez de empezar de cero.
+      if (t === target && ax === null) { ax = x; ay = y }
       if (t !== target || Math.hypot(x - ax, y - ay) > slop) {
         target = t; since = now; ax = x; ay = y
       }
@@ -143,7 +147,46 @@ export function createDwell({ ms = 3000, slop = 28 } = {}) {
     },
     // Quien ya hizo clic de otra forma (pellizco) sobre `t` lo da por usado.
     spend(t) { spent = t; target = null },
-    reset() { target = null; spent = null },
+    // Se perdió la mano: el progreso se congela (pause) y, si vuelve a
+    // tiempo, sigue desde ahí (resume) — el tiempo sin mano no cuenta.
+    pause(now) { if (pausedAt === null) pausedAt = now },
+    resume(now) {
+      if (pausedAt === null) return
+      since += now - pausedAt
+      pausedAt = null
+      ax = ay = null
+    },
+    reset() { target = null; spent = null; pausedAt = null },
+  }
+}
+
+// ¿Está la mano? Con un margen: perderla un instante (salió del cuadro, la
+// luz, un cuadro malo del modelo) no debe tirar lo que se estaba haciendo.
+//   present  se la ve
+//   lost     no se la ve desde hace menos de `grace` ms: todo en pausa
+//   gone     pasó el margen: se suelta todo
+// push() devuelve el estado, `t` (0..1, cuánto del margen pasó) y los
+// cambios de este cuadro: lost (se acaba de perder), back (volvió a
+// tiempo), gone (se terminó el margen).
+export function createPresence({ grace = 1000 } = {}) {
+  let state = 'gone', lostAt = 0
+  return {
+    push(present, now) {
+      const out = { state, t: 0, lost: false, back: false, gone: false }
+      if (present) {
+        out.back = state === 'lost'
+        state = 'present'
+      } else if (state === 'present') {
+        state = 'lost'; lostAt = now; out.lost = true
+      } else if (state === 'lost') {
+        out.t = Math.min(1, (now - lostAt) / grace)
+        if (out.t >= 1) { state = 'gone'; out.gone = true }
+      }
+      out.state = state
+      return out
+    },
+    get state() { return state },
+    reset() { state = 'gone' },
   }
 }
 

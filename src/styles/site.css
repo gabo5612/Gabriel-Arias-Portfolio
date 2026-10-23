@@ -473,6 +473,12 @@ p.projects__kind { margin: -12px 0 14px; }
   background: rgba(236, 232, 222, .05);
 }
 .hand-cursor[data-down="1"] .hand-cursor__ring { background: rgba(236, 232, 222, .16); }
+/* Mano perdida a mitad de gesto: el cursor queda como fantasma donde
+   desapareció, con el aro punteado, y se apaga a lo largo del margen
+   (--lost va de 0 a 1). El anillo de espera conserva su progreso. */
+.hand-cursor[data-lost="1"] { opacity: calc(.6 - var(--lost, 0) * .5); transition: none; }
+.hand-cursor[data-lost="1"] .hand-cursor__ring { border-style: dashed; }
+.hand-cursor[data-lost="1"] .hand-cursor__tip { box-shadow: none; opacity: .5; }
 
 /* Mantener para abrir: un anillo exterior fino que se llena en sentido
    horario en los 1.25 s. Es lo único de las ayudas que conserva el ámbar:
@@ -590,7 +596,9 @@ p.projects__kind { margin: -12px 0 14px; }
 /* La guía del gesto cambia con el modo: apuntar no muestra el medidor del
    swipe, y el scroll enciende la flecha del sentido. */
 .gesture[data-state="point"] .gesture__meter,
-.gesture[data-state="point"] .gesture__arrow { opacity: .25; }
+.gesture[data-state="point"] .gesture__arrow,
+.gesture[data-state="lost"] .gesture__meter,
+.gesture[data-state="lost"] .gesture__arrow { opacity: .25; }
 .gesture[data-state="point"] { color: var(--paper); }
 .gesture[data-scroll] .gesture__hand { transition: transform 200ms ease; }
 .gesture[data-scroll="down"] .gesture__hand { transform: translateY(8px); color: var(--paper); }

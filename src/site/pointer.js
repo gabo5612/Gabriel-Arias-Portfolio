@@ -9,10 +9,19 @@ export const pointer = {
   x: -1e4, y: -1e4,
   source: 'none',          // 'mouse' | 'hand' | 'none'
   handAt: 0,               // última vez que la mano escribió (ms)
+  mouseAt: -Infinity,      // última vez que el mouse se MOVIÓ de verdad (ms)
 }
 
+// Quién manda entre el mouse y el dedo: el que se movió último con
+// intención. Un mouse que se mueve de verdad (más de unos píxeles) toma el
+// control al instante y la mano cede (HandControls mira mouseAt); un temblor
+// del trackpad mientras apuntás no le roba la lupa al dedo.
+let mx = -1e4, my = -1e4
 export function fromMouse(x, y, now) {
-  if (pointer.source === 'hand' && now - pointer.handAt < 400) return
+  const moved = Math.hypot(x - mx, y - my) > 6
+  mx = x; my = y
+  if (moved) pointer.mouseAt = now
+  if (pointer.source === 'hand' && now - pointer.handAt < 400 && !moved) return
   pointer.x = x; pointer.y = y; pointer.source = 'mouse'
 }
 

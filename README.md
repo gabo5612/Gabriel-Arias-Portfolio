@@ -52,6 +52,15 @@ El cursor se congela donde empezaste a cerrar el pellizco, porque juntar el pulg
 la punta del índice. Con la palma abierta, la mano además agarra la formación y mueve la
 cámara (paralaje).
 
+**Si la mano se pierde a mitad de gesto** (sale del cuadro, la luz, un cuadro malo del
+modelo): durante 1 s todo queda en pausa. El cursor se queda donde desapareció como un
+fantasma (aro punteado, apagándose), el anillo de espera conserva su progreso, nada hace clic,
+suenan dos notas suaves que bajan y la guía dice *Lost your hand*. Si vuelve a tiempo, cerca
+del mismo lugar, sigue desde ahí (y suenan las mismas notas subiendo); si no, se suelta todo.
+**El mouse manda si se mueve de verdad** (más de 6 px): la mano cede el cursor 1.2 s desde el
+último movimiento, y lo retoma cuando el mouse queda quieto. `createPresence` y
+`dwell.pause/resume` en `engine/gestures.js`, con tests.
+
 **Calibración.** Los umbrales (palma abierta, apuntar, pellizco, recorrido del swipe, zona
 muerta del scroll) tienen valores por defecto, pero el panel de la cámara ofrece **Tune to
 your hand**: seis poses de unos segundos, y `engine/handProfile.js` deriva los umbrales de lo
