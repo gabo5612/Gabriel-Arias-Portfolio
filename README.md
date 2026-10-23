@@ -175,9 +175,10 @@ BASE_PATH=/Gabriel-Arias-Portfolio/ npx vite preview   # → /Gabriel-Arias-Port
 
 `npm run e2e` levanta Vite en modo dev (puerto 5191), abre Chromium headless con WebGL por
 software y recorre el sitio con la mano simulada por `window.__depth` (sólo existe en dev).
-21 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
+26 comprobaciones: vuelo con teclado y rueda, deep links y atrás, modelo por proyecto, títulos
 de partículas, lupa de texto, agarre de la figura, scroll/swipe/pellizco/espera con la mano,
-flechas de borde, dos manos, calibración completa, giroscopio, reduced motion, móvil, y que un
+flechas de borde, mano perdida a mitad de gesto (pausa y retoma, suelta tras el margen), el
+mouse que le quita el cursor a la mano, dos manos, calibración completa, giroscopio, reduced motion, móvil, y que un
 recorrido entero no haga peticiones fuera del sitio (fuentes aparte). El sonido no se
 escucha pero se mide: un analizador (sólo en dev) comprueba que el vuelo y el clic en la
 figura suben el nivel, que nada satura y que el botón lo deja en silencio exacto. Falla también ante
