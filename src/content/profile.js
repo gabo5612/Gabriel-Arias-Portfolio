@@ -112,4 +112,4 @@ export function askChatGptUrl(title) {
 
 // Architecture documentation URLs.
 export const architectureUrl = slug =>
-  `${SITE_URL}/architecture/${slug}.html`
+  `${SITE_URL}/architecture/${slug}`

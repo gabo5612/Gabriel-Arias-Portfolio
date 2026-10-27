@@ -97,7 +97,7 @@ ${experience.map(e => `<section><h2>${esc(e.title)}</h2><p>${esc(e.date)}${e.loc
         p.demo && [p.demoLabel || 'Live demo', p.demo],
         !p.demo && p.link && ['Visit', p.link],
         p.github && ['Code', p.github],
-        p.arch && ['Architecture', `${SITE_URL}/architecture/${p.arch}.html`],
+        p.arch && ['Architecture', `${SITE_URL}/architecture/${p.arch}`],
       ].filter(Boolean)
       return `<p><a href="${link({ id: 'projects' })}">All projects</a></p>
 <h1>${esc(plain(p.title))}</h1>
