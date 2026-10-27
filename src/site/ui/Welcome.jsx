@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { sound } from '../../engine/audio/worldSound'
+import { prefetchVision } from '../../engine/signal/prefetchVision'
 
 // La pantalla de bienvenida: lo único que no se puede descubrir mirando es
 // que el sitio suena y que se maneja con la mano. Se dice una vez, antes de
@@ -47,6 +48,8 @@ const TiltArt = () => (
 export default function Welcome({ cam, tilt, onDone }) {
   const first = useRef(null)
   useEffect(() => { first.current?.focus({ preventScroll: true }) }, [])
+  // La bienvenida ofrece la cámara: mientras se lee, el modelo ya baja.
+  useEffect(() => { if (!tilt.available && cam.canTrack) prefetchVision() }, [tilt.available, cam.canTrack])
   const phone = tilt.available
   const canMove = phone || cam.canTrack
 

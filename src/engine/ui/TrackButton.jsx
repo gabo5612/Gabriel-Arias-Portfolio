@@ -1,4 +1,5 @@
 import React from 'react'
+import { prefetchVision } from '../signal/prefetchVision'
 
 // El botón que enciende la cámara. Es lo único de la página que no se puede
 // adivinar leyendo, así que tiene que parecer pulsable: los estilos (respira
@@ -14,6 +15,9 @@ export default function TrackButton({ cam, compact = false, className = '' }) {
     <button
       type="button"
       onClick={cam.toggle}
+      // Intención de usar la cámara: se empieza a bajar el modelo ya.
+      onPointerEnter={prefetchVision}
+      onFocus={prefetchVision}
       className={`btn hero__track${cam.camOn ? ' hero__track--on' : ''}${compact ? ' hero__track--compact' : ''} ${className}`}
       aria-pressed={cam.camOn}
       title={compact && !cam.camOn ? 'Move through the site with your hands' : undefined}
