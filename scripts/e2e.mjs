@@ -76,7 +76,10 @@ async function open(page, hash = '#/', { query = '', world = true } = {}) {
   await wait(world ? 2500 : 300)
 }
 const pose = (page, p) => page.evaluate(p => window.__depth.pose(p), p)
-const hash = page => page.evaluate(() => location.hash)
+// El sitio usa rutas (/projects/crew); las pruebas siguen escribiendo el
+// estado como '#/projects/crew', que además es el formato viejo que el sitio
+// sigue aceptando y reescribe a ruta.
+const hash = page => page.evaluate(() => '#' + location.pathname)
 async function waitHash(page, want, ms = 4000) {
   const end = Date.now() + ms
   while (Date.now() < end) {
@@ -394,8 +397,11 @@ await check('sound: wakes on the first click, reacts to flight and poke, turns o
   assert(Math.max(flight, poke) < 0.9, 'output close to clipping')
   await page.click('.nav__sound')
   await wait(800)
-  const off = await peakDuring(page, 400)
-  assert(off === 0, `still sounding after turning it off (${off})`)
+  // Silencio exacto: la salida en 0 y el contexto suspendido. (No el pico
+  // del analizador: con la máquina cargada el hilo de audio se atrasa, y al
+  // suspender el analizador queda congelado con muestras viejas.)
+  const off = await page.evaluate(() => ({ gain: window.__sound.outGain(), state: window.__sound.state }))
+  assert(off.gain === 0 && off.state === 'suspended', `still sounding after turning it off (${JSON.stringify(off)})`)
   assert((await page.getAttribute('.nav__sound', 'aria-pressed')) === 'false', 'button not pressed=false')
 })
 

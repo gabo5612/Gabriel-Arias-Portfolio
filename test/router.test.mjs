@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { HOME, parseHash, step, toHash } from '../src/site/router.js'
+import { HOME, isKnownPath, parseHash, parsePath, step, toHash, toPath } from '../src/site/router.js'
 
 const pages = [
   { id: 'home' },
@@ -58,4 +58,25 @@ test('goto and close', () => {
   assert.deepEqual(step(HOME, { type: 'goto', id: 'projects', item: 'bogus' }, pages), { page: 2, item: null })
   assert.equal(step(HOME, { type: 'goto', id: 'bogus' }, pages), HOME)
   assert.deepEqual(step({ page: 2, item: 'crew' }, { type: 'close' }, pages), { page: 2, item: null })
+})
+
+// ── Rutas de verdad ─────────────────────────────────────────────────────────
+
+test('paths round-trip, with and without a base folder', () => {
+  for (const base of ['/', '/Gabriel-Arias-Portfolio/']) {
+    for (const s of [{ page: 0, item: null }, { page: 1, item: null }, { page: 2, item: 'shopfloor' }]) {
+      assert.deepEqual(parsePath(toPath(s, pages, base), pages, base), s)
+    }
+  }
+  assert.equal(toPath({ page: 0, item: null }, pages, '/'), '/')
+  assert.equal(toPath({ page: 2, item: 'shopfloor' }, pages, '/x/'), '/x/projects/shopfloor')
+  assert.deepEqual(parsePath('/about/', pages), { page: 1, item: null })
+})
+
+test('unknown paths are flagged, known ones are not', () => {
+  assert.ok(isKnownPath('/', pages))
+  assert.ok(isKnownPath('/projects/shopfloor', pages))
+  assert.ok(!isKnownPath('/nope', pages))
+  assert.ok(!isKnownPath('/projects/zzz', pages))
+  assert.ok(!isKnownPath('/about/a/b', pages))
 })

@@ -155,6 +155,38 @@ window.__depth.pose({ hands: 1, fingers: 1, point: 1, px: .2, py: .5 })  // curs
 window.__depth.pose({ pinch: 1 })                                // clic
 ```
 
+## SEO, llms.txt y lo que se lee sin JavaScript
+
+Las secciones son rutas de verdad (`/about`, `/projects/shopfloor`), no `#/…`: un buscador
+ignora todo lo que va después de `#`, así que con hash el sitio era una sola URL. Los
+enlaces viejos con hash siguen funcionando: se reescriben a ruta al cargar. Una ruta
+desconocida vuelve al inicio (y en producción es un 404 de verdad, `404.html`, noindex).
+
+`npm run build` = `vite build` + `scripts/prerender.mjs` + `scripts/verify-seo.mjs`:
+
+- **prerender** escribe un `.html` por ruta (17: seis secciones y once proyectos) con su
+  título, descripción, canonical, Open Graph, Twitter Card, JSON-LD (`Person`, `WebSite` y
+  por página `ProfilePage`, `AboutPage`, `CollectionPage`, `SoftwareSourceCode`/
+  `CreativeWork`, `ContactPage`, `BreadcrumbList`) y el contenido de la sección como HTML
+  semántico dentro de `#root`. React lo reemplaza al montar; sin JS, eso es la página. Más
+  `sitemap.xml`, `robots.txt` (todos los rastreadores, incluidos los de asistentes),
+  `404.html` y **`llms.txt`**.
+- Títulos y descripciones salen de `src/content/seo.js`, que también usa el sitio para el
+  título de la pestaña: no hay dos versiones.
+- `llms.txt` se arma del contenido del sitio (perfil, secciones con sus URLs, experiencia,
+  skills, contacto) más las notas largas de cada proyecto, que viven en
+  `src/content/llms-projects.md` bajo `### <título exacto>`. El botón **Ask ChatGPT** de cada
+  proyecto le pide al modelo justo esa sección.
+- **verify-seo** falla el build si una ruta no tiene título o descripción únicos (≤ 160),
+  canonical correcto, exactamente un `<h1>`, Open Graph y JSON-LD que parsea; si el sitemap no
+  coincide con las rutas, si `llms.txt` no tiene la sección de algún proyecto, o si el 404 es
+  indexable.
+- `public/og.jpg` (1200×630) es la imagen de las previsualizaciones de links: una captura del
+  inicio. Se regenera a mano si cambia el diseño.
+- `vercel.json` agrega `cleanUrls` (sirve `about.html` en `/about`), cabeceras de seguridad
+  (`nosniff`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy` con cámara y
+  giroscopio sólo para el propio sitio) y caché inmutable para `/assets`.
+
 ## Publicación
 
 `main` de `gabo5612/Gabriel-Arias-Portfolio` se publica solo en GitHub Pages

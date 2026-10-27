@@ -1,13 +1,12 @@
-# Gabriel Arias
+<!--
+Notas largas por proyecto para llms.txt. scripts/prerender.mjs toma cada
+bloque "### <título>" (el título exacto de projects.json: el botón "Ask ChatGPT"
+del sitio le pide al modelo esa sección) y lo pone bajo su proyecto. Las notas
+para asistentes van al final del archivo generado.
 
-> Web developer and AI engineer. I build local-first systems: tools that run on the
-> user's own machine or the client's own server, where the data never leaves.
-> Site: https://gabriel-arias-portfolio.vercel.app
-
-This file exists so that an assistant asked "what does this project do?" answers
-from here instead of guessing from the project's name. Everything below is work I
-built. There are no benchmarks or marketing figures here — the only numbers are
-counts you can reproduce by running the repository's own tests.
+Regla del workspace: nada de cifras inventadas. Los únicos números son conteos
+que se reproducen corriendo los tests de cada repositorio.
+-->
 
 ## Projects
 

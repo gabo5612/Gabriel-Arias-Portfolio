@@ -3,7 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useDepthSignal } from '../engine/signal/useDepthSignal'
 import { useCameraControl } from '../engine/signal/useCameraControl'
 import { useTilt } from '../engine/signal/useTilt'
-import { profile } from '../content'
+import { experience, profile, projects, skills } from '../content'
+import { pageMeta } from '../content/seo'
 import { PAGES } from './pages'
 import { useNavigation } from './useNavigation'
 import { useTextLens } from './useTextLens'
@@ -99,9 +100,10 @@ export default function App() {
   const onTravel = useCallback((t, flying) => routeRef.current?.travel(t, flying), [])
 
   const itemTitle = state.item && page.items ? state.item : null
+  // El mismo título que el HTML pre-generado de esta ruta (content/seo.js).
   useEffect(() => {
-    document.title = page.id === 'home' ? `${profile.name}` : `${page.label} · ${profile.name}`
-  }, [page])
+    document.title = pageMeta({ id: page.id, item: state.item }, { profile, projects, experience, skills }).title
+  }, [page, state.item])
 
   const Component = page.Component
   const key = `${page.id}/${state.item || ''}`

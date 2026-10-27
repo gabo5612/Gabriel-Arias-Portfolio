@@ -1,3 +1,4 @@
+import { href, newTab } from '../href'
 import { asset } from '../../engine/asset'
 import Rich from '../ui/Rich'
 import React from 'react'
@@ -25,15 +26,15 @@ export const page = {
 function List({ go }) {
   return (
     <div className="projects">
-      <h2 className="panel__title"><Rich text="Things I've built" /></h2>
+      <h1 className="panel__title"><Rich text="Things I've built" /></h1>
       <p className="panel__hint">Pick one, or use ↑ ↓ to walk through them. With your hand, point and pinch.</p>
       <ul className="projects__list">
         {projects.map(p => (
           <li key={p.id}>
             <a
               className="projects__row"
-              href={`#/projects/${p.id}`}
-              onClick={e => { e.preventDefault(); go({ type: 'goto', id: 'projects', item: p.id }) }}
+              href={href('projects', p.id)}
+              onClick={e => { if (newTab(e)) return; e.preventDefault(); go({ type: 'goto', id: 'projects', item: p.id }) }}
             >
               <span className="projects__name">
                 <span><Rich text={p.title} /></span>
@@ -57,7 +58,7 @@ function Detail({ p, go }) {
         All projects
       </button>
       {p.cover && <img className="project__cover" src={asset(p.cover)} alt="" loading="lazy" decoding="async" />}
-      <h2 className="panel__title"><Rich text={p.title} /></h2>
+      <h1 className="panel__title"><Rich text={p.title} /></h1>
       {p.kind === 'service' && <p className="projects__kind">Paid service</p>}
       <p className="panel__text"><Rich text={p.description} /></p>
       <ul className="project__tags">{p.tags.map(t => <li key={t}>{t}</li>)}</ul>

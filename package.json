@@ -4,13 +4,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/verify-seo.mjs",
     "preview": "vite preview",
     "test": "node --test \"test/*.test.mjs\"",
     "sync": "node scripts/sync-content.mjs",
     "make:model": "node scripts/make-sample-model.mjs",
     "make:models": "/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup --python blender/build_models.py -- public/models/projects",
-    "e2e": "node scripts/e2e.mjs"
+    "e2e": "node scripts/e2e.mjs",
+    "verify:seo": "node scripts/verify-seo.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.0.1",

@@ -2,14 +2,15 @@ import React from 'react'
 import TrackButton from '../../engine/ui/TrackButton'
 import TiltButton from '../../engine/ui/TiltButton'
 import SoundButton from './SoundButton'
+import { href, newTab } from '../href'
 
 export default function Nav({ pages, state, go, cam, tilt, name }) {
   return (
     <header className="nav">
       <a
         className="nav__logo"
-        href="#/"
-        onClick={e => { e.preventDefault(); go({ type: 'goto', id: pages[0].id }) }}
+        href={href()}
+        onClick={e => { if (newTab(e)) return; e.preventDefault(); go({ type: 'goto', id: pages[0].id }) }}
       >
         {name}
       </a>
@@ -18,9 +19,9 @@ export default function Nav({ pages, state, go, cam, tilt, name }) {
           {pages.map((p, i) => (
             <li key={p.id}>
               <a
-                href={i === 0 ? '#/' : `#/${p.id}`}
+                href={i === 0 ? href() : href(p.id)}
                 aria-current={state.page === i ? 'page' : undefined}
-                onClick={e => { e.preventDefault(); go({ type: 'goto', id: p.id }) }}
+                onClick={e => { if (newTab(e)) return; e.preventDefault(); go({ type: 'goto', id: p.id }) }}
               >
                 {p.label}
               </a>

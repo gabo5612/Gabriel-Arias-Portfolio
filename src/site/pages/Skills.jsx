@@ -18,7 +18,7 @@ export const page = {
 export default function Skills() {
   return (
     <div className="skills">
-      <h2 className="panel__title"><Rich text="What I work with" /></h2>
+      <h1 className="panel__title"><Rich text="What I work with" /></h1>
       <dl className="skills__list">
         {skills.map(g => (
           <div key={g.key} className="skills__group">

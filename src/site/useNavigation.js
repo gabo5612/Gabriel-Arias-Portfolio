@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { parseHash, same, step, toHash } from './router'
+import { HOME, isKnownPath, parseHash, parsePath, same, step, toPath } from './router'
 
 // Estado de navegación + todas las entradas que no son la mano. La mano entra
 // por GestureGuide, que llama al mismo `go`: todas pasan por step() y nadie
@@ -26,11 +26,29 @@ function canScroll(el, dy) {
   return el.scrollTop > 2
 }
 
+// Dónde vive el sitio ('/' o la subcarpeta de GitHub Pages).
+const BASE = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
+
+// El estado que dice la URL. Un enlace viejo con hash (#/projects/crew) manda
+// sobre la ruta y se reescribe a la ruta nueva, sin entrada de historial; una
+// ruta desconocida vuelve a la primera página y también se corrige.
+function fromLocation(pages) {
+  if (typeof window === 'undefined') return HOME
+  const { hash, pathname } = window.location
+  if (/^#\//.test(hash)) {
+    const state = parseHash(hash, pages)
+    window.history.replaceState(null, '', toPath(state, pages, BASE))
+    return state
+  }
+  if (!isKnownPath(pathname, pages, BASE)) {
+    window.history.replaceState(null, '', toPath(HOME, pages, BASE))
+    return HOME
+  }
+  return parsePath(pathname, pages, BASE)
+}
+
 export function useNavigation(pages, { onChange } = {}) {
-  const [nav, setNav] = useState(() => ({
-    state: parseHash(typeof window !== 'undefined' ? window.location.hash : '', pages),
-    dir: 0,
-  }))
+  const [nav, setNav] = useState(() => ({ state: fromLocation(pages), dir: 0 }))
   const navRef = useRef(nav)
   navRef.current = nav
 
@@ -44,14 +62,14 @@ export function useNavigation(pages, { onChange } = {}) {
       const items = pages[cur.page].items || []
       dir = items.indexOf(next.item) >= items.indexOf(cur.item) ? 1 : -1
     }
-    window.history.pushState(null, '', toHash(next, pages))
+    window.history.pushState(null, '', toPath(next, pages, BASE))
     setNav({ state: next, dir })
   }, [pages])
 
-  // Atrás/adelante del navegador, o un hash pegado a mano.
+  // Atrás/adelante del navegador, o un hash viejo pegado a mano.
   useEffect(() => {
     const onPop = () => {
-      const next = parseHash(window.location.hash, pages)
+      const next = fromLocation(pages)
       if (!same(next, navRef.current.state)) setNav({ state: next, dir: 0 })
     }
     window.addEventListener('popstate', onPop)

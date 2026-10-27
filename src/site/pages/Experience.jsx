@@ -17,7 +17,7 @@ export default function Experience() {
   const roles = [...experience].reverse()
   return (
     <div className="experience">
-      <h2 className="panel__title"><Rich text="Where I've worked" /></h2>
+      <h1 className="panel__title"><Rich text="Where I've worked" /></h1>
       <ol className="timeline">
         {roles.map(r => (
           <li key={r.date} className="timeline__item">

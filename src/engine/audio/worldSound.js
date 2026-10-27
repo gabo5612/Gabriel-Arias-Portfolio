@@ -519,6 +519,8 @@ export const sound = {
     for (let i = 1; i < bins.length; i++) if (bins[i] > bins[k]) k = i
     return Math.round((k * ctx.sampleRate) / analyser.fftSize)
   },
+  // Sólo para pruebas: la ganancia de salida (0 = silencio exacto).
+  outGain() { return out ? out.gain.value : 0 },
   // Sólo para pruebas: la nota grave del fondo ahora mismo, en Hz.
   padRoot() { return pad ? Math.round(pad.oscs[0].o.frequency.value) : 0 },
   get state() { return ctx?.state ?? 'none' },

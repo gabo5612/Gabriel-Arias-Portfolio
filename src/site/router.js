@@ -5,9 +5,14 @@
 //
 // Dos niveles: páginas (izquierda/derecha) e ítems dentro de una página que
 // los tenga (arriba/abajo), como los proyectos. La URL es el estado:
-//   #/                     primera página
-//   #/projects             la página, sin ítem abierto
-//   #/projects/shopfloor   el ítem abierto
+//   /                      primera página
+//   /projects              la página, sin ítem abierto
+//   /projects/shopfloor    el ítem abierto
+// Son rutas de verdad: cada una existe además como HTML pre-generado
+// (scripts/prerender.mjs), para que buscadores y asistentes la lean sin JS.
+// `base` es la subcarpeta donde vive el sitio ('/' en Vercel,
+// '/Gabriel-Arias-Portfolio/' en GitHub Pages). Los enlaces viejos con hash
+// (#/projects) se siguen leyendo con parseHash y se reescriben a ruta.
 //
 // `pages` es [{ id, items?: string[] }]: lo mínimo que hace falta para decidir.
 
@@ -25,6 +30,31 @@ export function toHash(state, pages) {
   if (state.page === 0 && !state.item) return '#/'
   const id = encodeURIComponent(pages[state.page].id)
   return state.item ? `#/${id}/${encodeURIComponent(state.item)}` : `#/${id}`
+}
+
+const trimBase = (pathname, base) => {
+  const b = base.endsWith('/') ? base : `${base}/`
+  const p = String(pathname || '/')
+  return p.startsWith(b) ? p.slice(b.length) : p.replace(/^\//, '')
+}
+
+export function parsePath(pathname, pages, base = '/') {
+  return parseHash(`#/${trimBase(pathname, base).replace(/\/+$/, '')}`, pages)
+}
+
+// Una ruta desconocida no es la primera página: el que la pegó tiene que
+// enterarse (la URL se corrige) y el buscador no debe indexarla.
+export function isKnownPath(pathname, pages, base = '/') {
+  const [id, item, extra] = trimBase(pathname, base).replace(/\/+$/, '').split('/').map(decodeURIComponent)
+  if (!id) return true
+  const page = pages.find(p => p.id === id)
+  if (!page || extra !== undefined) return false
+  return item === undefined || (page.items || []).includes(item)
+}
+
+export function toPath(state, pages, base = '/') {
+  const b = base.endsWith('/') ? base : `${base}/`
+  return b + toHash(state, pages).replace(/^#\/?/, '')
 }
 
 export const same = (a, b) => a.page === b.page && a.item === b.item
