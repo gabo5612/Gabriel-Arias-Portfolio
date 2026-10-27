@@ -160,9 +160,14 @@ function graph(r, meta) {
 const template = readFileSync(join(DIST, 'index.html'), 'utf8')
 if (!template.includes('<div id="root"></div>')) throw new Error('dist/index.html: no empty #root to fill')
 
-// Estilo mínimo del contenido estático: lo ve quien entra sin JavaScript, y
-// por un instante cualquiera mientras carga la app. Mismos colores y fuentes.
-const PRE_CSS = `<style>.pre{max-width:40rem;margin:0 auto;padding:88px 20px 64px;color:#ece8de;font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif}.pre nav ul{display:flex;flex-wrap:wrap;gap:4px 16px;list-style:none;padding:0;margin:0 0 40px}.pre a{color:#ece8de}.pre main a{text-decoration:underline;text-underline-offset:3px}.pre nav a{color:#a8acb8;text-decoration:none}.pre nav a[aria-current]{color:#ece8de}.pre h1{font:800 clamp(2rem,6vw,3.2rem)/1.05 "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 20px}.pre h2{font:700 1.25rem/1.3 "Bricolage Grotesque",system-ui,sans-serif;margin:28px 0 8px}.pre p,.pre li,.pre dd,.pre dt{color:#c9cbd2}.pre dl{display:flex;flex-wrap:wrap;gap:16px 28px}.pre dd{margin:0;font-weight:700;color:#ece8de}</style>`
+// Estilo mínimo del contenido estático: lo ve quien entra sin JavaScript.
+// Con JavaScript no se ve nunca: el script de abajo marca <html class="js">
+// antes del primer pintado y .js .pre lo oculta (si no, el texto aparece un
+// instante y desaparece cuando React monta). Si la app no llega a montar en
+// 5 s (un error, una red rota), se vuelve a mostrar: mejor el texto que
+// una página vacía. Buscadores y asistentes que no ejecutan JS lo leen igual.
+const PRE_JS = `<script>document.documentElement.classList.add('js');setTimeout(function(){if(document.querySelector('.pre'))document.documentElement.classList.remove('js')},5000)</script>`
+const PRE_CSS = `<style>.js .pre{display:none}.pre{max-width:40rem;margin:0 auto;padding:88px 20px 64px;color:#ece8de;font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif}.pre nav ul{display:flex;flex-wrap:wrap;gap:4px 16px;list-style:none;padding:0;margin:0 0 40px}.pre a{color:#ece8de}.pre main a{text-decoration:underline;text-underline-offset:3px}.pre nav a{color:#a8acb8;text-decoration:none}.pre nav a[aria-current]{color:#ece8de}.pre h1{font:800 clamp(2rem,6vw,3.2rem)/1.05 "Bricolage Grotesque",system-ui,sans-serif;margin:0 0 20px}.pre h2{font:700 1.25rem/1.3 "Bricolage Grotesque",system-ui,sans-serif;margin:28px 0 8px}.pre p,.pre li,.pre dd,.pre dt{color:#c9cbd2}.pre dl{display:flex;flex-wrap:wrap;gap:16px 28px}.pre dd{margin:0;font-weight:700;color:#ece8de}</style>`
 
 const OG_IMAGE = `${SITE_URL}/og.jpg`
 function page(r, { noindex = false } = {}) {
@@ -185,6 +190,7 @@ function page(r, { noindex = false } = {}) {
     `<meta name="twitter:image" content="${OG_IMAGE}" />`,
     `<link rel="alternate" type="text/plain" title="llms.txt" href="${BASE}llms.txt" />`,
     r ? ld(graph(r, meta)) : '',
+    PRE_JS,
     PRE_CSS,
   ].filter(Boolean).join('\n    ')
   let html = template
