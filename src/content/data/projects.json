@@ -112,6 +112,25 @@
     ]
   },
   {
+    "id": "appliance-invasion",
+    "cover": "/covers/appliance-invasion.webp",
+    "title": "Appliance Invasion",
+    "archNote": "A physics arena auto-battler where an AI agent on your own PC writes your robot's fighting program. Built in four days for the 2026 Epic AI MegaJam.",
+    "description": "A game made by a team of three in the four days of the 2026 Epic AI MegaJam. You build a kitchen-appliance robot from parts, and an AI agent on your own PC writes its fighting program in Lua through a localhost link: it reads the robot's brief, runs test fights and improves from their reports. The fight is decided by the physics simulation, not by scripted outcomes. My part was the infrastructure, the flooded and underground arenas, the arena hazards, sound and music, the interface style, the crowd and the balance. The C++ was written by Claude Code agents under my direction, one agent per piece in its own git worktree, and I played every build before it was merged. The models for the parts and the crowd come from a pipeline that rebuilds from one command: Meshy for image-to-3D, then Blender running headless from Python.",
+    "link": "https://gamazama.itch.io/appliance-invasion",
+    "demo": "https://gamazama.itch.io/appliance-invasion",
+    "demoLabel": "Play on itch.io",
+    "tags": [
+      "Unreal Engine 5.8",
+      "C++",
+      "Lua",
+      "Blender",
+      "Meshy",
+      "Claude Code",
+      "Game Jam"
+    ]
+  },
+  {
     "id": "trailplugin",
     "cover": "/covers/TrailKit.webp",
     "title": "TrailPlugin",

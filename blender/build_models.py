@@ -351,7 +351,23 @@ def daniel_arias():
         tube([(x * 3, -0.45), (x, 2.0)], 0.012)
 
 
+def appliance_invasion():
+    # Una tostadora que pelea: el cuerpo como marco hueco con dos ojos adentro
+    # (marco + relleno es contraste real, ver typeit), dos tostadas que asoman,
+    # cuatro patas y un brazo con un mazo de cocina en alto.
+    annulus(rrect(2.4, 1.3, 0.3), rrect(2.1, 1.0, 0.18), 0.5)
+    for x in (-0.45, 0.45):
+        ring(0.24, 0.1, 0.3, x, 0.05)                              # ojos
+        prism([(x + px, 0.95 + pz) for px, pz in rrect(0.7, 0.6, 0.18)], 0.2)   # tostadas
+    for sx in (-1, 1):
+        tube([(sx * 0.95, -0.65), (sx * 1.35, -0.95), (sx * 1.25, -1.45)], 0.07)  # pata de afuera
+        tube([(sx * 0.45, -0.65), (sx * 0.6, -1.05), (sx * 0.5, -1.45)], 0.07)    # pata de adentro
+    tube([(1.2, 0.2), (1.75, 0.55), (1.95, 1.25)], 0.08)           # brazo
+    box(1.98, 1.45, 0.85, 0.45, 0.4, angle=math.radians(-12))      # cabeza del mazo
+
+
 MODELS = {
+    'appliance-invasion': appliance_invasion,
     'gaboauditmyweb': gaboauditmyweb,
     'shopfloor': shopfloor,
     'groundcheck': groundcheck,

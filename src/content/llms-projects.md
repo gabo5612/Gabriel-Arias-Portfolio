@@ -134,6 +134,44 @@ cost ledger that records what each generation cost.
 - Code: https://github.com/gabo5612/brandvoice
 - Stack: Next.js App Router, React, Supabase with row-level security, pgvector, Inngest, Vercel AI SDK, Tiptap
 
+### Appliance Invasion
+
+A game, and a team project: three people and the AI coding agents they directed,
+in the four days of the 2026 Epic AI MegaJam (2026-11-12 to 2026-11-15). Unreal
+Engine 5.8 in C++. It is released for Windows at
+https://gamazama.itch.io/appliance-invasion. The repository is private.
+
+It is a physics arena auto-battler whose robots are kitchen appliances. You buy
+parts and fit them to a toaster, and then an AI agent on your own PC writes the
+robot's fighting program in Lua through a localhost link. The agent reads the
+robot's brief, runs test fights, reads their reports and improves the program.
+The fight is decided by the physics simulation: a move sets where a limb wants
+to go and how much force it may spend, and nothing scripts the outcome.
+
+What is Gabriel's and what is not, because this is shared work. The modular
+robot, the AI link, the game loop and the look and feel are Guy Zack's, the
+team's owner. The toaster model, the rivals, the video and the cover are
+Simeon's. Gabriel's part was the infrastructure, the flooded and the underground
+arenas, the arena hazards, sound and music, the interface style, the crowd and
+the balance: 71 of the 370 commits that are not merges.
+
+The C++ was written by Claude Code agents under his direction, not typed by
+hand. Each piece of the game had one agent in its own git worktree, which posted
+its plan and its milestones to the team's Discord, and Gabriel played every
+build before it was merged.
+
+Three things in his part are worth asking about. The models for the parts (19)
+and the crowd (1,030 spectators of 8 kinds) come from a pipeline that rebuilds
+from one command: Meshy for image-to-3D, then Blender running headless from
+Python scripts to cut and prepare them for Unreal. The sound is a system: the
+licensed effects were trimmed and loudness-matched with ffmpeg, fifteen more
+were generated on his own machine with Stable Audio Open, and a local "sound
+board" page plays every cue at its in-game level and shows where the code
+triggers it. And the rivals, which build and script their own robots, were
+balanced against 140 headless duels, not by feel.
+
+There is no jam result to report yet.
+
 ### TrailPlugin
 
 A commercial WordPress plugin for adventure routes, points of interest and guides,

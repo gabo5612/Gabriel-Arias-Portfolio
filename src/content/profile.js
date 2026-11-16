@@ -90,6 +90,7 @@ contact: {
 // Keep the same order as the portfolio.
 export const SKILL_GROUPS = [
   ['IA', 'AI & Automation'],
+  ['gameDev', 'Game Dev & 3D'],
   ['frontEnd', 'Front-End'],
   ['backend', 'Back-End'],
   ['shopify', 'Shopify'],

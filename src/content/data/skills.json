@@ -29,7 +29,29 @@
       "LLM Orchestration",
       "Claude Code",
       "Qwen",
-      "Embeddings"
+      "Embeddings",
+      "Parallel Coding Agents",
+      "Git Worktrees for Agents",
+      "AI 3D Generation",
+      "Local Audio Generation"
+    ]
+  },
+  {
+    "group": "gameDev",
+    "items": [
+      "Unreal Engine 5",
+      "Unreal C++",
+      "Chaos Physics",
+      "Niagara VFX",
+      "Level Design",
+      "Game Balancing",
+      "Game Audio",
+      "Blender",
+      "Blender Python (headless)",
+      "Meshy",
+      "Stable Audio Open",
+      "ffmpeg",
+      "three.js"
     ]
   },
   {
@@ -53,7 +75,6 @@
       "WCAG 2.1 AA"
     ]
   },
- 
   {
     "group": "shopify",
     "items": [
@@ -109,7 +130,6 @@
       "Multisite"
     ]
   },
-
   {
     "group": "styling",
     "items": [
