@@ -104,8 +104,10 @@ export const SKILL_GROUPS = [
 // Portfolio project integration with ChatGPT.
 // Each project is referenced by its exact heading in llms.txt.
 export function askChatGptUrl(title) {
+  // __BUILD__ comes from vite.config.js; the node scripts import this file too.
+  const v = typeof __BUILD__ !== 'undefined' ? `?v=${__BUILD__}` : ''
   const q =
-    `Read ${LLMS_TXT} and tell me what "${title}" is and what it does. ` +
+    `Read ${LLMS_TXT}${v} and tell me what "${title}" is and what it does. ` +
     `Use only the "### ${title}" section of that file — if you cannot fetch it, say so instead of guessing.`
 
   return `https://chatgpt.com/?q=${encodeURIComponent(q)}`
